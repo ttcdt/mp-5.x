@@ -1,0 +1,218 @@
+/*
+
+    Minimum Profit - A Text Editor
+    Encrypting functions.
+
+    ttcdt <dev@triptico.com> et al.
+
+    This software is released into the public domain.
+    NO WARRANTY. See file LICENSE for details.
+
+*/
+
+/** ARCFOUR (encryption) class **/
+
+global arcfour = {
+    i:      0,
+    j:      0,
+    S:      map(256),
+    byte:   sub (a4) {
+        i = (i + 1)    % 256;
+        j = (j + S[i]) % 256;
+
+        /* swap */
+        local t = S[i]; S[i] = S[j]; S[j] = t;
+
+        return S[(S[i] + S[j]) % 256];
+    },
+    char:   sub (a4, c) {
+        return chr(bitxor(ord(c), a4->byte()));
+    },
+    init:   sub (a4, key) {
+        /* split as an array of characters */
+        local k = split(key || '');
+        local n = 0;
+
+        /* scramble */
+        foreach (i, 256) {
+            local t = S[i];
+
+            n = (n + t + ord(k[i % size(k)])) % 256;
+
+            S[i] = S[n];
+            S[n] = t;
+        }
+
+        /* discard 256 bytes (as recommended in many sources) */
+        foreach (i, 256)
+            a4->byte();
+
+        return a4;
+    }
+};
+
+
+sub mp.crc16(crc, octet)
+/* CRC-16-CCITT (start with 0xffff) */
+{
+    crc = bitor(crc->bitshr(8), crc->bitshl(8)->bitand(0xffff));
+    crc = crc->bitxor(octet);
+    crc = crc->bitxor(crc->bitand(0xff)->bitshr(4));
+    crc = crc->bitxor(crc->bitshl(12)->bitand(0xffff));
+    crc = crc->bitxor(crc->bitand(0xff)->bitshl(5));
+
+    return crc;
+}
+
+
+/** editor actions **/
+
+mp_doc.actions['set_password'] = sub(d) {
+    local r = mp.form(
+        [
+            {
+                type:   'password',
+                label:  L("Password") + ':'
+            },
+            {
+                type:   'password',
+                label:  L("Password (again)") + ':'
+            }
+        ]
+    );
+
+    if (r != NULL) {
+        if (r[0] != r[1])
+            mp.alert(L("Passwords don't match."));
+        else {
+            d.password = r[0];
+            d.txt.mod  = 1;
+        }
+    }
+};
+
+
+/** action descriptions **/
+
+mp.actdesc['set_password'] = LL("Password protect...");
+
+/** code **/
+
+sub mp.crypt_load(fd, password, ver)
+/* loads an encrypted file into lines */
+{
+    local c;
+    local l = '';
+    local lines = [];
+    local start, left;
+
+    /* the signature has already been read */
+
+    /* init */
+    local a4 = new(arcfour)->init(password);
+
+    local crc = 0xffff;
+
+    /* calculate the bytes left */
+    start = ftell(fd);
+    fseek(fd, 0, 2);
+    left = ftell(fd) - start;
+    fseek(fd, start, 0);
+
+    /* if version 2, ignore last two bytes */
+    if (ver == 2)
+        left = left - 2;
+
+    while (left && (c = getchar(fd)) != NULL) {
+        /* decrypt byte and concat */
+        c = a4->char(c);
+
+        crc = crc->mp.crc16(ord(c));
+
+        if (c == "\n") {
+            /* end of line; push it and restart */
+            push(lines, l);
+            l = '';
+        }
+        else
+            l = l + c;
+
+        left = left - 1;
+    }
+
+    push(lines, l);
+
+    if (ver == 2) {
+        /* last 2 bytes are the crc16 */
+        if (bitor(fd->getchar()->ord() * 256, fd->getchar()->ord()) != crc)
+            lines = NULL;
+    }
+
+    return lines;
+}
+
+
+sub mp.crypt_save(fd, lines, password, ver)
+/* saves the lines as an encrypted file */
+{
+    local nl = 0;
+
+    /* default version */
+    if (ver != 1 && ver != 2)
+        ver = 2;
+
+    if (ver == 1)
+        fd->write("mpcrypt1\n")->putchar("");
+    else
+    if (ver == 2)
+        fd->write("mpcrypt2\n")->putchar("");
+
+    /* init */
+    local a4 = new(arcfour)->init(password);
+
+    crc = 0xffff;
+
+    /* loop the lines */
+    foreach (l, lines) {
+        /* write a line separator if it's not the first line */
+        if (nl)
+            l = "\n" + l;
+
+        /* write each char xoring with next crypto-byte */
+        foreach (c, split(l)) {
+            crc = crc->mp.crc16(ord(c));
+            putchar(fd, a4->char(c));
+        }
+
+        nl += 1;
+    }
+
+    if (ver == 2) {
+        /* store the 16bit crc */
+        fd->putchar(chr(crc->bitand(0xff00)->bitshr(8)));
+        fd->putchar(chr(crc->bitand(0x00ff)));
+    }
+
+    return nl;
+}
+
+
+sub mp.crypt_detect(fd)
+/* detects if fd is an mp encrypted file, returns version (or 0) */
+{
+    local ver = 0;
+    local sig1 = fd->read();
+    local sig2 = getchar(fd);
+
+    /* is second signature a 0? */
+    if (ord(sig2) == 0) {
+        /* check first signature */
+        if (sig1 == "mpcrypt1\n")
+            ver = 1;
+        else
+        if (sig1 == "mpcrypt2\n")
+            ver = 2;
+    }
+
+    return ver;
+}

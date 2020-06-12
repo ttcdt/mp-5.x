@@ -1,0 +1,606 @@
+/*
+
+    Minimum Profit - A Text Editor
+    Search and replace.
+
+    ttcdt <dev@triptico.com> et al.
+
+    This software is released into the public domain.
+    NO WARRANTY. See file LICENSE for details.
+
+*/
+
+/* successful searches will always be shown in this line */
+mp.config.move_seek_to_line = 5;
+
+/* grep recursivity */
+mp.config.recursive_grep = 0;
+
+/** editor actions **/
+
+mp_doc.actions['seek'] = sub (d) {
+    local t = mp.form(
+        [
+            {
+                label:   L("Text to seek") + ':',
+                type:    'text',
+                history: 'search'
+            },
+            {
+                label:   L("Case sensitive") + ':',
+                type:    'checkbox',
+                value:   mp.config.case_sensitive_search
+            }
+        ]
+    );
+
+    if (t != NULL) {
+        mp.config.case_sensitive_search = t[1];
+
+        d = mp_doc.actions.seek_next(d, mp.backslash_codes(t[0]));
+    }
+
+    return d;
+};
+
+
+mp_doc.actions['seek_next'] = sub (d, str) {
+    if (!d->long_op(mp_doc.search, str)) {
+
+        s = clone(d.txt);
+        d->move_bof();
+
+        if (!d->long_op(mp_doc.search, NULL)) {
+            d.txt = s;
+            mp.alert(L("Text not found."));
+        }
+        else {
+            mp.message = {
+                timeout:    time() + 2,
+                string:     L("Search wrapped")
+            };
+        }
+    }
+
+    return d;
+};
+
+mp_doc.actions['seek_prev'] = sub (d, str) {
+    if (!d->long_op(mp_doc.search_back, str)) { 
+
+        s = clone(d.txt);
+        d->move_eof();
+
+        if (!d->long_op(mp_doc.search_back, NULL)) {
+            d.txt = s;
+            mp.alert(L("Text not found."));
+        }
+        else {
+            mp.message = {
+                timeout:    time() + 2,
+                string:     L("Search wrapped")
+            };
+        }
+    }
+
+    return d;
+};
+
+mp_doc.actions['replace'] = sub (d) {
+    local r = mp.form(
+        [
+            {
+                'label'     => L("Replace text") + ':',
+                'type'      => 'text',
+                'history'   => 'search'
+            },
+            {
+                'label'     => L("Replace with") + ':',
+                'type'      => 'text',
+                'history'   => 'replace'
+            },
+            {
+                'label'     => L("Case sensitive") + ':',
+                'type'      => 'checkbox',
+                'value'     => mp.config.case_sensitive_search
+            },
+            {
+                'label'     => L("Global replace") + ':',
+                'type'      => 'checkbox',
+                'value'     => mp.config.global_replace
+            }
+        ]
+    );
+
+    if (r != NULL) {
+        mp.config.case_sensitive_search = r[2];
+        mp.config.global_replace = r[3];
+
+        d->store_undo();
+        d->long_op(mp_doc.replace, mp.backslash_codes(r[0]), mp.backslash_codes(r[1]));
+    }
+
+    return d;
+};
+
+mp_doc.actions['seek_next_char'] = sub (d) { d->seek_prev_or_next_char(mp_doc.search); };
+mp_doc.actions['seek_prev_char'] = sub (d) { d->seek_prev_or_next_char(mp_doc.search_back); };
+mp_doc.actions['seek_matching']  = sub (d) { d->seek_matching(); };
+
+mp.actions['grep']  = sub {
+    local r = mp.form(
+        [
+            {
+                'label'     => L("Text to seek") + ':',
+                'type'      => 'text',
+                'history'   => 'search'
+            },
+            {
+                'label'     => L("Files to grep (empty, all)") + ':',
+                'type'      => 'text',
+                'history'   => 'grep'
+            },
+            {
+                'label'     => L("Base directory (empty, current)") + ':',
+                'type'      => 'text',
+                'history'   => 'grep_base'
+            },
+            {
+                'label'     => L("Recursive?"),
+                'type'      => 'checkbox',
+                'value'     => mp.config.recursive_grep
+            }
+        ]
+    );
+
+    if (r != NULL && r[0] != '') {
+        mp.config.recursive_grep = r[3];
+
+        local t = '<grep ' + r[0] + ' ' + r[1] + '>';
+
+        if ((r = mp.long_op(mp.grep, '/' + r[0] + '/', r[1], r[2], r[3])) == NULL)
+            mp.alert(L("File(s) not found."));
+        else
+        if (size(r) == 0)
+            mp.alert(L("Text not found."));
+        else {
+            local l = mp.open(t);
+
+            l.txt.lines = r->map(sub (e) {
+                sprintf("%s:%d:%d: %s", e[0], e[1] + 1, e[2] + 1, e[3])->
+                    slice(0, mp.window.tx - 2);
+            });
+
+            l->move_bof();
+
+            l.txt.mod = 0;
+            l.read_only = 1;
+        }
+    }
+};
+
+
+sub mp.apply_func_to_all_lines(d, func) {
+    local cnt = 0;
+    local lines = [];
+
+    d->busy(1);
+
+    /* iterates all lines, counting and storing the different ones */
+    foreach (l, d.txt.lines) {
+        local nl = func(l);
+
+        if (l != nl) {
+            cnt += 1;
+            lines->push(nl);
+        }
+        else
+            lines->push(l);
+    }
+
+    d->busy(0);
+
+    if (cnt) {
+        d->store_undo();
+        d.txt.lines = lines;
+        d.txt.mod += 1;
+    }
+
+    mp.message = {
+        timeout:    time() + 4,
+        string:     sprintf(L("%d lines replaced"), cnt)
+    };
+}
+
+
+mp_doc.actions['replace_tabs_with_spaces'] = sub (d) {
+    mp.apply_func_to_all_lines(d, mp.replace_tabs_with_spaces);
+};
+
+
+mp_doc.actions['replace_spaces_with_tabs'] = sub (d) {
+    mp.apply_func_to_all_lines(d, mp.replace_spaces_with_tabs);
+};
+
+
+/** default key bindings **/
+
+mp_doc.keycodes['f3']               = 'seek_next';
+mp_doc.keycodes['ctrl-f3']          = 'seek_prev';
+mp_doc.keycodes['ctrl-f']           = 'seek';
+mp_doc.keycodes['ctrl-r']           = 'replace';
+mp_doc.keycodes['ctrl-page-down']   = 'seek_next_char';
+mp_doc.keycodes['ctrl-page-up']     = 'seek_prev_char';
+mp_doc.keycodes['ctrl-j']           = 'seek_matching';
+mp_doc.keycodes['alt-g']            = 'grep';
+
+/** action descriptions **/
+
+mp.actdesc['seek']                     = LL("Search text...");
+mp.actdesc['seek_next']                = LL("Search next");
+mp.actdesc['seek_prev']                = LL("Search previous");
+mp.actdesc['replace']                  = LL("Replace...");
+mp.actdesc['seek_next_char']           = LL("Move to next instance of current char");
+mp.actdesc['seek_prev_char']           = LL("Move to previous instance of current char");
+mp.actdesc['seek_matching']            = LL("Move to the matching bracket");
+mp.actdesc['grep']                     = LL("Grep (find inside) files...");
+mp.actdesc['replace_tabs_with_spaces'] = LL("Replace tabs with spaces");
+mp.actdesc['replace_spaces_with_tabs'] = LL("Replace spaces with tabs");
+
+/** code **/
+
+/**
+ * mp_doc.search_set_y - Sets the y position after a successful search.
+ * @doc: the document
+ * @y: y coordinate
+ *
+ * Sets the y position after a successful search, setting the
+ * visual line to that defined in mp.config.move_seek_to_line.
+ */
+sub mp_doc.search_set_y(doc, y)
+{
+    doc->set_y_keep_vy(y);
+
+    /* set always to the same line */
+    if (mp.config.move_seek_to_line != NULL &&
+       (doc.txt.vy = doc.txt.y - mp.config.move_seek_to_line) < 0)
+        doc.txt.vy = 0;
+
+    return doc;
+}
+
+/**
+ * mp_doc.seek_matching - Move to the matching brace char if the cursor if
+ * on a brace.
+ * @doc: the document
+ *
+ * This can not use regex based searching because of the recurrence issue.
+ * This accepts ( { and [ type braces.
+ */
+sub mp_doc.seek_matching(doc)
+{
+    local matching_open  = [ '(', '{', '[' ];
+    local matching_close = [ ')', '}', ']' ];
+    local txt = doc.txt;
+
+    /* get current char, it's the increment char */
+    local inc = slice(txt.lines[txt.y], txt.x, 1);
+    local i = 1; local j = 0;
+    local p = seek(matching_open, inc);
+    if (p != -1)
+    {   
+        /* forward searching */
+        local dec = matching_close[p];
+        txt.x += 1;
+        while (i > 0 && txt.y < (size(txt.lines) - 1)) {
+            local line = split(txt.lines[txt.y]);
+            for (j = txt.x; i && j < size(line); j += 1) {
+                if (line[j] == inc) i += 1;
+                else if (line[j] == dec) i -= 1;   
+            }    
+            if (!i) 
+                return doc->set_y(txt.y)->set_x(j-1);
+            txt.y += 1;
+            txt.x = 0;
+        }
+        return doc;
+    }
+
+    p = seek(matching_close, inc);
+    if (p != -1)
+    {
+        /* backward searching */
+        local dec = matching_open[p];
+        if (txt.x) txt.x -= 1;
+        else {
+            txt.y -= 1;
+            if (txt.y >= 0) txt.x = size(txt.lines[txt.y]) - 1;
+        }
+        while (i > 0 && txt.y >= 0) {
+            local line = split(txt.lines[txt.y]);
+            for (j = txt.x; i && j >= 0; j -= 1) {
+                if (line[j] == inc) i += 1;
+                else if (line[j] == dec) i -= 1;
+            }    
+            if (!i)
+                return doc->set_y(txt.y)->set_x(j + 1);
+            txt.y -= 1;
+            if (txt.y >= 0) txt.x = size(txt.lines[txt.y]) - 1;
+        }
+    }
+
+    return doc;
+}
+
+sub mp.prefix_regex(str)
+/* set str to be a valid regex */
+{
+    if (!str)
+        return NULL;
+
+    /* surround with / for the regex */
+    str = '/' + str + '/';
+
+    /* add optional case insensitivity flag */
+    if (! mp.config.case_sensitive_search)
+        str = str + 'i';
+
+    return str;
+}
+
+
+sub mp_doc.search_dir(doc, str, dir)
+/* search str and put the current position there, with direction */
+{
+    local txt, r, l, lines;
+    local bx, by, ex, ey;
+
+    if (str == NULL)
+        str = mp.last_search;
+    else {
+        str = mp.prefix_regex(str);
+        mp.last_search = str;
+    }
+
+    if (str == NULL)
+        return NULL;
+
+    txt = doc.txt;
+
+    if (dir == -1) {
+        /* search backwards */
+        str = str + 'l';
+
+        ex = txt.x && txt.x - 1 || 0;
+        ey = txt.y;
+
+        if (txt.mark && !txt.mark.incomplete) {
+            if (ey >= txt.mark.ey) {
+                ey = txt.mark.ey;
+
+                if (ex > txt.mark.ex)
+                    ex = txt.mark.ex;
+            }
+
+            bx = txt.mark.bx;
+            by = txt.mark.by;
+        }
+        else {
+            bx = 0;
+            by = 0;
+        }
+    }
+    else {
+        /* search forward */
+        bx = txt.x;
+        by = txt.y;
+
+        if (txt.mark && !txt.mark.incomplete) {
+            if (by <= txt.mark.by) {
+                by = txt.mark.by;
+
+                if (bx < txt.mark.bx)
+                    bx = txt.mark.bx;
+            }
+
+            ex = txt.mark.ex;
+            ey = txt.mark.ey;
+        }
+        else {
+            ex = size(txt.lines[-1]);
+            ey = size(txt.lines);
+        }
+    }
+
+    lines = doc->get_range(bx, by, ex, ey, 0);
+
+    /* do the search */
+    local n = (dir == -1) && (size(lines) - 1) || 0;
+    while ((l = lines[n]) != NULL && regex(l, str) == NULL)
+        n += dir;
+
+    r = regex();
+
+    if (r) {
+        /* if it was found in the first line, add offset */
+        r[0] += (n == 0 && bx);
+
+        doc->search_set_y(by + n)->set_x(r[0] + r[1]);
+    }
+
+    return r;
+}
+
+
+sub mp_doc.search(doc, str)
+/* search str and put the current position there, downwards */
+{
+    doc->search_dir(str, 1);
+}
+
+
+sub mp_doc.search_back(doc, str)
+/* search str and put the current position there, backwards */
+{
+    doc->search_dir(str, -1);
+}
+
+
+sub mp_doc.replace_1(doc, org, dst)
+/* searches 'org' and replaces it with 'dst', once */
+{
+    local c;
+
+    if ((c = doc->search(org)) != NULL) {
+        local txt, l;
+
+        txt = doc.txt;
+
+        /* substitute */
+        txt.lines[txt.y] = splice(txt.lines[txt.y], dst, c[0], c[1]);
+
+        /* move to new position */
+        doc->set_x(c[0] + count(dst));
+
+        txt.mod += 1;
+    }
+
+    return c;
+}
+
+
+sub mp_doc.replace(doc, org, dst)
+/* replaces 'org' with 'that', may be globally */
+{
+    local cnt = 0;
+
+    while (doc->replace_1(org, dst)) {
+        cnt += 1;
+
+        if (!mp.config.global_replace)
+            break;
+    }
+
+    mp.message = {
+        timeout:    time() + 4,
+        string:     sprintf(L("%d replaces"), cnt)
+    };
+
+    return doc;
+}
+
+
+sub mp_doc.seek_prev_or_next_char(doc, func)
+/* moves to next or previous occurence of current char */
+{
+    local txt = doc.txt;
+
+    /* get current char */
+    local w = slice(txt.lines[txt.y], txt.x, 1);
+
+    /* move one char right */
+    doc->move_right();
+
+    /* search for it (mp.search() or mp.search_back()) */
+    local t = mp.last_search;
+    doc->func("\\" + w);
+    mp.last_search = t;
+
+    /* move back */
+    doc->move_left();
+
+    return doc;
+}
+
+
+sub mp.grep(rx, spec, base, rec, r)
+/* Greps str in the files in spec. Returns NULL if no file matched the glob()
+   (or glob() is unsupported), an empty list if the string was not found or
+   an array with the matches, that are four-element arrays with the file name,
+   the line number, the column number and the line that matched */
+{
+    local all;
+
+    /* if spec is empty, set as NULL (meaning "glob everything") */
+    if (spec == '')
+        spec = NULL;
+
+    if (base == '')
+        base = NULL;
+
+    all = glob(spec, base);
+
+    if (r == NULL)
+        r = [];
+
+    /* spec globs to NULL or empty; abort */
+    if (size(all) == 0)
+        return r;
+
+    foreach (fn, all) {
+        local f;
+
+        if ((f = open(fn, "r")) != NULL) {
+            local l, n;
+
+            /* file open; now grep */
+            n = 0;
+            while (l = read(f)) {
+                l = mp.chomp(l);
+
+                if (regex(l, rx)) {
+                    local t = regex();
+                    /* found; store line, filename and linenum */
+                    push(r, [ fn, n, t[0], l ]);
+                }
+
+                n += 1;
+            }
+
+            close(f);
+        }
+    }
+
+    if (rec) {
+        /* glob again, trying subdirectories */
+        foreach (fn, glob(NULL, base)) {
+            if (regex(fn, '@/$@')) {
+                r = mp.grep(rx, spec, fn, rec, r);
+            }
+        }
+    }
+
+    return r;
+}
+
+
+sub mp.replace_tabs_with_spaces(line) {
+    local r = '';
+    local l = line->split("\t");
+    local s = mp.config.tab_size->map(' ')->join();
+
+    while (size(l) > 1) {
+        r = r + shift(l);
+        r = r + s->slice(size(r) % size(s), -1);
+    }
+
+    r = r + shift(l);
+
+    return r;
+}
+
+
+sub mp.replace_spaces_with_tabs(line) {
+    local r = [];
+    local s = '';
+    local ts = mp.config.tab_size;
+
+    while ((s = line->slice(0, ts)) && size(s) == ts) {
+        r->push(s->sregex("/ +$/", "\t"));
+        line = line->slice(ts, -1);
+    }
+
+    r->push(s);
+
+    return r->join();
+}

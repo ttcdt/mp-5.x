@@ -1,0 +1,31 @@
+{
+    'id'        =>  'ruby',
+    'name'      =>  'Ruby',
+    'filenames' =>  [ '/\.rb$/i' ],
+    'defs'      =>  [
+        'word1',    [
+            mp.syn_token_list( [
+                "BEGIN", "END", "alias", "and", "begin",
+                "break", "case", "class", "def", "defined",
+                "do", "else", "elsif", "end", "ensure",
+                "false", "for", "if", "in", "module", "next",
+                "nil", "not", "or", "redo", "rescue", "retry",
+                "return", "self", "super", "then", "true",
+                "undef", "unless", "until", "when", "while",
+                "yield", "require", "include" ]
+            )
+        ],
+        'word2',    [ '/[-=<>:\?\+\*\!\%&\|{}]+/', '/=(begin|end)/' ],
+        'quotes',   [
+            "/\"([^\"\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^\"\\\\\n]*)*)\"/",
+            "/'([^'\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^'\\\\\n]*)*)'/",
+            "/\<-?[0-9]+\>/",                           /* numbers */
+            "/\<0x[0-9a-f]+\>/i",                       /* hex numbers */
+            "/\<[0-9[:upper:]_]+\>/",                   /* all-caps words */
+            [ "/`/", "/`/" ]                            /* backticks */
+        ],
+        'comments', [
+            "/#[^\n\x{ad}]*(\x{ad}\n[^\n]*)*/"
+        ]
+    ]
+};

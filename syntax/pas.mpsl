@@ -1,0 +1,38 @@
+{
+    id:         'pascal',
+    name:       'Pascal',
+    help:       [ "man 2 %s", "man 3 %s" ],
+    defs:       [
+        'word1', [
+            mp.syn_token_list(
+                [
+                    "if", "then", "else",
+                    "program", "function", "procedure", "const", "var", "type",
+                    "for", "to", "downto", "do", "begin", "end", "of",
+                    "repeat", "until", "while", "in", "case",
+                    "unit", "interface", "uses", "implementation"
+                ]
+            ) + 'i'
+        ],
+        'word2', [
+            mp.syn_token_list(
+                [
+                    "char", "byte", "record", "integer", "boolean", "array",
+                    "and", "or", "div", "with", "not", "string", "file", "word"
+                ]
+            ) + 'i'
+        ],
+        'word3', [
+            '/]/',
+            '/[:\.-=<>\?\+\*\/\!\%&\|\{\}\[]+/'
+        ],
+        'quotes', [
+            "/'([^'\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^'\\\\\n]*)*)'/",
+            "/\<-?[0-9]+\>/",                           /* numbers */
+            "/\<(true|false)\>/"                        /* symbolic constant names */
+        ],
+        'comments', [
+            [ "|\\{|", "|\\}|" ]
+        ]
+    ]
+};

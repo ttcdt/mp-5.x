@@ -1,0 +1,157 @@
+/*
+
+    Minimum Profit - A Text Editor
+    A simple IDE-like build system.
+
+    ttcdt <dev@triptico.com> et al.
+
+    This software is released into the public domain.
+    NO WARRANTY. See file LICENSE for details.
+
+*/
+
+mp.config.make_opts = '';
+
+/** editor actions **/
+
+mp.actions['build']	= sub {
+    local t, target;
+
+    if ((t = mp.build_get_targets()) == NULL)
+        mp.alert(L("No build targets found."));
+    else {
+        /* more than one target? ask user to pick one */
+        local r = mp.form(
+            [
+                {
+                    label:  L("Build target") + ':',
+                    type:   'list',
+                    list:   t,
+                    value:  mp.makefile_target
+                }
+            ]
+        );
+
+        if (r != NULL) {
+            mp.makefile_target = r[0];
+            target = t[mp.makefile_target];
+        }
+
+        if (target != NULL)
+            mp.long_op(mp.build_execute, target);
+    }
+};
+
+
+/** Default key bindings **/
+
+mp.keycodes['f2'] = "build";
+
+/** action descriptions **/
+
+mp.actdesc['build'] = LL("Build project...");
+
+
+/** code **/
+
+sub mp.build_get_targets()
+{
+    local r = [];
+    local m = 'make';
+    local f;
+
+    if (mp.config.make_opts)
+        m = m + ' ' + mp.config.make_opts;
+
+    if ((f = open('Makefile', 'r')) != NULL) {
+        r->push(m);
+
+        foreach (l, f) {
+            local t;
+
+            if (t = regex(l, '/^[A-Za-z0-9_\.-]+:/'))
+                push(r, m + ' ' + sregex(t, '/:/', ''));
+        }
+
+        close(f);
+    }
+
+    if ((f = mp.active.syntax.build_targets) != NULL) {
+        r = r + f->map(sub (e) { sprintf(e, mp.active.name); });
+    }
+
+    return r;
+}
+
+
+sub mp.build_execute(target)
+{
+    local syntax = mp.active.syntax.name;
+    local log = mp.open('<build output>');
+
+    log.txt.lines = [];
+    log.txt.y = 0;
+
+    /* very very special cases: MPSL */
+    if (syntax == "MPSL" && (regex(target, "/^check/") || regex(target, "/^execute/"))) {
+        local op = target->split(" ");
+
+        local f = open(op[1]);
+
+        if (f) {
+            local res = '';
+            local code = eval(sub { compile(f, op[1]); });
+            f->close();
+
+            if (ERROR)
+                res = ERROR;
+            else {
+                if (op[0] == 'execute') {
+                    res = eval(code);
+
+                    if (ERROR)
+                        res = ERROR;
+                    else
+                        res = dumper(res);
+                }
+                else
+                    res = 'Syntax OK';
+            }
+
+            log->append(res);
+            ERROR = NULL;
+        }
+        else
+            log->append("Error opening " + op[1]);
+    }
+    else {
+        /* pipe through make */
+        local p;
+        if ((p = popen(target, 'r')) != NULL) {
+            foreach (l, p)
+                log->append(mp.chomp(l));
+
+            pclose(p);
+        }
+        else
+            mp.alert(sprintf(L("Error executing '%s'"), target));
+    }
+
+    log.txt.mod = 0;
+    log.read_only = 1;
+    log.syntax = mp.get_syntax('make_output');
+
+    log.txt.vy = 0;
+    log->move_eof();
+    log->move_bol();
+
+    /* ensure the log document has something */
+    if (count(log.txt.lines) == 0)
+        log.txt.lines = [''];
+
+    /* set the last search regex to match file:line strings,
+        so that calling seek-next and seek-prev moves there */
+    mp.last_search = '/^[a-z\.\_0-9\/-]+:[0-9]+:/m';
+
+    mp.redraw();
+}

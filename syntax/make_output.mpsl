@@ -1,0 +1,8 @@
+{
+    'id'        =>  'make_output',
+    'name'      =>  'Make output',
+    'defs'      =>  [
+        'word1',    [ "/^.*warning:.*$/m" ],
+        'word2',    [ "/^.*error:.*$/m" ]
+    ]
+};

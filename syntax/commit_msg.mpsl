@@ -1,0 +1,10 @@
+{
+    'id'        =>  'commit_msg',
+    'name'      =>  'VCS commit message',
+    'defs'      =>  [
+        'word1',    [ '/^AM? .+$/m' ],
+        'word2',    [ '/^D .+$/m' ],
+        'quotes',   [ '/^M .+$/m' ],
+        'comments', [ '/^=== .+$/m', '/^--.+$/m', '/^#.*$/m' ]
+    ]
+};

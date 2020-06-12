@@ -1,0 +1,1 @@
+mp.syntax.commit_msg || load("syntax/commit_msg.mpsl");

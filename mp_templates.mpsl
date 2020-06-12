@@ -1,0 +1,137 @@
+/*
+
+    Minimum Profit - A Text Editor
+    Templates.
+
+    ttcdt <dev@triptico.com> et al.
+
+    This software is released into the public domain.
+    NO WARRANTY. See file LICENSE for details.
+
+*/
+
+/** editor actions **/
+
+mp_doc.actions['insert_template'] = sub(d) {
+    /* no templates? do nothing */
+    local l = d->long_op(d.read_templates_file);
+
+    if (count(l)) {
+        /* select one */
+        local t = mp.form(
+            [
+                {
+                    label:  L("Template to insert") + ':',
+                    type:   'list',
+                    list:   l
+                }
+            ]
+        );
+
+        if (t != NULL) {
+            t = t[0];
+
+            d->store_undo();
+
+            /* get the template content */
+            local c = mp.templates[l[t]];
+
+            /* does it start with #!? execute as MPSL */
+            if (regex(l[t], "/^ *#!/")) {
+                c = eval(c);
+
+                if (ERROR)
+                    mp.alert(ERROR);
+
+                ERROR = NULL;
+            }
+
+            if (c)
+                d->insert(c);
+        }
+    }
+};
+
+mp.actions['open_templates_file'] = sub {
+    local templates = glob(HOMEDIR + "/.mp_templates/*"); /* Treat as a dir */
+
+    if (size(templates) == 0) {
+        mp.open(HOMEDIR + ".mp_templates");
+    }
+    else {
+        if ((t = mp.form(
+                [
+                    {
+                        label:  L("Template file to edit") + ':',
+                        type:   'list',
+                        list:   templates
+                    }
+                ]
+            )) == NULL)
+            return;
+
+        mp.open(templates[t[0]]);
+    }
+};
+
+/** default key bindings **/
+
+/** action descriptions **/
+
+mp.actdesc['insert_template']     = LL("Insert template...");
+mp.actdesc['open_templates_file'] = LL("Edit templates file");
+
+/** data **/
+
+mp.templates = {};
+
+/** code **/
+
+sub mp_doc.read_templates_file(d)
+/* reads the $HOME/.mp_templates or $HOME/.mp_templates/{global,syntax.name} file into mp.templates */
+{
+    local tmpl_lst = [];
+
+    local read_template = sub(filename) {
+        local k = NULL;
+        local v = [];
+
+        foreach (l, open(filename, "r")) {
+            l = mp.chomp(l);
+
+            if (l->slice(0, 2) == "%%") {
+                /* new template: store previous, if any */
+                if (k) {
+                    push(tmpl_lst, k);
+                    mp.templates[k] = v->join("\n");
+                }
+
+                /* strip prefix */
+                k = l->slice(2, -1);
+                v = [];
+            }
+            else {
+                /* add to v */
+                v->push(l);
+            }
+        }
+
+        /* store pending */
+        if (k) {
+            push(tmpl_lst, k);
+            mp.templates[k] = v->join("\n");
+        }
+    };
+
+    /* reset */
+    mp.templates = {};
+
+    read_template(HOMEDIR + "/.mp_templates");
+    read_template(HOMEDIR + "/.mp_templates/global");
+
+    if (d.syntax != NULL)
+        read_template(HOMEDIR + "/.mp_templates/" + d.syntax.id);
+
+    /* returns keys(mp.templates), but in its original order */
+    return tmpl_lst;
+}

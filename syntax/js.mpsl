@@ -1,0 +1,45 @@
+{
+    id:         'js',
+    name:       'JavaScript',
+    defs:       [
+        'word1', [
+            mp.syn_token_list(
+                [
+                    "break", "case", "catch", "continue", "debugger",
+                    "default", "delete", "do", "else", "finally",
+                    "for", "function", "if", "in", "instanceof",
+                    "return", "switch", "throw", "try", "while", "with"
+                ]
+            )
+        ],
+        'word2', [
+            mp.syn_token_list(
+                [
+                    "new", "this", "typeof", "var", "void"
+                ]
+            )
+        ],
+        'word3', [
+            '/[-=<>:\?\+\*\/\!\%&\|~\^\.\{\}\(\)\[]+/',
+            '/]/'
+        ],
+        'quotes', [
+            "/\"([^\"\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^\"\\\\\n]*)*)\"/",
+            "/'([^'\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^'\\\\\n]*)*)'/",
+            "/\<-?[0-9]+\>/",                           /* numbers */
+            "/\<[0-9]+e[0-9]+\>/",                      /* numbers in exp format */
+            "/\<0[0-7]+\>/",                            /* octal numbers */
+            "/\<0x[0-9a-f]+\>/i",                       /* hex numbers */
+            "/\<(true|false|null)\>/"                   /* symbolic constant names */
+        ],
+        'comments', [
+            [ '|/\*|', '|\*/|' ],                       /* C-like */
+            "/\/\/[^\n\x{ad}]*(\x{ad}\n[^\n]*)*/"       /* C++-like */
+        ],
+        'documentation', [
+            [ "|/\*\*\n|", '|\*/|' ],                   /* mp_doccer */
+            '/^/\*\*.*\*\*/$/m'                         /* section mark */
+        ]
+    ],
+    section:    [ '/(^\/\*\*.*\*\*\/$|^#pragma mark|^[A-Za-z_])/' ]
+};

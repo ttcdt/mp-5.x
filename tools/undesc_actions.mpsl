@@ -1,0 +1,6 @@
+/* Prints all actions without description */
+
+foreach(a, keys(mp.actions)) {
+	if (!exists(mp.actdesc, a))
+		print("mp.actdesc['", a, "'] = LL('');");
+}

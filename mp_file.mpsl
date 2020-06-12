@@ -1,0 +1,1004 @@
+/*
+
+    Minimum Profit - A Text Editor
+    File manipulation.
+
+    ttcdt <dev@triptico.com> et al.
+
+    This software is released into the public domain.
+    NO WARRANTY. See file LICENSE for details.
+
+*/
+
+/** RTF config tweaks **/
+
+mp.config.rtf_font_face      = 'Times New Roman';
+mp.config.rtf_font_size      = 12;
+mp.config.rtf_mono_font_face = 'Courier New';
+mp.config.rtf_mono_font_size = 10;
+mp.config.rtf_style_default  = '\sa227\sl480\slmult1';
+mp.config.rtf_style_first    = '\qj\fi0';
+mp.config.rtf_style_para     = '\qj\fi567';
+mp.config.rtf_style_center   = '\qc\fi0';
+mp.config.rtf_style_verbatim = '\ql\fi0\sl0';
+mp.config.troff_font_size    = 12;
+mp.config.troff_page_height  = 10;
+mp.config.html_title         = '';
+
+/** editor actions **/
+
+mp.actions['new']   = sub {
+    local d = mp.find_file_by_name(L("<unnamed>"));
+
+    if (d != -1) {
+        mp.active_i = d;
+        d = mp.active();
+    }
+    else
+        d = mp.add(new(mp_doc, { is_new: 1 }));
+
+    return d;
+};
+
+mp.actions['next'] = sub { mp.next(); };
+mp.actions['prev'] = sub { mp.prev(); };
+
+mp_doc.actions['save_as'] = sub (d, newname) {
+
+    if (newname == NULL)
+        newname = mp.savefile(L("Save file as") + ':');
+
+    if (newname != NULL) {
+        /* store new name */
+        d.name = newname;
+
+        if (d->long_op(d.save) == -1)
+            mp.alert(sprintf(L("Error saving '%s': %s"),
+                        mp.trim(d.name, 32), ERRNO));
+        else
+            d->detect_syntax();
+    }
+
+    return d;
+};
+
+mp_doc.actions['save'] = sub (d) {
+
+    /* name is <unnamed> or something similar; ask for one */
+    if (regex(d.name, "/^<.+>$/"))
+        d->actions.save_as();
+    else
+    if (d->long_op(d.save) == -1)
+        mp.alert(sprintf(L("Error saving '%s': %s"),
+                        mp.trim(d.name, 32), ERRNO));
+
+    return d;
+};
+
+mp_doc.actions['export'] = sub (d, filename) {
+    local ret = 0;
+
+    mp.load_on_demand(mp_mptxt, "mp_mptxt.mpsl");
+
+    local formats = mp_mptxt.exporters->map(index)->join(", ");
+
+    if (filename == NULL)
+        filename = mp.savefile(L("Export to file (available formats: ")
+            + formats + '):');
+
+    if (filename != NULL) {
+        local format = filename->split(".")->pop()->lc();
+
+        d->busy(1);
+
+        ret = mp_mptxt.export(d, format);
+
+        d->busy(0);
+
+        if (ret == NULL)
+            mp.alert(sprintf(L("Unsupported format '%s'.\n(Not one of: [%s])"),
+                format, formats));
+        else {
+            local p_enc = ENCODING;
+            encoding(mp_mptxt.encodings[format]);
+
+            if ((f = open(filename, "wb"))) {
+                f->write(ret)->close();
+            }
+            else {
+                mp.alert(sprintf(L("Error exporting '%s': %s"),
+                    mp.trim(filename, 32), ERRNO));
+            }
+
+            encoding(p_enc);
+        }
+    }
+};
+
+mp.actions['close'] = sub (d) {
+    if (d->query_close() != 0)
+        mp.close();
+};
+
+mp.actions['exit']  = sub {
+    if (mp.config.auto_sessions)
+        mp.save_session();
+
+    if (mp.actions.close_all())
+        mp_c.exit();
+};
+
+mp.actions['suspend'] = sub {
+    mp_drv.suspend();
+};
+
+mp.actions['open'] = sub (d, filename) {
+    if (filename == NULL)
+        filename = mp.openfile(L("File to open") + ':');
+
+    if (filename != NULL && filename != "") {
+        if (mp.long_op(mp.open, filename) == NULL) {
+            if (ERRNO == NULL) {
+                /* not open but no ERRNO: it's encrypted */
+                local f = mp.form(
+                    [
+                        {
+                            type: 'password',
+                            label: L("Password") + ':'
+                        }
+                    ]
+                );
+
+                if (f != NULL) {
+                    if (mp.long_op(mp.open, filename, f[0]) == NULL)
+                        mp.alert(sprintf(L("Bad password for file '%s'"),
+                            mp.trim(filename, 32)));
+                }
+            }
+            else
+                mp.alert(sprintf(L("Error opening '%s': %s"),
+                            mp.trim(filename, 32), ERRNO));
+        }
+    }
+
+    return filename;
+};
+
+
+mp.actions['open_recent'] = sub (d) {
+    /* create the list of filenames... */
+    local filenames = mp.state.files->map(index)->
+        /* delete all those not having a timestamp... */
+        grep(sub (v, i) { exists(mp.state.files[v], 't'); })->
+
+        /* sort by timestamp... */
+        sort(sub (a, b) { cmp(mp.state.files[b].t, mp.state.files[a].t); })->
+
+        /* and add a timestamp for humans */
+        map(sub (v) { v + sprintf("\t%t{%Y-%m-%d %H:%M:%S}", mp.state.files[v].t); });
+
+    local form = mp.form(
+        [
+            {
+                label:  L("Recent files") + ':',
+                type:   'list',
+                list:   filenames
+            }
+        ]
+    );
+
+    if (form != NULL) {
+        mp.actions.open(d, filenames[form[0]]->split("\t")->shift());
+    }
+};
+
+
+mp.actions['open_folder'] = sub {
+    local f;
+
+    if ((f = mp_drv.openfolder(L("Folder to open"))) != NULL)
+        mp.actions.open(NULL, f);
+};
+
+mp_doc.actions['revert'] = sub (d) {
+    /* save current name */
+    local p = d.name;
+
+    if (d.txt.mod) {
+        local r;
+        r = mp.confirm(sprintf(L("'%s' has changed. Are you sure?"),
+                            mp.trim(p, 32)));
+
+        /* cancel? don't close */
+        if (r == 0 || r == 2)
+            return d;
+    }
+
+    d->store_undo();
+
+    mp.close();
+    if (mp.long_op(mp.open, p) == NULL && ERRNO != NULL)
+        mp.alert(sprintf("Error opening '%s': %s", p, ERRNO));
+
+    local nd = mp.active();
+
+    nd.undo_q = d.undo_q;
+
+    nd->set_y(d.txt.y)->set_x(d.txt.x);
+    nd.txt.vy = d.txt.vy;
+
+    return nd;
+};
+
+mp.actions['open_config_file']  = sub {
+    mp.open(HOMEDIR + ".mp.mpsl");
+};
+
+mp.actions['sync'] = sub {
+    /* save all modified documents */
+    foreach (d, grep(mp.docs, sub (e) { e.txt.mod; }))
+        d->actions.save();
+
+    return d;
+};
+
+mp_doc.actions['exec_command'] = sub (d, cmd) {
+    if (cmd == NULL) {
+        local t = mp.form(
+            [
+                {
+                    label:      L("System command") + ':',
+                    type:       'text',
+                    history:    'system'
+                }
+            ]
+        );
+
+        if (t != NULL)
+            cmd = t[0];
+    }
+    
+    if (cmd != NULL) {
+        /* does it start with a pipe? */
+        if (regex(cmd, '/^\|/')) {
+            local p;
+
+            /* yes; current document should be fed to it */
+            cmd = sregex(cmd, '/^\|/');
+
+            if ((p = popen(cmd, "w")) != NULL) {
+                mp.busy(1);
+
+                foreach (l, d->get_active_area())
+                    write(p, l + mp.config.eol);
+
+                pclose(p);
+                mp.busy(0);
+            }
+            else
+                mp.alert(sprintf(L("Error writing to command '%s'"), cmd));
+        }
+        else {
+            /* no; execute command and insert into cursor */
+            local p;
+
+            if ((p = popen(cmd, "r")) != NULL) {
+                local l;
+
+                d->store_undo();
+                mp.busy(1);
+                
+                /* prevent auto indenting the command output */
+                local p_config = clone(mp.config);
+
+                mp.config.auto_indent = 0;
+                mp.config.visual_wrap = 0;
+
+                foreach (l, p)
+                    d->insert(l);
+
+                mp.config = p_config;
+
+                /* invalidate window size to trigger a visual re-wrap */
+                mp.txt.last_tx = 0;
+
+                pclose(p);
+                mp.busy(0);
+            }
+            else
+                mp.alert(sprintf(L("Error reading from command '%s'"), cmd));
+        }
+    }
+
+    return d;
+};
+
+mp_doc.actions['filter_selection'] = sub (d, cmd) {
+    if (cmd == NULL) {
+        local t = mp.form(
+            [
+                {
+                    'label'     => L("System command") + ':',
+                    'type'      => 'text',
+                    'history'   => 'system2'
+                }
+            ]
+        );
+
+        if (t != NULL)
+            cmd = t[0];
+    }
+
+    if (cmd != NULL) {
+        d->store_undo();
+
+        /* if there is no selection, take full document */
+        if (d.txt.mark == NULL) {
+            d->move_bof()->mark()->move_eof()->mark();
+        }
+
+        /* take it out */
+        d->cut();
+
+        /* now feed it to the command */
+        local p = popen2(cmd);
+
+        if (p != NULL) {
+            write(p[1], join(mp.clipboard, "\n"));
+            pclose(p[1]);
+
+            local l;
+            while ((l = read(p[0])) != NULL)
+                d->insert(l);
+
+            pclose(p[0]);
+        }
+    }
+
+    return d;
+};
+
+mp.actions['close_all'] = sub {
+    local s;
+
+    while (s = size(mp.docs)) {
+        local doc = mp.docs[mp.active_i];
+
+        /* close current document */
+        mp.actions.close(doc);
+
+        /* if the size of the list hasn't changed,
+            action was cancelled, so don't exit */
+        if (s == size(mp.docs))
+            return 0;
+    }
+
+    return 1;
+};
+
+mp_doc.actions['open_under_cursor'] = sub (d) {
+    local w;
+
+    if (d.txt.lines[d.txt.y]->regex('/^@@ /')) {
+        /* it's a diff mark */
+
+        /* pick line */
+        local l = d.txt.lines[d.txt.y]->regex('/[0-9]+/');
+        local f;
+        local y = d.txt.y - 1;
+
+        foreach (_, y) {
+            /* pick filename (stripping mark from previous line) */
+            if (d.txt.lines[y]->regex('/^\+\+\+ /')) {
+                f = d.txt.lines[y]->sregex('/^\+\+\+ .\//');
+                break;
+            }
+        }
+
+        if (f != NULL)
+            d = mp.open(f + ':' + l + ':');
+    }
+    else
+    if ((w = d->get_word("/[^ \t\"\'<>]+/")) != NULL)
+        d = mp.open(w);
+
+    return d;
+};
+
+
+sub mp.load_on_demand(sym, src)
+/* loads a source code file on demand and whines if it can't */
+{
+    local ok = bool(1);
+
+    if (sym == NULL) {
+        eval(sub { load(src); } );
+
+        if (ERROR) {
+            mp.alert(ERROR);
+            ERROR = NULL;
+            ok = !ok;
+        }
+    }
+
+    return ok;
+}
+
+
+mp.actions['hex_view']  = sub (doc, filename) {
+    local d = NULL;
+
+    if (filename == NULL)
+        filename = mp.openfile(L("File to open") + ':');
+
+    if (filename != NULL && filename != "") {
+        if (mp.load_on_demand(mp_hex_view, "mp_hex.mpsl")) {
+            d = new(mp_hex_view, { name: filename })->init();
+
+            if (d == NULL)
+                mp.alert(sprintf("Error opening '%s': %s",
+                            mp.trim(filename, 32), ERRNO));
+            else
+                mp.add(d);
+        }
+    }
+
+    return d;
+};
+
+mp.actions['open_dropped_files'] = sub {
+    while (size(mp.dropped_files))
+        mp.open(shift(mp.dropped_files));
+};
+
+
+/** default key bindings **/
+
+mp.keycodes['ctrl-n']           = 'next';
+mp.keycodes['ctrl-o']           = 'open';
+mp.keycodes['ctrl-q']           = 'exit';
+mp.keycodes['ctrl-l']           = 'suspend';
+mp.keycodes['ctrl-w']           = 'close';
+mp.keycodes['dropped-files']    = 'open_dropped_files';
+mp.keycodes['close-window']     = 'exit';
+mp_doc.keycodes['ctrl-s']       = 'save';
+mp_doc.keycodes['ctrl-enter']   = 'open_under_cursor';
+mp_doc.keycodes['alt-enter']    = 'ctrl-enter';
+mp_doc.keycodes['ctrl-k']       = "toggle_visual_wrap";
+
+/** action descriptions **/
+
+mp.actdesc['new']                = LL("New");
+mp.actdesc['save']               = LL("Save...");
+mp.actdesc['save_as']            = LL("Save as...");
+mp.actdesc['export']             = LL("Export...");
+mp.actdesc['next']               = LL("Next");
+mp.actdesc['prev']               = LL("Previous");
+mp.actdesc['open']               = LL("Open...");
+mp.actdesc['exit']               = LL("Exit");
+mp.actdesc['suspend']            = LL("Suspend");
+mp.actdesc['close']              = LL("Close");
+mp.actdesc['revert']             = LL("Revert");
+mp.actdesc['close_all']          = LL("Close all");
+mp.actdesc['open_folder']        = LL("Open folder...");
+
+mp.actdesc['open_config_file']   = LL("Edit configuration file");
+mp.actdesc['sync']               = LL("Save modified texts");
+mp.actdesc['exec_command']       = LL("Run system command...");
+mp.actdesc['filter_selection']   = LL("Filter selection through system command...");
+mp.actdesc['open_under_cursor']  = LL("Open file under cursor");
+mp.actdesc['hex_view']           = LL("Hexadecimal viewer...");
+mp.actdesc['open_dropped_files'] = LL("Open dropped files");
+mp.actdesc['open_recent']        = LL("Open recent files...");
+mp.actdesc['toggle_visual_wrap'] = LL("Toggle visual wrap");
+
+/** code **/
+
+sub mp.chomp(str)
+/* chomps the end of file chars from a string */
+{
+    sregex(str, "/\r*\n*$/");
+}
+
+
+sub mp_doc.pre_event(doc, k)
+/* an event is to be processed */
+{
+    if (doc.mtime && time() > mp.mtime_test) {
+        local s;
+
+        if ((s = stat(doc.name)) != NULL && s[9] > doc.mtime) {
+            if (mp.confirm(sprintf(L("'%s' was changed externally. Reload?"),
+                mp.trim(doc.name, 32))) == 1) {
+                doc->actions.revert();
+                k = NULL;
+            }
+ 
+            doc.mtime = s[9];
+        }
+
+        mp.mtime_test = time() + 2;
+    }
+
+    return k;
+}
+
+
+sub mp_doc.post_event(doc, k)
+/* an event has just been processed */
+{
+    /* if it's read only but has modifications, revert them */
+    if (doc.read_only && size(doc.undo_q)) {
+        while (size(doc.undo_q))
+            doc->undo();
+
+        /* forget the last insert time */
+        doc.last_insert = 0;
+
+        mp.message = {
+            timeout:    time() + 2,
+            string:     '*' + L("Read-only document") + '*'
+        };
+    }
+
+    return doc;
+}
+
+
+sub mp_doc.query_close(doc)
+/* queries a close; if it returns 0, the closing is rejected */
+{
+    local r = 1;
+
+    if (doc.txt.mod) {
+        r = mp.confirm(sprintf(L("'%s' has changed. Save changes?"),
+                    mp.trim(doc.name, 32)));
+
+        /* confirm? save */
+        if (r == 1)
+            doc->actions.save();
+    }
+
+    return r;
+}
+
+
+sub mp.save_th(f, doc)
+/* mp.save() helper */
+{
+    local nl = 0;
+    local eol = mp.config.keep_eol && doc.eol || mp.config.eol;
+    local lines;
+
+    doc.disk_op = 1;
+
+    if (mp.config.visual_wrap)
+        lines = clone(doc.txt.lines)->mp.vw_unwrap();
+    else
+        lines = doc.txt.lines;
+
+    /* save as a plain text file */
+    foreach (l, lines) {
+        /* write a line separator if it's not the first line */
+        if (nl)
+            write(f, eol);
+
+        write(f, l);
+        nl += 1;
+    }
+
+    doc.disk_op = 0;
+
+    return nl;
+}
+
+
+sub mp_doc.save(doc)
+/* saves a file */
+{
+    local f;
+    local s = NULL;
+    local ret = 0;
+
+    /* if unlink before write is desired, do it */
+    if (mp.config.unlink && (s = stat(doc.name)) != NULL)
+        unlink(doc.name);
+
+    /* set the encoding for this file opening */
+    TEMP_ENCODING = doc.encoding;
+
+    if ((f = open(doc.name, "wb")) == NULL) {
+        /* can't write? delete name */
+        doc.name = L("<unnamed>");
+        ret = -1;
+    }
+    else {
+        ret = 0;
+
+        /* if the document has a password, save it encrypted */
+        if (doc.password)
+            mp.crypt_save(f, doc.txt.lines, doc.password, doc.crypt_ver);
+        else
+            mp.save_th(f, doc);
+
+        close(f);    
+        doc.txt.mod = 0;
+    
+        /* set back the permissions and ownership, if available */
+        if (s != NULL) {
+            chmod(doc.name, s[2]);
+            chown(doc.name, s[4], s[5]);
+        }
+
+        s = stat(doc.name);
+        doc.mtime  = s[9];
+        doc.is_new = 0;
+    }
+    
+    return ret;
+}
+
+
+sub mp_doc.long_op(doc, func, a2, a3, a4)
+{
+    local r;
+
+    doc->busy(1);
+    r = doc->func(a2, a3, a4);
+    doc->busy(0);
+
+    return r;
+}
+
+
+sub mp.add(doc)
+/* adds a doc to the list of documents */
+{
+    /* store in the list and set as active */
+    ins(mp.docs, doc, mp.active_i);
+
+    return doc;
+}
+
+
+sub mp.next()
+/* rotates through the document list */
+{
+    mp.active_i = (mp.active_i + 1) % count(mp.docs);
+
+    return mp.active();
+}
+
+
+sub mp.prev()
+/* rotates through the document list, backwards */
+{
+    mp.active_i = (mp.active_i - 1 + count(mp.docs)) % count(mp.docs);
+
+    return mp.active();
+}
+
+
+sub mp_doc.state(doc)
+/* returns a structure to be store into the state */
+{
+    return { vy: doc.txt.vy, o: doc->get_offset() };
+}
+
+
+sub mp.close()
+/* closes the active document */
+{
+    /* no state for files? create it */
+    if (!exists(mp.state, 'files'))
+        mp.state.files = {};
+
+    /* store in the state of files */
+    local l = mp.active();
+
+    local state = l->state();
+
+    if (state != NULL) {
+        state.t = time();
+        mp.state.files[l.name] = state;
+
+        /* if the file is specially marked as no_state, delete it */
+        if (regex(l.name, '/^<') || l.no_state || l.is_new)
+            del(mp.state.files, l.name);
+    }
+
+    /* delete from the list */
+    del(mp.docs, mp.active_i);
+
+    /* rotate if it was the last one */
+    if (mp.active_i == size(mp.docs))
+        mp.active_i = 0;
+
+    /* cannot call mp.active() */
+}
+
+
+sub mp.find_file_by_name(filename)
+/* finds an open file by its name */
+{
+    mp.docs->map(sub(d) { d.name; })->seek(filename);
+}
+
+
+sub mp.open(filename, password)
+/* opens a new document */
+{
+    local d, s, f;
+    local x, y;
+
+    /* test if filename includes :y: or :y:x: positioning */
+    if (regex(filename, "/.+:[0-9]+:([0-9]+:)?$/")) {
+        local l = split(filename, ':');
+
+        x        = integer(l[2]);
+        y        = integer(l[1]);
+        filename = l[0];
+    }
+
+    if ((s = mp.find_file_by_name(filename)) != -1) {
+        /* already open */
+        mp.active_i = s;
+        d = mp.active();
+    }
+    else
+    if ((s = stat(filename)) == NULL) {
+        /* non-existent file; create as new */
+        mp.message = {
+            timeout:    time() + 2,
+            string:     sprintf(L("New file '%s'"), filename)
+        };
+
+        ERRNO = NULL;
+
+        d = mp.add(new(mp_doc, { name: filename, is_new: 1 }));
+    }
+    else
+    if (s[13] != NULL) {
+        local r;
+
+        /* canonicalize, if possible */
+        filename = s[13];
+
+        /* look again for this filename in the open files */
+        if ((r = mp.find_file_by_name(filename)) != -1) {
+            mp.active_i = r;
+            d = mp.active();
+        }
+    }
+
+    if (d == NULL) {
+        /* still not open: load */
+        f = open(filename, "rb");
+
+        if (f != NULL) {
+            local ver;
+
+            if ((ver = mp.crypt_detect(f))) {
+                ERRNO = NULL;
+
+                if (password != NULL && password != '') {
+                    /* and load the file */
+                    local lines = mp.crypt_load(f, password, ver);
+
+                    if (lines != NULL) {
+                        d = mp.add(new(mp_doc, { name: filename }));
+                        d.txt.lines = lines;
+                        d.password  = password;
+                        d.crypt_ver = ver;
+                    }
+                }
+            }
+            else {
+                /* mp.crypt_detect() called read(), so there
+                   is (possibly) and eol already detected */
+                local e = eol(f);
+
+                /* close file (needed for rewinding AND
+                   possible encoding autodetection) */
+                close(f);
+
+                /* reopen and read in auto-chomp mode */
+                AUTO_CHOMP = 1;
+
+                f = open(filename, "rb");
+                d = mp.add(new(mp_doc, { name: filename }));
+
+                d.txt.lines = map(f);
+
+                if (count(d.txt.lines) == 0)
+                    d.txt.lines->push('');
+
+                /* store the detected eol or the default one */
+                d.eol = e || mp.config.eol;
+
+                AUTO_CHOMP = 0;
+            }
+
+            close(f);
+        }
+        else
+        if (bitand(s[2], 0040000)) {
+            /* it's a directory: show it */
+            ERRNO = NULL;
+
+            if (mp.load_on_demand(mp_doc_dir, "mp_dir.mpsl")) {
+                d = mp.add(new(mp_doc_dir, { name: filename }));
+                d->setup();
+            }
+        }
+
+        if (d) {
+            /* store mtime */
+            d.mtime = s[9];
+
+            /* store the encoding */
+            d.encoding = DETECTED_ENCODING || ENCODING || '';
+
+            d->detect_syntax();
+
+            /* ignore further system errors */
+            ERRNO = NULL;
+        }
+    }
+
+    if (d) {
+        /* look in the state if we have a previous position */
+        local p;
+        if ((p = mp.state.files[filename]) != NULL) {
+            /* if it has an offset, use it */
+            if (p->exists("o"))
+                d->set_offset(integer(p.o));
+            else {
+                d->set_y(integer(p.y));
+                d->set_x(integer(p.x));
+            }
+
+            d.txt.vy = integer(p.vy);
+        }
+
+        if (y)
+            d->search_set_y(y - 1);
+        if (x)
+            d->set_x(x - 1);
+    }
+
+    return d;
+}
+
+
+/** visual wrap **/
+
+sub mp.vw_col()
+/* returns the column for visual wrap */
+{
+    local tx = mp.window.tx;
+
+    if (tx > mp.config.double_page)
+        tx /= 2;
+
+    return tx - 2;
+}
+
+
+sub mp.vw_unwrap_y(lines, y)
+/* unwrap line y (and the next ones) */
+{
+    /* while this line ends in a soft-hyphen... */
+    while (lines[y][-1] == "\x{ad}") {
+        /* strip the hyphen and join next line */
+        lines[y] = lines[y]->slice(0, -2) + lines[y + 1];
+
+        /* destroy next line */
+        lines->del(y + 1);
+    }
+
+    return lines;
+}
+
+sub mp.vw_wrap_y(lines, y, max)
+/* wrap line y to max. Returns next y */
+{
+    /* unwrap first */
+    mp.vw_unwrap_y(lines, y);
+
+    /* while this line is longer... */
+    while (count(lines[y]) > max) {
+        local l = lines[y];
+        local m = max;
+
+        /* wrap by word */
+        while (m > 0 && l[m] == " ")
+            m -= 1;
+        while (m > 0 && l[m] != " ")
+            m -= 1;
+
+        if (m == 0)
+            m = max;
+
+        /* get rest of line */
+        local r = l->slice(m + 1, -1);
+
+        /* replace current cropped line + soft-hyphen */
+        lines[y] = l->slice(0, m + 1) + "\x{ad}";
+
+        /* and insert the rest of line below */
+        y += 1;
+        lines->ins(r, y);
+    }
+
+    return y + 1;
+}
+
+
+sub mp.vw_unwrap(lines)
+/* unwraps all lines */
+{
+    for (y = 0; y < count(lines); y += 1)
+        mp.vw_unwrap_y(lines, y);
+}
+
+
+sub mp.vw_wrap(lines)
+/* rewrap all lines to max */
+{
+    local y = 0;
+    local max = mp.vw_col();
+
+    while (y < count(lines))
+        y = mp.vw_wrap_y(lines, y, max);
+}
+
+
+sub mp_doc.vw_unwrap(doc)
+/* unwraps a document, keeping the position */
+{
+    doc->busy(1);
+    local o = doc->get_offset();
+    mp.vw_unwrap(doc.txt.lines);
+    doc->set_offset(o);
+    doc->busy(0);
+}
+
+
+sub mp_doc.vw_wrap(doc)
+/* wraps a document, keeping the position */
+{
+    doc->busy(1);
+    local o = doc->get_offset();
+    mp.vw_wrap(doc.txt.lines);
+    doc->set_offset(o);
+    doc->busy(0);
+}
+
+
+mp_doc.actions["toggle_visual_wrap"] = sub (d) {
+    mp.config.visual_wrap = !mp.config.visual_wrap;
+
+    if (mp.config.visual_wrap)
+        d->vw_wrap();
+    else
+        d->vw_unwrap();
+};
+
+
+sub mp_doc.get_offset(doc)
+/* returns the offset of the cursor from the document */
+{
+    return mp_c.get_offset(doc.txt.lines, doc.txt.y) + doc.txt.x;
+}
+
+
+sub mp_doc.set_offset(doc, o)
+/* moves the cursor to an absolute offset */
+{
+    local r = mp_c.set_offset(doc.txt.lines, o);
+
+    doc->set_y(r[1]);
+    doc->set_x(r[0]);
+    txt.vx = 0;
+}

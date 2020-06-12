@@ -1,0 +1,80 @@
+#!/usr/local/bin/mpsl3
+
+/* MPSL3 encrypted MP document cat */
+
+var file     = ARGV[0];
+var password = ARGV[1];
+
+var Arcfour = {
+    i:      0
+    j:      0
+    S:      []
+    byte:   sub {
+        i = (i + 1) & 0xff;
+        j = (j + S[i]) & 0xff;
+
+        /* swap */
+        var t = S[i]; S[i] = S[j]; S[j] = t;
+
+        return S[(S[i] + S[j]) & 0xff];
+    }
+    init:   sub (key) {
+        var k = key.split(), n = 0;
+
+        i = 0;
+        j = 0;
+        S = 256 -> value;
+
+        foreach 256 {
+            var t = S[value];
+            n = (n + t + k[value % k.size()].ord()) & 0xff;
+
+            S[value] = S[n];
+            S[n] = t;
+        }
+
+        foreach 256 {
+            byte();
+        }
+    }
+};
+
+if file {
+    var f = sys.open(file, "rb");
+
+    if f != NULL {
+        /* pick first line */
+        var l = f.read();
+
+        if l.cmp("mpcrypt1\n") == 0 && f.getchar().ord() == 0 {
+            if password {
+                var c, a4 = new(Arcfour);
+
+                a4.init(password);
+
+                while c = f.getchar() != NULL {
+                    c = (c.ord() ^ a4.byte()).chr();
+                    STDOUT.putchar(c);
+                }
+            }
+            else
+                sys.p("Password needed.\n");
+        }
+        else {
+            /* non-encrypted: reopen */
+            f.close();
+            f = sys.open(file, "rb");
+
+            while l = f.read()
+                sys.p(l);
+        }
+
+        f.close();
+    }
+    else {
+        sys.p("Error opening \"", file, "\": ", ERRNO, "\n");
+    }
+}
+else {
+    sys.p("Usage: cat_mpcrypt {file} [{password}]\n");
+}

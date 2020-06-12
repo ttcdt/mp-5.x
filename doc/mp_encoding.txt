@@ -1,0 +1,156 @@
+Minimum Profit character encoding support
+=========================================
+
+This document describes the character encodings supported by the
+Minimum Profit text editor and the performed autodetection tests.
+
+None (default locale)
+---------------------
+
+The following steps are performed on input:
+
+ * If any utf BOM is found, it sets the document encoding to any of
+   `utf-8bom', `utf-16le', `utf-16be', `utf-32le' or `utf-32be';
+ * Otherwise, if an explicit utf-8 sequence is detected, it sets the
+   document encoding to `utf-8';
+ * Otherwise, if some character is found with the 7 bit set (that is,
+   a non-ASCII character), but does not conform to the utf-8 standard,
+   it sets the document encoding to `8bit';
+ * In any other case, no encoding is forced, and the file is read using
+   the locale conversion functions.
+
+On output, the document is saved using the locale conversion functions.
+
+utf-8
+-----
+
+The following steps are performed on input:
+
+ * If an utf-8 BOM is found, it sets the document encoding to `utf-8bom';
+ * In any other case, utf-8 is assumed as the character encoding and any
+   invalid character combination is converted to the `?' character.
+
+On output, it saves the document using the utf-8 encoding without a BOM
+prefix.
+
+utf-8bom
+--------
+
+On input, if no utf-8 BOM is found, the encoding is still assumed to be
+`utf-8', but not changed to it.
+
+On output, it saves the document using the utf-8 encoding with a BOM
+prefix.
+
+8bit
+----
+
+No character conversion is done on input nor output.
+
+iso8859-1
+---------
+
+Characters are treated as being encoded using the iso8859-1 character set,
+that is, no real conversion is done. This mode is really identical to
+`8bit'.
+
+Aliases: `latin1'.
+
+utf-16
+------
+
+On input, it tries to determine the endianness of the document by reading
+the BOM; if a valid one is found, encoding is set to `utf-16le' or
+`utf-16be'; if none is found, it assumes `utf-16le'.
+
+On output, it behaves like `utf-16le'.
+
+Aliases: `ucs-2'.
+
+utf-16le
+--------
+
+On input, it assumes utf-16 little endian characters.
+
+On output, it saves the document using the utf-16 little endian encoding
+with a BOM prefix.
+
+Aliases: `ucs-2le'.
+
+utf-16be
+--------
+
+On input, it assumes utf-16 big endian characters.
+
+On output, it saves the document using the utf-16 big endian encoding
+with a BOM prefix.
+
+Aliases: `ucs-2be'.
+
+utf-32
+------
+
+On input, it tries to determine the endianness of the document by reading
+the BOM; it a valid one is found, encoding is set to `utf-32le' or
+`utf-32be'; if none is found, it assumes `utf-32le'.
+
+On output, it behaves like `utf-32le'.
+
+Aliases: `ucs-4'.
+
+utf-32le
+--------
+
+On input, it assumes utf-32 little endian characters.
+
+On output, it saves the document using the utf-32 little endian encoding
+with a BOM prefix.
+
+Aliases: `ucs-4le'.
+
+utf-32be
+--------
+
+On input, it assumes utf-32 big endian characters.
+
+On output, it saves the document using the utf-32 big endian encoding
+with a BOM prefix.
+
+Aliases: `ucs-4be'.
+
+msdos-437
+---------
+
+On input and output, uses the MSDOS 437 (original IBM PC) code page.
+
+msdos-850
+---------
+
+On input and output, uses the MSDOS 850 (DOS Latin 1) code page.
+
+windows-1252
+------------
+
+On input and output, uses the Windows-1252 code page, also misnomed
+everywhere as ANSI. Many texts that claim to be iso8859-1 are really
+windows-1252.
+
+Iconv support
+-------------
+
+If Minimum Profit is compiled with support for the `iconv' library, many
+more encodings will be available. There is no easy way of knowing their
+names; the underlying system may provide the `iconv --list' command to have
+a list.
+
+End of line markers
+-------------------
+
+Though not directly related to character encodings, the Minimum Profit text
+editor remembers the end of line marker found inside each document, and use
+it when saving it afterwards. This helps in maintaining document
+compatibility and portability. This behaviour can be disabled by setting
+the `mp.config.keep_eol' configuration directive to 0.
+
+----
+ttcdt <dev@triptico.com>

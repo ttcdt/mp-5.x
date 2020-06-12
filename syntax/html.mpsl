@@ -1,0 +1,46 @@
+{
+    'id'        =>  'html',
+    'name'      =>  'HTML',
+    'defs'      =>  [
+        'word1',    [
+            "/<[\/]?[ \t]*(" +
+                join([
+                    "a", "abbr", "acronym", "address",
+                    "area", "b", "base", "bdo", "big",
+                    "blockquote", "body", "br", "button",
+                    "caption", "center", "cite", "code", "col",
+                    "colgroup", "dd", "del", "dfn", "div",
+                    "dl", "dt", "em", "fieldset", "form",
+                    "h1", "h2", "h3", "h4", "h5", "h6",
+                    "head", "hr", "html", "i", "img",
+                    "input", "ins", "kbd", "label", "legend",
+                    "li", "link", "map", "meta", "noscript",
+                    "object", "ol", "optgroup", "option",
+                    "p", "param", "pre", "q", "samp",
+                    "script", "select", "small", "span",
+                    "strong", "style", "sub", "sup", "table",
+                    "tbody", "td", "textarea", "tfoot", "th",
+                    "thead", "title", "tr", "tt", "ul",
+                    "var" ], "|") +
+            ")[^<>]*>/i"
+        ],
+        'word2',    [
+            mp.syn_token_list( [
+                 "!DOCTYPE", "class", "type",
+                "cellspacing", "cellpadding",
+                "href", "align", "valign", "name", "lang",
+                "value", "action", "width", "height",
+                "content", "http-equiv", "src", "alt",
+                "bgcolor", "text", "link", "vlink", "alink",
+                "media", "id", "rel" ])
+        ],
+        'quotes',   [
+            "/\"([^\"\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^\"\\\\\n]*)*)\"/",
+            "/'([^'\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^'\\\\\n]*)*)'/"
+        ],
+        'comments', [
+            [ '/<!--/', '/-->/' ]
+        ]
+    ],
+    'section'   =>  [ '/<\s*h[0-9]\s*>/' ]
+};

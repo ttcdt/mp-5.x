@@ -1,0 +1,110 @@
+/*
+
+    Minimum Profit - A Text Editor
+    Directory edition.
+
+    ttcdt <dev@triptico.com> et al.
+
+    This software is released into the public domain.
+    NO WARRANTY. See file LICENSE for details.
+
+*/
+
+/** mp_doc_dir subclass **/
+
+global mp_doc_dir = new(mp_doc);
+
+
+/** code **/
+
+sub mp_doc_dir.setup(doc)
+{
+    doc.title = sprintf(L("<listing of %s>"), doc.name);
+
+    /* get the directory content */
+    doc.dir_content = glob(NULL, doc.name)->
+        grep(regcomp("@[^/]$@"))->map(sub (e) { e->split('/')->pop(); });
+
+    doc.txt.lines = [
+        L("Directory editor"),
+        L("Deleting a line deletes the file;"),
+        L("Changing a line renames the file;"),
+        L("Saving commits the changes."),
+        L("(Keep the 'number:' on each line untouched)"),
+        ''
+    ]->map("# %s");
+
+    foreach (v, i, doc.dir_content)
+        doc.txt.lines->push(sprintf("%4d: %s", i + 1, v));
+
+    doc.txt.mod = 0;
+
+    if (doc.txt.y > size(doc.txt.lines))
+        doc.txt.y = size(doc.txt.lines);
+
+    doc.mtime = NULL;
+}
+
+
+sub mp_doc_dir.save(doc)
+{
+    local log = new(mp_doc, {
+        name: sprintf(L("<changes to directory '%s'>"), doc.name)
+        }
+    );
+
+    log.txt.lines = [];
+
+    /* rename changed files */
+    foreach (l, doc.txt.lines) {
+        local p = l->sscanf(" %d: %S");
+        local n;
+
+        if (size(p) == 2 && (n = integer(p[0])) > 0 && p[1]) {
+            local op = doc.name + '/' + doc.dir_content[n - 1];
+            local np = doc.name + '/' + p[1];
+
+            if (op != np) {
+                local m;
+
+                if (rename(op, np) == -1)
+                    m = sprintf(L("# error renaming '%s' to '%s' (%s)"),
+                        op, np, ERRNO);
+                else
+                    m = sprintf(L("# renamed '%s' to '%s'"), op, np);
+
+                push(log.txt.lines, m);
+            }
+
+            doc.dir_content[n - 1] = NULL;
+        }
+    }
+
+    /* delete unreferenced files */
+    foreach (l, doc.dir_content) {
+        if (l != NULL) {
+            local m;
+
+            l = doc.name + '/' + l;
+
+            if (unlink(l) == -1)
+                m = sprintf(L("# error deleting '%s' (%s)"), l, ERRNO);
+            else
+                m = sprintf(L("# deleted '%s'"), l);
+
+            push(log.txt.lines, m);
+        }
+    }
+
+    if (count(log.txt.lines) == 0)
+        log.txt.lines->push(L("# nothing changed."));
+
+    mp.add(log);
+    log.read_only = 1;
+
+    doc.txt.mod = 0;
+
+    doc->setup();
+
+    return 0;
+}

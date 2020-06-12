@@ -1,0 +1,37 @@
+Minimum Profit Documentation Center
+===================================
+
+General Documentation
+---------------------
+
+ * ./mp_data_model.html (Minimum Profit Data Model).
+ * ./mp_configuration.html (Minimum Profit Configuration Directives).
+ * ./mp_actions.html (Minimum Profit Action Reference).
+ * ./mp_keycodes.html (Minimum Profit Keycodes).
+ * ./mp_encoding.html (Minimum Profit character encoding support).
+ * ./mp_interactive_dialog_boxes.html (Creating interactive dialog boxes).
+ * ./mp_cookbook.html (Minimum Profit Cookbook).
+ * ./mp_api.html (Minimum Profit API).
+ * ./mp_function_reference.html (Minimum Profit Function Reference), contributed
+   by Lee Page.
+ * ./mp_internals.html (Internals). Implementation details.
+ * ./mp_man.html (Manual Page).
+
+Minimum Profit Scripting Language
+---------------------------------
+
+ * ./mpsl_overview.html (Overview). Introduction to MPSL.
+ * ./mpsl_reference.html (Reference). A reference to MPSL library functions and variables.
+ * ./mpsl_quickref.ps (Quick reference sheet) (A4 PostScript).
+ * ./mpsl_internals.html (Internals). Notes about this particular
+   MPSL implementation.
+ * ./mpsl_api.html (C API). Reference for using MPSL from inside C programs.
+
+Minimum Profit Data Manager
+---------------------------
+
+ * ./mpdm_overview.html (Overview). Introduction to MPDM.
+ * ./mpdm_api.html (C API). Reference for using MPDM from inside C programs.
+
+---
+ttcdt <dev@triptico.com>

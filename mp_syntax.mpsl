@@ -1,0 +1,296 @@
+/*
+
+    Minimum Profit - A Text Editor
+    Syntax highlight.
+
+    ttcdt <dev@triptico.com> et al.
+
+    This software is released into the public domain.
+    NO WARRANTY. See file LICENSE for details.
+
+*/
+
+/** editor actions **/
+
+sub mp_doc.actions.help(d) {
+    local w, h, r;
+
+    /* get the special word regex separator for help (if any) */
+    r = d.syntax.help_word_regex;
+
+    /* if there is a word at the cursor position,
+        try searching for help */
+    if ((w = d->get_word(r)) != NULL) {
+        d->busy(1);
+        h = d->help(w);
+        d->busy(0);
+    }
+
+    if (h == NULL)
+        mp.alert(sprintf(L("No help for '%s'."), w));
+    else {
+        local hd;
+
+        hd = mp.open(sprintf(L("<help on '%s'>"), w));
+
+        hd.txt.lines    = h;
+        hd.txt.y        = 0;
+        hd.read_only    = 1;
+        hd.syntax       = d.syntax;
+    }
+}
+
+sub mp_doc.actions.section_list(d) {
+    local l = d->section_list();
+
+    if (l == NULL)
+        mp.alert(L("No detection for sections for this mode."));
+    else {
+        if (size(l) == 0)
+            mp.alert(L("No sections were found in this document."));
+        else {
+            local pos = -1;
+
+            /* set pos to the section nearest the cursor */
+            foreach (e, l) {
+                if (e[1] > d.txt.y)
+                    break;
+
+                pos += 1;
+            }
+
+            if (pos < 0 || pos > size(l))
+                pos = 0;
+
+            local r = mp.form(
+                [
+                    {
+                        label:  L("Section list") + ':',
+                        type:   'list',
+                        list:   map(l, sub (e) { e[0]; }),
+                        value:  pos
+                    }
+                ]
+            );
+
+            if (r != NULL) {
+                d->search_set_y(l[r[0]][1])->set_x(0);
+            }
+        }
+    }
+}
+
+
+sub mp_doc.actions.move_section_up(d) {
+    local pos = -1;
+
+    foreach (e, d->section_list()) {
+        if (e[1] >= d.txt.y)
+            break;
+
+        pos = e[1];
+    }
+
+    if (pos != -1) {
+        d.txt.x = 0;
+        d.txt.y = pos;
+    }
+
+    return d;
+}
+
+
+sub mp_doc.actions.move_section_down(d) {
+    local pos = d.txt.y;
+
+    foreach (e, d->section_list()) {
+        if (e[1] > pos) {
+            pos = e[1];
+            break;
+        }
+    }
+
+    d.txt.x = 0;
+    d.txt.y = pos;
+
+    return d;
+}
+
+
+/** default key bindings **/
+
+mp_doc.keycodes['f1']               = "help";
+mp_doc.keycodes['ctrl-d']           = "section_list";
+mp_doc.keycodes['ctrl-cursor-up']   = "move_section_up";
+mp_doc.keycodes['ctrl-cursor-down'] = "move_section_down";
+
+/** action descriptions **/
+
+mp.actdesc['help']              = LL("Help on word over cursor");
+mp.actdesc['section_list']      = LL("Section list...");
+mp.actdesc['move_section_up']   = LL("Move one section up");
+mp.actdesc['move_section_down'] = LL("Move one section down");
+
+/** data **/
+
+mp.syntax = {};
+
+/** syntax definitions **/
+
+sub mp.syn_token_list(l) { '/\<(' + join(l, "|") + ')\>/'; }
+
+/** code **/
+
+sub mp.get_syntax(key)
+{
+    local r = NULL;
+
+    key = lc(key);
+
+    if (exists(mp.syntax, key))
+        r = mp.syntax[key];
+    else {
+        /* try on-demand load */
+        if ((r = eval("load('syntax/" + key + ".mpsl');")) != NULL)
+            mp.syntax[key] = r;
+
+        ERROR = NULL;
+    }
+
+    return r;
+}
+
+
+sub mp_doc.detect_syntax(doc)
+/* tries to detect the syntax of a document */
+{
+    doc.syntax = NULL;
+    local v;
+
+    /* try extensions */
+    if ((v = doc.name->regex("/\.[^.]+$/"))) {
+        v = v->sregex("/\./");
+        doc.syntax = mp.get_syntax(v);
+    }
+
+    /* try full name (Makefile, etc.) */
+    if (doc.syntax == NULL) {
+        if ((v = doc.name->regex("/[^/]+$/"))) {
+            doc.syntax = mp.get_syntax(v);
+        }
+    }
+
+    if (doc.syntax == NULL) {
+        /* test for she-bangs */
+        v = doc.txt.lines[0];
+
+        if (regex(v, "/^#!/")) {
+            /* strip paths and possible command-line options */
+            v = v->sregex("/^.*\//")->sregex("/ -[^ ]+/g");
+
+            foreach (e, split(v, " ")) {
+                if ((doc.syntax = mp.get_syntax(e))) {
+                    break;
+                }
+            }
+        }
+    }
+
+    /* not yet? try the 'detect' subroutine */
+    if (doc.syntax == NULL) {
+        foreach (s, mp.syntax) {
+            if (is_exec(s.detect) && s.detect(doc)) {
+                doc.syntax = s;
+                break;
+            }
+        }
+    }
+
+    return doc;
+}
+
+
+sub mp_doc.help(doc, word)
+{
+    local h;
+
+    foreach (c, doc.syntax.help) {
+        local f;
+
+        /* format the command */
+        c = sprintf(c, word);
+
+        /* pipe from it */
+        if ((f = popen(c, "r")) != NULL) {
+            local l;
+            h = [];
+
+            while ((l = read(f)) != NULL) {
+                l = sregex(l, "/\x{0008}./g");
+                push(h, mp.chomp(l));
+            }
+
+            /* fails? */
+            if (pclose(f) != 0)
+                h = NULL;
+        }
+
+        /* is there already help? don't look for more */
+        if (h != NULL)
+            break;
+    }
+
+    if (h == NULL && doc.syntax.help_func)
+        h = doc.syntax.help_func(word);
+
+    return h;
+}
+
+
+/**
+ * mp_doc.section_list - Returns the list of sections of a document.
+ * @doc: the document
+ *
+ * Applies the `section' array of regular expressions of the
+ * document's syntax definition and returns it as an array of
+ * line and line number pairs.
+ *
+ * If the document has no syntax highlight definition, or it has
+ * one without a `section' definition, NULL is returned. Otherwise,
+ * an array of line, line number pairs is returned (it can be
+ * an empty list if the document has no recognizable sections).
+ */
+sub mp_doc.section_list(doc)
+{
+    local r = NULL;
+
+    if (doc.syntax.section) {
+        r = [];
+
+        foreach (l, i, doc.txt.lines) {
+            foreach (ex, doc.syntax.section) {
+                if (regex(l, ex)) {
+                    push(r, [l, i]);
+                    break;
+                }
+            }
+        }
+    }
+    else {
+        r = [];
+
+        /* select all lines after an FF (page break) */
+        foreach (l, i, doc.txt.lines) {
+            if (l == "\x{000c}") {
+                r->push([doc.txt.lines[i + 1], i + 1]);
+            }
+        }
+
+        if (size(r))
+            r->ins([doc.txt.lines[0], 0]);
+        else
+            r = NULL;
+    }
+
+    return r;
+}

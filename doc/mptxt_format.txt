@@ -1,0 +1,65 @@
+ *Minimum Profit: the mptxt format* 
+
+ Ángel Ortega <angel@triptico.com> 
+
+The mptxt format is a very lightweight text formatting markup that can be
+converted by the Minimum Profit text editor to other text formats. This
+document describes version 1.00 of the mptxt format.
+
+Output formats supported as of Minimum Profit 5.32 are rtf, troff and html.
+
+Default paragraphs are delimited by blank lines; line breaks can be used
+arbitrarily and treated the same as spaces. On output they follow the
+de-facto spanish literary convention: first line is indented unless it's
+the first paragraph of the text or if it follows a special section, like
+centered text or a section break.
+
+Paragraphs with a leading space are treated as _verbatim_ text; in this
+kind of text, line breaks are meaningful and no justification is done.
+This is an example:
+
+ From: Ángel Ortega <angel@triptico.com>
+ To: <biohazard laboratory staff>
+ Subject: Release the virus
+  
+ This is an example email.
+     Line breaks are shown as written.
+
+These kind of paragraphs will be shown in a monospaced font if the output
+format makes it possible. In the example above, the line between the
+subject and the body has *two* spaces: one to mark it as a paragraph to be
+centered and another one to include some content, as leading spaces are
+deleted on output. Otherwise, they will be treated as two different
+paragraphs.
+
+If a paragraph is made of lines with a leading space *and* a trailing
+space, it's treated as text that must be shown centered, as in titles or
+subtitles. This is an example:
+
+ INTERREGNO EVIL CORPORATION 
+ NO ENTRY 
+ TRESPASSERS WILL BE SHOT ON SIGHT 
+
+Or, for example, to introduce a section separator, like this:
+
+ *** 
+
+If the output format supports it somehow, URLs shall be made clickable,
+like when writing one like https://triptico.com or similar.
+
+Text that must be shown emphasized can be surrounded by underscores, like
+in _this example_. As well, strong text can be surrounded by asterisks,
+like in *this very attention-demanding text*.
+
+Unicode is accepted wherever possible; some output formats have encoding
+limitations, though, so be reasonable. As it's important for spanish
+writing, special treatment for m-dashes (—) is included.
+
+
+
+Some output formatting can be tweaked via configuration variables, see
+mp.config for details.
+
+Finally, please note that this format has been designed to make it suitable
+for writing by Ángel Ortega in spanish. You may find it useless, stupid or
+whatever. I don't care. Keep moving.

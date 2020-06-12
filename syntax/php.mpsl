@@ -1,0 +1,37 @@
+{
+    'id'        =>  'php',
+    'name'      =>  'PHP',
+    'defs'      =>  [
+        'word1',    [
+            mp.syn_token_list( [
+                "and", "array", "as",
+                "bool", "boolean", "break", "case", "class",
+                "const", "continue", "declare", "default",
+                "die", "do", "double", "echo", "else", "elseif",
+                "empty", "enddeclare", "endfor", "endforeach",
+                "endif", "endswitch", "endwhile", "eval",
+                "exit", "extends", "__FILE__", "float", "for",
+                "foreach", "function", "cfunction", "global",
+                "if", "include", "include_once", "int",
+                "integer", "isset", "__LINE__", "list", "new",
+                "object", "old_function", "or", "print", "real",
+                "require", "require_once", "return",
+                "static", "string", "switch", "unset", "use",
+                "var", "while", "xor", 'true', 'false' ]
+            )
+        ],
+        'word2',    [ '/\$\w+/', '/[-=<>:\?\+\*\!\%&\|]+/' ],
+        'quotes',   [
+            "/\"([^\"\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^\"\\\\\n]*)*)\"/",
+            "/'([^'\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^'\\\\\n]*)*)'/",
+            "/\<-?[0-9]+\>/",                           /* numbers */
+            "/\<0x[0-9a-f]+\>/i",                       /* hex numbers */
+            "/\<[0-9[:upper:]_]+\>/",                   /* all-caps words */
+            [ "/`/", "/`/" ]                            /* backticks */
+        ],
+        'comments', [
+            [ '|/\*|', '|\*/|' ],                       /* C-like */
+            "/\/\/[^\n\x{ad}]*(\x{ad}\n[^\n]*)*/"       /* C++-like */
+        ]
+    ]
+};

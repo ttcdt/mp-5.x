@@ -1,0 +1,112 @@
+/*
+
+    Minimum Profit - A Text Editor
+    Session handling.
+
+    ttcdt <dev@triptico.com> et al.
+
+    This software is released into the public domain.
+    NO WARRANTY. See file LICENSE for details.
+
+*/
+
+/* automatically load / save sessions */
+mp.config.auto_sessions = 0;
+
+/* local sessions */
+mp.config.local_sessions = 0;
+
+/** session actions **/
+
+mp.actions['save_session'] = sub { mp.long_op(mp.save_session); };
+mp.actions['load_session'] = sub { mp.long_op(mp.load_session); };
+
+/** default keybindings **/
+
+/** action descriptions **/
+
+mp.actdesc['load_session'] = LL("Load session");
+mp.actdesc['save_session'] = LL("Save session");
+
+/** code **/
+
+sub mp.session_file()
+/* returns the appropriate session saving file */
+{
+    return (mp.config.local_sessions && './' || HOMEDIR) + '.mp_session';
+}
+
+
+sub mp.save_session()
+/* saves currently open files as a session. Returns: -1, nothing to save;
+   -2, error saving; or 0, session correctly saved */
+{
+    local fh, filenames;
+
+    filenames = [];
+
+    /* no named files? exit doing nothing */
+    if (grep(mp.docs, sub (e) { e.name != L("<unnamed>"); }) == NULL)
+        return -1;
+
+    if ((fh = open(mp.session_file(), "w")) == NULL) {
+        return -2;
+    }
+
+    foreach (doc, mp.docs) {
+        if (doc.name != L("<unnamed>"))
+            write (fh,
+                sprintf("%s\t%i\t%i\t%s\n",
+                    doc.name, doc.txt.x, doc.txt.y,
+                    (cmp(doc, mp.active()) == 0 && 'a' || '')
+                )
+            );
+    }
+
+    close(fh);
+
+    return 0;
+}
+
+
+sub mp.load_session()
+/* loads a session. Returns: -1, no session, -2, user cancellation on closing
+   currently open documents and 0, ok */
+{
+    local fh, l;
+
+    /* check to see if a session file can actually be opened before closing
+       all the editing windows */
+    if ((fh = open(mp.session_file(), "r")) == NULL) {
+        return -1;
+    }
+
+    if (!mp.actions.close_all()) {
+        close(fh);
+        return -2;
+    }
+
+    local active = -1;
+
+    while (l = read(fh)) {
+        local data, doc;
+        data = split (mp.chomp(l), "\t");
+
+        if (stat(data[0]) != NULL) {
+            doc = mp.open(data[0]);
+
+            doc->set_y(integer(data[2]))->set_x(integer(data[1]));
+
+            /* if it has the 'a' flag, set as active */
+            if (regex(data[3], '/a/'))
+                active = seek(mp.docs, doc);
+        }
+    }
+
+    if (active != -1)
+        mp.active_i = active;
+
+    close(fh);
+
+    return 0;
+}

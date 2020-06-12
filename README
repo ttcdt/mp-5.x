@@ -1,0 +1,48 @@
+Minimum Profit README
+=====================
+
+ Minimum Profit - A Text Editor
+ ttcdt <dev@triptico.com> et al.
+ Home Page: https://triptico.com/software/mp.html
+
+Minimum Profit (mp) is a text editor for programmers. Among its features
+are the following:
+
+ - Fully scriptable using a C-like scripting language.
+ - Unlimited undo levels.
+ - Complete Unicode support.
+ - Multiple files can be edited at the same time and blocks copied
+   and pasted among them.
+ - Syntax highlighting for many popular languages / file formats: C, C++,
+   Perl, Shell Scripts, Ruby, Php, Python, HTML...
+ - Creative use of tags: tags created by the external utility _ctags_
+   are used to move instantaneously to functions or variables inside
+   your current source tree. Tags are visually highlighted (underlined),
+   and symbol completion can be triggered to avoid typing your own function
+   names over and over.
+ - Intelligent help system: pressing F1 over any word of a text being edited
+   triggers the underlying system help (calling _man_ when editing C or Shell
+   files, _perldoc_ with Perl, _ri_ on Ruby...).
+ - Understandable interface: drop-down menus, reasonable default key bindings.
+ - Configurable keys, menus and colors.
+ - Text templates can be easily defined / accessed.
+ - Multiplatform: Unix/Linux ANSI and Curses, Qt4/Qt5, GTK+, KDE4, MS Windows
+   (both windowed and console).
+ - Automatic indentation, word wrapping, internal _grep_, learning /
+   repeating functions.
+ - Spellchecking support (via the ispell package).
+ - Multilingual.
+ - Password-protected, encrypted text files (using the ARCFOUR algorithm).
+ - It helps you abandon vi, emacs and other six-legged freaks definitely.
+
+This software has been released into the public domain. See file LICENSE
+for details.
+
+Compiling & Installing from source
+----------------------------------
+
+	 $ ./config.sh
+	 $ make
+	 # make install
+
+See the included documentation for more information.

@@ -1,0 +1,401 @@
+Minimum Profit 5 TODO / Bug List
+================================
+
+Release Critical Bugs
+---------------------
+
+None!
+
+Open Bugs
+---------
+
+ * 1150: The GTK menu is not rebuilt when calling mp.update_ui().
+ * 1176: Add interface to set the undo levels.
+ * 1189: mp.drv.form() cannot be used from the command line in win32.
+ * 1199: On GTK, the default font (Mono 12, seemingly an alias to an
+   actual font) doesn't get its width calculated correctly, so right
+   margin detection and mouse positioning doesn't work. To workaround
+   this, set mp.config.font_face (in the config file) to an existing
+   monospaced font, like "DejaVu Mono" or "Bitstream Vera Sans Mono".
+ * 1233: Document all MPSL code using mp_doccer (at least, the
+   interface functions).
+ * 1242: There cannot be two tags with the same name, as they are
+   stored as hash keys.
+ * 1271: Section marks should be multiline.
+ * 1278: The Qt driver does not accept Qt-specific command line
+   arguments.
+ * 1282: The timer function in the Curses driver does not work
+   while pressing keys.
+ * 1306: Fix win32 file permissions.
+ * 1308: Document mp_doc.keycodes in mp_data_model.
+
+Pending Enhancements
+--------------------
+
+ * 1100: Paren matching should be syntax-highlight-dependent, so that
+   HTML / XML / SGML match < > pairs.
+ * 1101: Paren matching should not be limited to just parentheses and
+   similar, but to full strings (very useful for HTML open / close tags.)
+ * 1183: Many actions should operate only on the selection block
+   (expand this issue).
+ * 1203: Change the drawing engine to only apply the syntax highlighting
+   regexes whenever the modified flag has changed or the viewport is
+   different.
+ * 1225: Add a regex (or similar) filter for lines. Lines matching it
+   (or not) won't appear on screen.
+
+Closed
+------
+
+ * 1103: When the end of a coloured block (for example, a comment in
+   C code) is lost below the last line, it's not coloured (this probably
+   means there should exist 'postread lines')(Fixable with special regular
+   expressions; Tue, 15 Nov 2005 13:49:45 +0100).
+ * 1114: Add delete line (Thu, 24 Nov 2005 20:12:05 +0100).
+ * 1121: Treatment of EOL in last line is uncertain
+   (Thu, 08 Dec 2005 20:01:09 +0100).
+ * 1123: When deleting the only line of a file, it gets mad
+   (Thu, 08 Dec 2005 20:09:42 +0100).
+ * 1104: When moving up / down, the X position should match the visual
+   column and not the exact one. Now, when moving among lines with a
+   different number of tabs, the cursor jumps weirdly
+   (Fri, 09 Dec 2005 10:59:01 +0100).
+ * 1105: Use a reasonable build system with config.sh
+   (Thu, 15 Dec 2005 08:32:19 +0100).
+ * 1124: Add the multi-document management (Thu, 15 Dec 2005 11:12:14 +0100).
+ * 1102: Tabs are incorrectly coloured when the cursor is over one
+   (Thu, 15 Dec 2005 12:09:35 +0100).
+ * 1122: Fix quote regexes to not match newlines
+   (Thu, 15 Dec 2005 12:36:51 +0100).
+ * 1125: Make it installable under Unix systems
+   (Mon, 19 Dec 2005 17:17:19 +0100).
+ * 1106: Add tag support (Wed, 21 Dec 2005 07:55:03 +0100).
+ * 1126: The dynamic array length in drw_as_array() is not taken
+   into account (Wed, 21 Dec 2005 18:30:22 +0100).
+ * 1127: If a double width char does not fit to the end of the line,
+   draw a single space instead (Wed, 21 Dec 2005 18:45:08 +0100).
+ * 1108: Add word wrapping (Sat, 24 Dec 2005 19:26:45 +0100).
+ * 1128: Add the -e command line switch
+   (Mon, 26 Dec 2005 19:45:20 +0100).
+ * 1119: Add learn mode (Fri, 20 Jan 2006 18:55:41 +0100).
+ * 1129: Add '+line' command line argument (Tue, 24 Jan 2006 06:22:49 +0100).
+ * 1130: When the last open file is closed (so a new, empty file is created
+   automatically), the tab files are not rebuilt (as the size of the tab set
+   is the same) (Tue, 14 Feb 2006 08:08:55 +0100).
+ * 1132: Add move word right (Mon, 20 Feb 2006 17:23:57 +0100).
+ * 1111: Add search (Tue, 21 Feb 2006 07:28:36 +0100).
+ * 1112: Add replace (Tue, 21 Feb 2006 07:48:36 +0100).
+ * 1113: Add replace all (Tue, 21 Feb 2006 08:33:02 +0100).
+ * 1133: Add replace in all documents (Tue, 21 Feb 2006 08:37:11 +0100).
+ * 1134: Add ~/.mp.mpsl (user profile) support (Tue, 28 Feb 2006 17:44:56 +0100).
+ * 1135: If ~/.mp.mpsl does not exist, aborts
+  (Tue, 11 Apr 2006 17:05:27 +0200).
+ * 1117: Add go to line (Mon, 17 Apr 2006 13:36:34 +0200).
+ * 1136: Add the 'modified' flag to documents
+   (Wed, 19 Apr 2006 08:16:37 +0200).
+ * 1145: Add tag target to the status line (Sat, 13 May 2006 09:56:37 +0200).
+ * 1118: Add move word left (Sat, 13 May 2006 12:25:01 +0200).
+ * 1107: Add ispell support (Mon, 15 May 2006 11:50:29 +0200).
+ * 1147: Add history to GTK's readline (Sun, 21 May 2006 17:33:42 +0200).
+ * 1148: Add history to win32's readline (Sun, 21 May 2006 17:48:35 +0200).
+ * 1139: Add the 'default' value to mp.drv.readline()
+   (Mon, 22 May 2006 06:10:17 +0200).
+ * 1143: Add interactive help (Tue, 23 May 2006 18:39:29 +0200).
+ * 1149: Unify mp.insert() and mp.paste(), as they do the same thing
+   (Thu, 25 May 2006 13:40:26 +0200).
+ * 1138: The call to mp.load_tags() in mp_tags.mpsl startup does not
+   work because at that time the colors are not built (so there is no
+   mp.colors.tag.attr) (Mon, 05 Jun 2006 19:25:32 +0200).
+ * 1144: Add the menu (Tue, 06 Jun 2006 19:09:38 +0200).
+ * 1146: Add 'recording macro' flag to the status line
+   (Sat, 10 Jun 2006 11:51:28 +0200).
+ * 1151: The menu should show a ? if the action doesn't exist
+   (Tue, 13 Jun 2006 16:19:05 +0200).
+ * 1152: The menu should show the bound key, if any
+   (Tue, 13 Jun 2006 16:19:11 +0200).
+ * 1154: Change syntax highlight definitions to be an array, so that
+   preference works (Tue, 27 Jun 2006 16:35:18 +0200).
+ * 1110: Add mp_templates support (Tue, 27 Jun 2006 18:18:49 +0200).
+ * 1140: Add mp.drv.list() (Closed by #1156 and #1157).
+ * 1156: Add mp.drv.list() to GTK (Tue, 04 Jul 2006 13:19:58 +0200).
+ * 1157: Add mp.drv.list() to win32 (Thu, 06 Jul 2006 13:14:14 +0200).
+ * 1141: Add complete tag support, with 'ctags' execution, asking for
+   a tag (needs #1139) and selecting from a list (needs #1140)
+   (Thu, 13 Jul 2006 13:59:02 +0200).
+ * 1142: Add symbol completion with tags (needs #1140)
+   (Thu, 13 Jul 2006 17:10:49 +0200).
+ * 1159: Do something to avoid having carriage returns in the text
+   (Mon, 17 Jul 2006 14:22:26 +0200).
+ * 1158: Fail on trying to open directories (Mon, 17 Jul 2006 15:54:25 +0200).
+ * 1160: Current opening file method (read-write mode and then stat())
+   fails opening read-only files, which is unacceptable
+   (Wed, 19 Jul 2006 13:15:07 +0200).
+ * 1153: Suppress the "File '.mp.mpsl' not found in INC" spurious
+   error message (Wed, 19 Jul 2006 18:28:09 +0200).
+ * 1161: Pressing backspace at the beggining of a document deleted
+   the first character (Wed, 19 Jul 2006 18:34:17 +0200).
+ * 1163: Add readline_password to TUI (Thu, 27 Jul 2006 10:17:54 +0200).
+ * 1164: Add readline_password to GTK (Thu, 27 Jul 2006 10:23:56 +0200).
+ * 1165: Add readline_password to Win32 (Thu, 27 Jul 2006 10:38:16 +0200).
+ * 1155: Add replace (Sat, 02 Sep 2006 11:54:06 +0200).
+ * 1167: Tags fail because mp.search() now delimits the string with /
+   (Sun, 17 Sep 2006 09:54:46 +0200).
+ * 1177: Add mp.drv.form() support to Win32 (Mon, 25 Sep 2006 19:49:29 +0200).
+ * 1178: Add mp.drv.form() support to TUI (Sat, 30 Sep 2006 08:03:10 +0200).
+ * 1115: Add password protection (Closed by #1180;
+   Mon, 02 Oct 2006 17:24:36 +0200).
+ * 1162: Add menu support to the Curses / TUI interface
+   (Mon, 02 Oct 2006 20:11:28 +0200).
+ * 1181: Search should always be positioned in the same line
+   (Mon, 02 Oct 2006 20:19:24 +0200).
+ * 1180: Prompt for a password when detecting encrypted files
+   (Thu, 12 Oct 2006 10:54:45 +0200).
+ * 1186: Password-protected files cannot be opened from the command
+   line because mp.drv.form() doesn't exist at that time
+   (Thu, 12 Oct 2006 12:23:14 +0200).
+ * 1187: Tagged words aren't coloured in the GTK driver
+   (Fri, 13 Oct 2006 17:45:56 +0200).
+ * 1188: Tagged words aren't coloured in the win32 driver
+   (Fri, 13 Oct 2006 18:02:55 +0200).
+ * 1190: Encrypted files fail opening in win32
+   (Closed by #1191; Fri, 13 Oct 2006 18:28:02 +0200).
+ * 1191: The win32 version seems to write encrypted files correctly
+   (they can be read on win32 and on unix), but can't read
+   (Fixed in MPDM; Fri, 13 Oct 2006 18:59:01 +0200).
+ * 1192: Fix password protected opening form to equal cancellation
+   if the password is empty (Fri, 13 Oct 2006 20:37:41 +0200).
+ * 1193: mp.drv.form() cannot be used from the command line in GTK,
+   dialogs are created with no fields (but password protected files
+   and tags do work) (My mistake, they work; Sat, 14 Oct 2006 09:31:57 +0200).
+ * 1131: Add move to next / previous ocurrence of character
+   (Mon, 16 Oct 2006 16:17:54 +0200).
+ * 1197: Win32 forms under Win98 don't return anything (it seems that
+   GetDlgItemTextW() is failing) (Fri, 20 Oct 2006 07:42:10 +0200).
+ * 1196: Win32 forms don't show any text under Win98 (it seems that
+   SetDlgItemTextW() is failing) (Fri, 20 Oct 2006 07:50:49 +0200).
+ * 1185: Delete '.' from INC (Fri, 03 Nov 2006 14:03:46 +0100).
+ * 1182: Add selection by moving with the shift key down
+   (Fri, 03 Nov 2006 15:48:41 +0100).
+ * 1200: Add selection by mouse dragging to GTK
+   (Fri, 03 Nov 2006 16:57:26 +0100).
+ * 1202: Block selection doesn't work well. The first mark should have
+   preference from the other (must never change in a selection
+   'session') (Fri, 03 Nov 2006 17:34:03 +0100).
+ * 1201: Add selection by mouse dragging to Win32
+   (Wed, 08 Nov 2006 18:04:03 +0100).
+ * 1116: Add grep (Tue, 14 Nov 2006 17:20:24 +0100).
+ * 1206: Add 'sync' (save all modified documents)
+   (Sun, 26 Nov 2006 12:39:07 +0100).
+ * 1207: Add 'Reopen as UTF-8' (Closed by: #1209, #1210;
+   Sun, 03 Dec 2006 20:27:28 +0100).
+ * 1208: Add 'Reopen as current locale' (Closed by: #1209, #1210;
+   Sun, 03 Dec 2006 20:27:28 +0100).
+ * 1211: Add the 'document_list' action (Fri, 12 Jan 2007 08:28:32 +0100).
+ * 1179: It doesn't work with ncurses, so stop lying about it and
+   ask for ncursesw (Thu, 18 Jan 2007 08:15:14 +0100).
+ * 1169: Port translations from mp 3.x (Thu, 18 Jan 2007 09:02:38 +0100).
+ * 1204: When toggling spelling, the document is incorrectly refreshed
+   (Mon, 22 Jan 2007 13:21:09 +0100).
+ * 1198: Add interface to active spellchecking
+   (Mon, 22 Jan 2007 13:28:36 +0100).
+ * 1210: Add interface to set the encoding
+   (Mon, 22 Jan 2007 13:35:25 +0100).
+ * 1209: Add 'Reopen' (renamed to 'Revert'; Mon, 22 Jan 2007 13:40:25 +0100).
+ * 1172: Add interface to set the word wrapping column
+   (Mon, 22 Jan 2007 14:06:09 +0100).
+ * 1173: Add interface to set the line terminator
+   (Mon, 22 Jan 2007 14:06:09 +0100).
+ * 1174: Add interface to set autoindentation.
+   (Mon, 22 Jan 2007 14:06:09 +0100).
+ * 1171: Add interface to set tab size (Mon, 22 Jan 2007 16:28:47 +0100).
+ * 1175: Add interface to set the tabs-as-spaces
+   (Mon, 22 Jan 2007 16:28:47 +0100).
+ * 1168: Port all syntax highlight definitions from mp 3.x
+   (Wed, 24 Jan 2007 17:58:36 +0100).
+ * 1212: Add mp.config.maximize support for GTK
+   (Thu, 25 Jan 2007 08:45:39 +0100).
+ * 1213: Add mp.config.maximize support for Win32
+   (Thu, 25 Jan 2007 17:12:39 +0100).
+ * 1120: Add a 'system-command' action (Fri, 02 Feb 2007 10:13:26 +0100).
+ * 1137: Word wrap counts all caracters as measuring 1 column,
+   which is stupid. This is specially true for tabs
+   (Thu, 22 Feb 2007 14:10:09 +0100).
+ * 1214: Search and replace don't replace \t, \r and such
+   (Mon, 26 Feb 2007 17:30:50 +0100).
+ * 1215: Rewrite the timer so that it's no longer an action, but
+   a specific function call (Thu, 29 Mar 2007 12:37:01 +0200).
+ * 1216: Document the new timer functionality
+   (Tue, 03 Apr 2007 16:51:06 +0200).
+ * 1217: Add 'Please wait...' messages (Thu, 19 Apr 2007 13:06:54 +0200).
+ * 1220: Tag completion seems to redraw incorrectly
+   (Thu, 10 May 2007 10:29:08 +0200).
+ * 1221: When tag completion expands to exactly one tag, redraw
+   is still incorrect (Thu, 10 May 2007 13:25:25 +0200).
+ * 1224: Also execute /etc/mp.mpsl (Tue, 22 May 2007 08:22:18 +0200).
+ * 1223: Add a mprc.mpsl.sample file (Closed by #1226;
+   Wed, 30 May 2007 13:51:51 +0200).
+ * 1226: Document the configuration values
+   (Wed, 30 May 2007 13:51:58 +0200).
+ * 1228: Add 'ctrl-a: Menu' to Curses status line
+   (Tue, 05 Jun 2007 13:49:02 +0200).
+ * 1229: The 'replace' action should use sregex() instead of an
+   ad-hoc splice() + mp.insert() (Tue, 19 Jun 2007 09:03:57 +0200).
+ * 1231: Selection from GTK lists crashes if the element have
+   changed and ENTER or Escape is pressed (Fixed by a library
+   upgrade; Fri, 29 Jun 2007 08:01:17 +0200).
+ * 1232: Update the features in the home page
+   (Wed, 29 Aug 2007 14:04:15 +0200).
+ * 1237: /etc/mp.mpsl is not being executed
+   (Wed, 12 Sep 2007 12:26:35 +0200).
+ * 1238: On win32, the 'exit' action is called twice when exiting
+   from the keystroke or the menu (but *not* when closing the
+   window) (Mon, 17 Sep 2007 14:28:28 +0200).
+ * 1234: Add support for local sessions
+   (Mon, 17 Sep 2007 17:37:41 +0200).
+ * 1184: Stop inserting the keypress if a key is not bound
+   (Mon, 17 Sep 2007 19:52:19 +0200).
+ * 1241: Implement keycode multiplexing ala Emacs
+   (Tue, 18 Sep 2007 13:25:52 +0200).
+ * 1235: Change the calling points for auto-saved sessions
+   (They are fine now; Tue, 18 Sep 2007 13:36:30 +0200).
+ * 1239: Don't save session if only unnamed files are open
+   (Thu, 20 Sep 2007 19:07:03 +0200).
+ * 1243: The new drw_search_hit() function should pass the
+   mp.last_search value through mp.prefix_regex() (or
+   mp.last_search stored as a regex) (Mon, 15 Oct 2007 14:42:17 +0200).
+ * 1246: An empty search hangs (Tue, 13 Nov 2007 13:13:02 +0100).
+ * 1245: The record macro function, when called from the menu,
+   drops the last keystroke (Thu, 22 Nov 2007 14:39:50 +0100).
+ * 1247: The menu doesn't move on the Curses version
+   (Thu, 22 Nov 2007 14:53:49 +0100).
+ * 1195: The curses menu crashes if it doesn't fit on the screen
+   (Thu, 22 Nov 2007 15:10:52 +0100).
+ * 1222: Add --help info
+   (Fri, 23 Nov 2007 13:22:05 +0100).
+ * 1240: Fix the -f (execute script) command-line argument
+   (Fri, 23 Nov 2007 13:33:11 +0100).
+ * 1219: Update the man page (Fri, 23 Nov 2007 14:16:54 +0100).
+ * 1218: Create or adapt The README file
+   (Tue, 27 Nov 2007 13:29:10 +0100).
+ * 1244: Document the data model
+   (Thu, 29 Nov 2007 07:31:47 +0100).
+ * 1250: Autoindent should be disabled while pasting
+   (Fri, 07 Dec 2007 08:14:25 +0100).
+ * 1251: In TUI's list, when the cursor is on the last element, the
+   rest of the screen is drawn in cursor color
+   (Tue, 18 Dec 2007 11:14:19 +0100).
+ * 1252: Ctrl-keys on GTK fail when caps enabled
+   (Fri, 22 Feb 2008 07:57:40 +0100).
+ * 1236: Calling with -t doesn't draw the screen if only one
+   tag is found (Mon, 25 Feb 2008 15:17:43 +0100).
+ * 1205: Copy & paste from two different instances of MP (GTK)
+   seem to fail (copying or pasting from other applications seem
+   to work) (Tue, 26 Feb 2008 07:28:50 +0100).
+ * 1253: Document the 'build' action (Thu, 13 Mar 2008 07:50:28 +0100).
+ * 1254: Sessions don't set the y position of files correctly
+   (Mon, 31 Mar 2008 17:30:18 +0200).
+ * 1255: Document change in 'grep' (Tue, 01 Jul 2008 08:05:11 +0200).
+ * 1256: Document change in 'build' (Tue, 01 Jul 2008 08:05:11 +0200).
+ * 1257: Document new builtin encoders (Tue, 01 Jul 2008 08:05:11 +0200).
+ * 1258: Document change in curses dialogs (Tue, 01 Jul 2008 08:05:11 +0200).
+ * 1262: Add text underlining to KDE4 (Sun, 31 Aug 2008 16:10:35 +0200).
+ * 1263: Add history to form() text fields in KDE4
+   (Mon, 01 Sep 2008 12:37:01 +0200).
+ * 1264: Avoid exiting if no xserver can be connected to in KDE4
+   (Tue, 02 Sep 2008 12:25:01 +0200).
+ * 1248: No localisation on Win32
+   (Tue, 07 Oct 2008 13:39:49 +0200).
+ * 1265: Fix localisation / gettext when KDE4 support is compiled
+   (Tue, 07 Oct 2008 13:39:36 +0200).
+ * 1267: Sometimes replace all hangs (Tue, 04 Nov 2008 09:19:50 +0100).
+ * 1269: Don't try to search inside the block if it's empty
+   (Wed, 21 Jan 2009 10:37:16 +0100).
+ * 1261: Apply Jeremy's function_list()
+   (Mon, 02 Feb 2009 16:10:34 +0100).
+ * 1272: Fix the `open_templates_file' action
+   (Wed, 04 Mar 2009 10:04:59 +0100).
+ * 1227: The length of an open combobox (at least under XP)
+   is ridiculous (Tue, 21 Apr 2009 12:17:22 +0200).
+ * 1194: Underlined text doesn't work under win32
+   (Tue, 21 Apr 2009 12:51:38 +0200).
+ * 1270: tools/po2mpsl.mpsl skips the last string
+   (Tue, 21 Apr 2009 17:47:42 +0200).
+ * 1274: Add interface to configure the repeated word detector
+   (Wed, 22 Apr 2009 08:52:43 +0200).
+ * 1273: mp.repeated_words() leaves the last max_dist words
+   unchecked (Tue, 28 Apr 2009 11:55:42 +0200).
+ * 1276: Fix win32 processing of Unicode characters
+   (Mon, 27 Jul 2009 16:52:20 +0200).
+ * 1277: Fix win32 window title (Tue, 28 Jul 2009 06:59:56 +0000).
+ * 1266: Add a new tab style, in which the next tab column is taken from
+   the previous line (Thu, 01 Oct 2009 10:48:37 +0200).
+ * 1268: Implement mp.timer() in the KDE4 driver
+   (Tue, 24 Nov 2009 12:50:32 +0100).
+ * 1166: Add a file open navigator to TUI
+   (Thu, 25 Nov 2010 10:33:52 +0100).
+ * 1259: Apply Jeremy's indent_block() (Wed, 31 Aug 2011 12:49:38 +0200).
+ * 1260: Apply Jeremy's outdent_block() (Wed, 31 Aug 2011 12:49:38 +0200).
+ * 1281: The multithreaded hex viewer crashes (seemingly only
+   in multicore machines)
+   (Option removed; Sat, 15 Oct 2011 09:24:16 +0200).
+ * 1283: Add Jeremy's smart-bol to the "Line options..." form
+   (Tue, 18 Oct 2011 14:42:26 +0200).
+ * 1288: Add an option to set the selected item in form lists
+   (Option already exists, you moron; Wed, 02 Nov 2011 19:49:13 +0000).
+ * 1289: Remember the last Makefile target (needs #1288 fixed)
+   (Thu, 03 Nov 2011 09:17:28 +0100).
+ * 1290: In the `section_list' action, select the item nearest to
+   current cursor position (needs #1288 fixed)
+   (Thu, 03 Nov 2011 10:05:17 +0100).
+ * 1291: In C and MPSL the help action should search for
+   mp_doccer-style documentation code
+   (Thu, 10 Nov 2011 13:34:55 +0100).
+ * 1292: Insert new documents after the current one
+   (Wed, 21 Dec 2011 16:09:50 +0100).
+ * 1170: The curses driver doesn't redraw when the terminal window
+   is resized (Wed, 11 Jan 2012 10:01:52 +0100).
+ * 1293: Add a mp.pipes() game (Fri, 20 Jan 2012 12:58:44 +0100).
+ * 1284: Add version control support (git, svn, etc)
+   (Tue, 14 Feb 2012 12:25:04 +0100).
+ * 1294: If the `keep_eol' config variable is not set, EOLs should
+   be forced (Mon, 27 Feb 2012 12:47:26 +0000).
+ * 1295: Delete backspace+char pairs when piping help
+   (Mon, 27 Feb 2012 15:43:29 +0100).
+ * 1296: Add a `check_for_updates' action
+   (Wed, 28 Mar 2012 09:57:30 +0200).
+ * 1286: Add an action to move to previous section
+   (Thu, 19 Apr 2012 14:30:45 +0000).
+ * 1287: Add an action to move to next section
+   (Thu, 19 Apr 2012 14:30:45 +0000).
+ * 1299: Fix the commit on_close issue
+   (Sun, 29 Apr 2012 12:22:31 +0200).
+ * 1300: Fix make (Mon, 30 Apr 2012 12:52:48 +0200).
+ * 1297: Fix +NNN in the command line (Thu, 03 May 2012 09:56:30 +0000).
+ * 1301: As mp_doc.keypress() is a pure method now, those in "toys"
+   no longer process MP keycodes as next doc, close or quit
+   (Tue, 08 May 2012 13:26:20 +0200).
+ * 1302: Change keycodes to be splitted in mp and mp_doc namespaces
+   (Tue, 08 May 2012 13:26:20 +0200).
+ * 1303: Fix keystrokes help in the menu
+   (Tue, 08 May 2012 15:17:57 +0200).
+ * 1298: Fix password prompt in encrypted files
+   (Wed, 16 May 2012 18:27:21 +0200).
+ * 1304: Fix `exec_action' to include all actions
+   (Fri, 25 May 2012 13:13:53 +0200).
+ * 1275: Add a 'Writing' menu bar (Tue, 29 May 2012 13:49:24 +0200).
+ * 1305: Refactor the hex viewer to be object-oriented
+   (Wed, 13 Jun 2012 14:35:28 +0000).
+ * 1307: 'play macro' crashes (dom, 02 dic 2012 11:22:07 +0100).
+ * 1285: Fix KDE build (Thu, 26 Jun 2014 11:35:25 +0000).
+ * 1109: Add jump to matching paren (Fixed by X-Ryl669; Thu,
+   21 dec 2017 15:17:53 +0100).
+ * 1280: Study a way to convert MP to a "portable" application, i.e.
+   to be formed by just the executable with all MPSL code embedded
+   (mainly aimed towards MS Windows) (Tue, 05 Feb 2019 08:14:36 +0100).
+ * 1230: Action `eval_doc' seems to fail forever after an error
+   (I think I fixed this years ago; Mon, 11 May 2020 12:56:30 +0200).
+ * 1249: Change TUI dialogs to be really dialogs (discarded, after 10+
+   years, they are OK like they are; Mon, 11 May 2020 12:58:13 +0200).
+ * 1279: Add a new visual wrap mode (Mon, 11 May 2020 12:59:16 +0200).
+
+Email bugs to angel@triptico.com

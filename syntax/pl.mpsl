@@ -1,0 +1,59 @@
+{
+    'id'        =>  'perl',
+    'name'      =>  'Perl',
+    'help'      =>  [ 'perldoc -f %s', 'perldoc %s' ],
+    'help_word_regex' =>    '/[A-Z_][A-Z0-9_:]*/i',
+    'defs'  =>  [
+        'word1',    [
+            mp.syn_token_list( [
+                "for", "if", "next", "last", "else", "elsif",
+                "unless", "while", "shift", "unshift", "push",
+                "pop", "delete", "new", "bless", "return",
+                "foreach", "keys", "values", "sort", "grep",
+                "tr", "length", "system", "exec", "fork", "map",
+                "print", "write", "open", "close", "chop",
+                "chomp", "exit", "sleep", "split", "join",
+                "sub", "printf", "sprintf", "s", "glob",
+                "scalar", "my", "local", "undef", "defined",
+                "use", "package", "require", "ref", "can", "isa",
+                "qw", "qq", "eq", "ne", "or", "exists",
+                "and", "not", "import", "our", "caller" ]),
+            '/->/'
+        ],
+        'word2',    [
+            '/[:\?\+\*\/\!\$@\%&\|~\.]+/',
+            '/[\$@%]\w+/'
+        ],
+        'quotes',   [
+            "/\"([^\"\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^\"\\\\\n]*)*)\"/",
+            "/'([^'\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^'\\\\\n]*)*)'/",
+            "/\<-?[0-9]+\>/",                           /* numbers */
+            "/\<0x[0-9a-f]+\>/i",                       /* hex numbers */
+            "/\<[0-9[:upper:]_]+\>/",                   /* all-caps words */
+            [ "/q\(/", "/\)/" ],                        /* quote */
+            [ "/qw\(/", "/\)/" ],                       /* quote word */
+            '/\w+\s*=>/',                               /* barewords as hash keys 1 */
+            '/\{\s*-?\w+\s*\}/',                        /* barewords as hash keys 2 */
+            [ "/`/", "/`/" ],                           /* backticks */
+            [ "/<<[\"']?EOF.*$/m", "/^EOF$/m" ]         /* 'document here' */
+        ],
+        /* color all => as word2 */
+        'word2',    [ '/=>/' ],
+        /* color curly brackets as word */
+        'word',     [ '/[{}]/' ],
+        'comments', [
+            "/#[^\n\x{ad}]*(\x{ad}\n[^\n]*)*/"
+        ],
+        'documentation',    [
+            "/__END__\n.*$/",           /* __END__ */
+            '/^## .*$/m',               /* section mark */
+            [ "/^=(head[1-4]|over|item|back|pod|begin|end|for)/m",
+                "/^=cut$/m" ]           /* POD */
+        ]
+     ],
+    'section'       =>  [ '/(^sub \w+|^package|^## )/' ],
+    'build_targets' => [
+        'perl %s',
+        'perl -I. -cw %s'
+    ]
+};

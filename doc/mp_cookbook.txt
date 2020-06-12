@@ -1,0 +1,234 @@
+Minimum Profit cookbook
+=======================
+
+This document includes some recipes for the Minimum Profit text editor.
+
+Executing MPSL code
+-------------------
+
+There are three ways of executing MPSL inside the editor.
+
+From the command line
+~~~~~~~~~~~~~~~~~~~~~
+
+The first one is from the command line using the -e switch:
+
+ mp-5 -e 'mp.config.word_wrap = 75;'
+
+This command opens the editor and immediately executes an assignation to
+the mp.config.word_wrap variable, giving it a value of 75 (this operation
+have activated word wrapping on column 75). Take note that the leading
+semicolon is mandatory. Several sentences can be given:
+
+ mp-5 -e 'mp.config.word_wrap = 75; mp.ispell(1); mp.alert("Hello!");'
+
+Word wrapping is set, ispell is activated (if supported) and a greeting
+message is given. As seen, any valid MPSL program can be given here.
+
+Using the 'eval' action
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The 'eval' action is on the menu as the "Edit/Execute MPSL code..." entry.
+This action asks for a string of MPSL code to be executed. The return
+value will be returned as an alert message.
+
+Using the 'eval_doc' action
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The 'eval_doc' in on the menu as the "Edit/Execute document as MPSL". This
+action will take the contents of the currently active document and pass it
+directly to the MPSL engine.
+
+Using different encodings
+-------------------------
+
+By default, MP reads and writes files using the current locale for
+character set conversions. This way, if you run it in an UTF-8
+environment, you don't have to do anything special, just open and save
+your files. But, if you need to read or write files using different
+encodings (for example, if your locale encoding is ISO-8859-1 and you need
+to read UTF-8 files), you can use the encoding() function. This function
+receives an encoding string as argument; after calling it, all I/O
+operations will use that encoding. To get back to 'normal' (i.e., default
+local encoding), just call it without arguments, or with a NULL one.
+
+This snippet will convert a file named 'text' to UTF-8:
+
+ local d = mp.open('text'); encoding('utf-8'); mp.save(d); mp.close();
+
+Spellchecking
+-------------
+
+Spellchecking is done under Unix-like systems by piping the words of the
+current document to the external command *ispell*, so it must be installed,
+correctly configured and with properly installed dictionary files to be
+useful. To activate spell checking, the mp.ispell() function must be called
+with a boolean argument telling if spellchecking is wanted or not.
+
+By default, the command to be executed is "ispell -a". If you have it in a
+non-standard path, or want to use a different program as *aspell*, you can
+change it by changing the configuration variable mp.config.ispell_cmd.
+
+Note: if you happen to use an UTF-8 locale, the ispell program doesn't
+work correctly. Either use aspell, or change the command configuration
+variable to "ispell -a -Tutf8".
+
+Disabling syntax highlighting for slow machines
+-----------------------------------------------
+
+Syntax highlighting in Minimum Profit 5.x can be a CPU hog on embedded or
+small systems. An easy way to disable it is to set mp.syntax to an empty
+hash:
+
+	/* disable all syntax highlighting */
+	mp.syntax = {};
+
+Creating a print dialog
+-----------------------
+
+Minimum Profit 5.x lacks a print command, but it's easy to create one by
+using its powerful scripting language (MPSL) and some external commands
+used as pipes. The following example will create a dialog that will ask for
+some printing options and print the current document, optionally with
+preview. The external programs `paps', `psnup', `psselect' and `gv' must be
+installed and accesible with the current path.
+
+Copy this subroutine in an empty document and execute the menu option
+"Edit / Execute document as MPSL". Hopefully, the script will compile
+without errors and the new function my_print() will be created inside MP's
+machine:
+
+ sub my_print(doc) {
+ 
+ 	local r = mp.form( [
+ 		{
+ 			'label'		=> 'Page range (empty: all):',
+ 			'type'		=> 'text'
+ 		},
+ 		{
+ 			'label'		=> 'Pages per page:',
+ 			'type'		=> 'text',
+ 			'value'		=> 1
+ 		},
+ 		{
+ 			'label'		=> 'Preview?',
+ 			'type'		=> 'checkbox'
+ 		}
+ 	]);
+ 
+ 	if (r != NULL) {
+ 		local cmd = []; /* empty array */
+ 		local f;
+ 
+ 		/* first program is the text to PostScript converter */
+ 		push(cmd, 'paps');
+ 
+ 		/* select range using psselect, if available */
+ 		if (r[0] != '')
+ 			push(cmd, 'psselect -p' ~ r[0]);
+ 
+ 		/* select pages-in-page using psnup */
+ 		if (r[1] > 1)
+ 			push(cmd, 'psnup -' ~ r[1]);
+ 
+ 		/* preview using gv? */
+ 		if (r[2])
+ 			push(cmd, 'gv -');
+ 		else
+ 			push(cmd, 'lpr');
+ 
+ 		local c = join(cmd, '|');
+ 
+ 		/* now pipe */
+ 		if ((f = popen(c, "w")) != NULL) {
+ 			foreach (local l, doc.txt.lines)
+ 				write(f, l ~ "\n");
+ 
+ 			if (pclose(f) != 0)
+ 				f = NULL;
+ 		}
+ 
+ 		if (f == NULL)
+ 			mp.alert("Error '" ~ ERRNO ~ "' piping to '" ~ c ~ "'");
+ 	}
+ }
+
+The code should be self-explaining (I hope): a call to mp.form()
+creates a dialog box asking for the following printing options: a page
+range suitable for the `psselect' utility, a number of n-up pages for
+`psnup' (it's cool to avoid wasting paper by printing two pages into one)
+and a preview checkbox. If the dialog box is validated, the return values
+are used to construct an array of commands to pipe to. They are finally
+joined into one string using the '|' separator to build a command that
+will be used as a writable pipe.
+
+To test the new code, hit the Escape key (twice if using the Curses
+interface) and type the following:
+
+ 	my_print(mp.active());
+
+This is fine, but it would be much better if this new operation would be
+accesible from a hotkey or a menu option.
+
+In any of those two cases, an editor 'action' must be created. Actions are
+special functions that live in the `mp.actions' name space, and accept a
+document as the only argument. Optionally, actions have a description,
+a human-readable string:
+
+ 	mp.actions.my_print = sub(d) { my_print(d); };
+ 	mp.actdesc.my_print = "Print...";
+
+This is just one way of creating it, by using an anonymous subroutine;
+another way would be:
+
+ 	sub mp.actions.my_print(d) { my_print(d); }
+
+or even
+
+ 	mp.actions.my_print = my_print;
+
+Because the my_print() and the action itself use the same number of
+arguments.
+
+If you want to bind this action to ctrl-p, it's also easy:
+
+ 	mp.keycodes['ctrl-p'] = 'my_print';
+
+Execute that and, from now on, every hit to `ctrl-p' will invoke my_print()
+on the current document.
+
+To add it to the menu, the mp.menu array must be patched. This is less
+straightforward because the menu structure is a bit more complicated: it's
+an array of two-element arrays, where the zeroth element is the menu bar
+("File", "Edit", and so on) and the first one is itself another array, this
+time of action names.
+
+We want for our print option to live in the first menu bar ("File"), just
+above the last option, which is "Exit". The ins() MPSL library function
+inserts an element in a given position of an array, with negative
+subscripts starting from the end, so the following code will do:
+
+ 	ins(mp.menu[0][1], '-', -2);
+ 	ins(mp.menu[0][1], 'my_print', -2);
+
+The '-' special option creates a menu separator.
+
+The menu is not automatically rebuilt, so a call to the mp.update_ui()
+function is also needed:
+
+ 	mp.update_ui();
+
+Take note that on current version the GTK version doesn't rebuild its
+menu when calling mp.update_ui() (it's bug #1150).
+
+This examples show the easy expandability of the new MP 5.x version.
+
+I'm sure all this is fascinating, but everything will be lost on exit; the
+way to make this changes permanent is to add all that code to the personal
+configuration file, which is nothing more than an MPSL source code file
+that is compiled and parsed on startup. It's called .mp.mpsl, on Unix/Linux
+systems live in $HOME and on Win32 in the "My Documents" folder. The "File
+/ Edit configuration file" menu option gives easy access to it.
+
+----
+ttcdt <dev@triptico.com>

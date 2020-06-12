@@ -1,0 +1,47 @@
+{
+    id:         'nh3',
+    name:       'nh3',
+    filenames:  [ '/\.nh3?$/i' ],
+    defs:       [
+        'word1', [
+            mp.syn_token_list(
+                [
+                    'if', 'else', 'while', 'foreach',
+                    'sub', 'break', 'return', 'new'
+                ]
+            )
+        ],
+        'word2', [
+            "/(NULL|var|this)/"
+        ],
+        'word3', [
+            '/]/',
+            '/[\.-=<>\?\+\*\/\!\%&\|\{\}\[]+/'
+        ],
+        'quotes', [
+            "/\"([^\"\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^\"\\\\\n]*)*)\"/",
+            "/'([^'\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^'\\\\\n]*)*)'/",
+            "/\<-?[0-9]+\>/",                           /* numbers */
+            "/\<0x[0-9a-f]+\>/i",                       /* hex numbers */
+            "/\<0b[0-1]+\>/i",                          /* binary numbers */
+            '/\w+\s*:/',                                /* JS-type hashes */
+            "/\<[0-9[:upper:]_]+\>/"                    /* all-caps words */
+        ],
+        'word3',    [
+            '/:/'
+        ],
+        'comments', [
+            [ '|/\*|', '|\*/|' ],                       /* C-like */
+            "/\/\/[^\n\x{ad}]*(\x{ad}\n[^\n]*)*/"       /* C++-like */
+        ],
+        'documentation', [
+            [ "|/\*\*\n|", '|\*/|' ],                   /* mp_doccer */
+            '/^/\*\*.*\*\*/$/m'                         /* section mark */
+        ]
+    ],
+    section:    [ '/(^[A-Za-z_]|^\/\*\*.*\*\*\/$)/' ],
+    build_targets: [
+        "nh3 %s",
+        "nh3 -t %s"
+    ]
+};

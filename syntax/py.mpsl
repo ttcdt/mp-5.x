@@ -1,0 +1,50 @@
+{
+    'id'        =>  'python',
+    'name'      =>  'Python',
+    'help'      =>  [
+                        "python3 -c 'help(%s)'",
+                        "python3 -c 'import %s as m; help(m)'"
+                    ],
+    'defs'      =>  [
+        'word1',    [
+            mp.syn_token_list( [
+                "and", "as", "assert", "break", "class", "continue",
+                "def", "del", "elif", "else", "except", "exec",
+                "finally", "for", "from", "if", "import", "in",
+                "is", "lambda", "not", "or", "pass", "print",
+                "raise", "return", "try", "while", "with", "yield"
+                ]
+            )
+        ],
+        'word2',  [
+            '/global/', '/\$\w+/', '/__[a-z]+__/',
+            mp.syn_token_list([
+                "True", "False", "None", "self",
+                "dict", "list", "set", "bool",
+                "int", "float", "str", "repr"
+                ]
+            )
+        ],
+        'word3', [
+            '/]/',
+            '/[-=<>:\.\?\+\*\!\%&\|{}\[\/]+/'
+        ],
+        'quotes',	[
+            "/\"([^\"\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^\"\\\\\n]*)*)\"/",
+            "/'([^'\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^'\\\\\n]*)*)'/",
+            "/\<-?[0-9]+\>/",                           /* numbers */
+            "/\<0x[0-9a-f]+\>/i",                       /* hex numbers */
+            "/\<0o[0-7]+\>/i",                          /* octal numbers */
+            "/\<[0-9[:upper:]_]+\>/"                    /* all-caps words */
+        ],
+        'comments', [
+            "/#[^\n\x{ad}]*(\x{ad}\n[^\n]*)*/"
+        ],
+        'documentation',    [ [ '/"""/m', '/"""$/m' ], [ "/'''/m", "/'''/m" ] ]
+    ],
+    'section'   =>  [ '/^[ \t]*(def|class) /' ],
+    'build_targets' => [
+        'python3 %s',
+        'python3 -m py_compile %s && echo "Syntax OK"'
+    ]
+};

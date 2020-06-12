@@ -1,0 +1,85 @@
+/*
+
+    Minimum Profit - A Text Editor
+    Macro recording (learning mode).
+
+    ttcdt <dev@triptico.com> et al.
+
+    This software is released into the public domain.
+    NO WARRANTY. See file LICENSE for details.
+
+*/
+
+/** editor actions **/
+
+mp.actions['record_macro']  = sub { mp.record_macro(); };
+mp.actions['play_macro']    = sub { mp.play_macro(); };
+
+/** default key bindings **/
+
+mp.keycodes['f10']      = "record_macro";
+mp.keycodes['ctrl-f10'] = "f10";
+mp.keycodes['f7']       = "play_macro";
+
+/** action descriptions **/
+
+mp.actdesc['record_macro']  = LL("Record macro");
+mp.actdesc['play_macro']    = LL("Play macro");
+
+/* learning/recording data */
+
+mp.macro = {
+    process_event:  NULL,
+    keycodes:       NULL,
+    lock:           0
+};
+
+/** code **/
+
+sub mp.process_event_and_record(k)
+/* patched version of mp.process_event() */
+{
+    /* records */
+    push(mp.macro.keycodes, k);
+
+    /* calls the real mp.process_event() function */
+    mp.macro.process_event(k);
+}
+
+
+sub mp.record_macro
+/* start recording a macro */
+{
+    if (!mp.macro.lock) {
+        if (mp.macro.process_event == NULL) {
+            /* if still not recording, store the real mp.process_event()
+               function and replace it by ours */
+            mp.macro.process_event = mp.process_event;
+            mp.process_event = mp.process_event_and_record;
+    
+            /* reset keycode list */
+            mp.macro.keycodes = [];
+        }
+        else {
+            /* unpatch mp.process_event() */
+            mp.process_event = mp.macro.process_event;
+            mp.macro.process_event = NULL;
+        }
+    }
+}
+
+sub mp.play_macro
+/* play a macro */
+{
+    /* if it's recording, stop now */
+    if (mp.macro.process_event != NULL)
+        mp.record_macro();
+
+    mp.macro.lock = 1;
+
+    /* process all stored keycodes */
+    foreach (k, mp.macro.keycodes)
+        mp.process_event(k);
+
+    mp.macro.lock = 0;
+}

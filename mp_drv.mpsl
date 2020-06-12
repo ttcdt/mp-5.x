@@ -1,0 +1,60 @@
+/*
+
+    Minimum Profit - A Text Editor
+
+    ttcdt <dev@triptico.com> et al.
+
+    This software is released into the public domain.
+    NO WARRANTY. See file LICENSE for details.
+
+*/
+
+/** editor actions **/
+
+mp.actions['menu']  = sub (d) { mp_drv.menu(); };
+
+/** default key bindings **/
+
+mp.keycodes['ctrl-a']       = 'menu';
+mp.keycodes['alt-a']        = 'menu';
+mp.keycodes['shift-f10']    = 'menu';
+mp.keycodes['alt-space']    = 'menu';
+mp.keycodes['mouse-menu']   = 'menu';
+
+/** action descriptions **/
+
+mp.actdesc['menu']          = LL("Menu");
+
+/** default UI functions (dummy) **/
+
+sub mp_drv.alert(msg)           { return NULL; }
+sub mp_drv.busy(onoff)          { return NULL; }
+sub mp_drv.clip_to_sys()        { return NULL; }
+sub mp_drv.confirm(msg)         { return NULL; }
+sub mp_drv.form(widgets, flags) { return NULL; }
+sub mp_drv.main_loop()          { return NULL; }
+sub mp_drv.menu()               { return NULL; }
+sub mp_drv.openfile(prompt)     { return NULL; }
+sub mp_drv.openfolder(prompt)   { return NULL; }
+sub mp_drv.savefile(prompt)     { return NULL; }
+sub mp_drv.suspend()            { return NULL; }
+sub mp_drv.sys_to_clip()        { return NULL; }
+sub mp_drv.timer(msecs,func)    { return NULL; }
+sub mp_drv.update_ui()          { return NULL; }
+sub mp_drv.shutdown()           {
+    if (mp.exit_message)
+        print(mp.exit_message);
+
+    return NULL;
+}
+
+/** driver wrappers **/
+
+sub mp.update_ui()          { mp_drv.update_ui(); }
+sub mp.alert(msg)           { mp_drv.alert(msg); }
+sub mp.confirm(msg)         { mp_drv.confirm(msg); }
+sub mp.openfile(prompt)     { mp_drv.openfile(prompt); }
+sub mp.savefile(prompt)     { mp_drv.savefile(prompt); }
+sub mp.form(widgets, flags) { mp_drv.form(widgets, flags); }
+sub mp.timer(msecs,func)    { mp_drv.timer(msecs,func); }
+sub mp.busy(onoff)          { mp_drv.busy(onoff); }

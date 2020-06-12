@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Minimum Profit Text Editor
+Comment=Edit text files
+Exec=mp-5 %F
+Terminal=false
+Type=Application
+StartupNotify=true
+Icon=minimum-profit
+Categories=Development;Utility;TextEditor;TextTools;
+Keywords=Text;Editor;Plaintext;Write;
+MimeType=text/plain;
+X-Desktop-File-Install-Version=0.23

@@ -1,0 +1,20 @@
+{
+    'id'        =>  'rc',
+    'name'     => 'Resource file',
+    'defs'      => [
+        'word1',    [ ],
+        'word2',    [ ],
+        'quotes',   [
+            "/\"([^\"\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^\"\\\\\n]*)*)\"/",
+            "/'([^'\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^'\\\\\n]*)*)'/",
+            "/\<-?[0-9]+\>/",                           /* numbers */
+            "/\<0x[0-9a-f]+\>/i",                       /* hex numbers */
+            "/\<[0-9[:upper:]_]+\>/"                    /* all-caps words */
+        ],
+        'comments', [
+            [ '|/\*|', '|\*/|' ],                       /* C-like */
+            "/\/\/[^\n\x{ad}]*(\x{ad}\n[^\n]*)*/",      /* C++-like */
+            '/^\s*#[a-z]+/m'                            /* CPP directives */
+        ]
+    ]
+};

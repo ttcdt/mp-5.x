@@ -1,0 +1,261 @@
+/**
+ * mp.c_gather_help - Gathers help in C-style files
+ * @word: the help term
+ *
+ * Searches in all applicable files for code snippets that may
+ * conform help for @word (mp_doccer style help, struct or
+ * function definitions, etc).
+ *
+ * Returns an array of text with the gathered information.
+ */
+sub mp.c_gather_help(word)
+{
+    local h = [];
+    local filenames = [
+        '/\.c$/i', '/\.h$/i', '/\.l$/i', '/\.y$/i', '/\.d$/i', '/\.hh$/i',
+        '/\.cpp$/i', '/\.hpp$/i', '/\.c++$/i', '/\.cxx$/i', '/\.xpm$/i'
+    ];
+
+    foreach (fn, glob()) {
+        local f;
+        local ok = 0;
+
+        /* test if this file is relevant to C */
+        foreach (ext, filenames) {
+            if (regex(fn, ext)) {
+                ok = 1;
+                break;
+            }
+        }
+
+        if (ok && (f = open(fn, "r")) != NULL) {
+            local n = 0;
+
+            foreach (l, f) {
+                n += 1;
+                local where = fn + ':' + n + ':';
+
+                l = mp.chomp(l);
+
+                if (regex(l, "/^[ \t]*#define[ \t]+" + word + "/")) {
+                    /* it's a CPP define */
+                    push(h, where, l);
+                }
+                else
+                if (regex(l, "/^[A-Za-z_]+.*[ \t]+\*?" + word + "[ \t]*\(.*/")) {
+                    /* it's a function definition or prototype */
+                    push(h, where, l);
+                }
+                else
+                if (regex(l, "/^(typedef[ \]*|static[ \]*)?struct[ \t]+.*" + word + ".*\{/")) {
+                    /* it's a structure definition */
+                    push(h, where, l);
+
+                    /* add up to the end of the struct */
+                    foreach (l, f) {
+                        l = mp.chomp(l);
+
+                        n += 1;
+                        push(h, l);
+
+                        if (regex(l, "/^\};/"))
+                            break;
+                    }
+                }
+                else
+                if (regex(l, "/^\/\*\*$/")) {
+                    /* mp_doccer help: is it for this word? */
+                    l = read(f);
+                    l = mp.chomp(l);
+                    n += 1;
+
+                    if (regex(l, "/ \* " + word + " - /")) {
+                        /* it is; dump up to a ; */
+                        push(h, where, '/' + '**', l);
+
+                        foreach (l, f) {
+                            n += 1;
+                            l = mp.chomp(l);
+
+                            if (regex(l, "/^\{/"))
+                                break;
+
+                            push(h, l);
+                        }
+                    }
+                }
+            }
+
+            close(f);
+        }
+    }
+
+    if (size(h)) {
+        ins(h, sprintf(L("Gathered information on %s:"), word), 0);
+        ins(h, '', 1);
+    }
+    else
+        h = NULL;
+
+    return h;
+}
+
+/**
+ * mp.clang_complete - Try to complete the current document's word using clang
+ * @d: the document to work with
+ *
+ * Search all compatible completions for the current word in the document by invoking clang
+ *
+ * Returns 1 on success or NULL on error (in that case, it'll fallback to common word based completion)
+ */
+sub mp.clang_complete(o, d) {
+    local w = d->get_word(), clang_options = mp.state.completion.c || "";
+    if (size(w) == 0)
+        return NULL;
+
+    local ext = "", extension = "";
+    ext = lc(d.name->regex("/\.[^.]+$/"));
+    if (ext == ".cpp") extension = "c++";
+    if (ext == ".c++") extension = "c++";
+    if (ext == ".cc")  extension = "c++";
+    if (ext == ".c")   extension = "c";
+    /* For headers we can't deduce if it's c++ or c, so let's guess it's C++ */
+    if (ext == ".h")   extension = "c++";
+    if (ext == ".hpp") extension = "c++";
+    if (ext == ".hh")  extension = "c++";
+    /* Clang only works for C/C++ */
+    if (extension == "") return NULL;
+
+    d->busy(1);
+
+    /* the clang command to trigger is: 
+        clang -fsyntax-only -Xclang -code-completion-macros -Xclang -code-completion-patterns -Xclang -code-completion-brief-comments -Xclang -code-completion-at=file:line:col <clang-build-options> <file>
+       we use stdin here to avoid creating a temporary file 
+    */
+    local target = sprintf("clang -x%s -fsyntax-only -Xclang -code-completion-macros -Xclang -code-completion-brief-comments -Xclang -code-completion-at=-:%d:%d %s - 2>./.clang_complete_error.log", extension, d.txt.y+1, d.txt.x - size(w)+1, clang_options); 
+    local p, lines = [];
+    if ((p = popen2(target)) != NULL) {
+        /* write the document first (close is done in the function) */
+        mp.save_th(p[1], d);
+        pclose(p[1]);
+
+        foreach (l, p[0])
+            lines->push(mp.chomp(l));
+        
+        pclose(p[0]);
+        /* check if we did not get error to remove the log file */
+        local s = stat("./.clang_complete_error.log");
+        if (s != NULL && s[7] == 0) unlink("./.clang_complete_error.log");
+        else {
+            local log = open("./.clang_complete_error.log", "ab");
+            if (log != NULL) {
+                write(log, "\nwhile running:\ncat \"" + d.name + "\"|" + target);
+                close(log);
+            }
+        }
+         
+        /* we only keep completions that start with the current word */
+        lines = lines->grep(regcomp('/^COMPLETION: ' + w + '/'))->map(sub(v) { split(v, ': '); });
+    }
+    else {
+        d->busy(0);
+/*        mp.alert(sprintf(L("Error executing '%s'"), target));*/
+
+        return NULL;
+    }
+    if (size(lines) == 0) {
+
+        return NULL;
+    }
+
+    local list = [];
+    /* lines format is [[garbage, completion with arguments, <optional description>], ...] */
+    foreach(line, lines) {
+        if (line[1] != NULL) {
+            local completion = split(line[1], " ");
+            if (line[2] != NULL)
+                list->push(completion[0] + "\t" + line[2]);
+            else list->push(completion[0]);
+        }
+    }
+    d->busy(0);
+    d->complete(list);        
+    return 1;
+}
+
+{
+    id:         'c',
+    name:       'C / C++',
+    help:       [ "man 2 %s", "man 3 %s" ],
+    help_func:  sub (w) { mp.c_gather_help(w); },
+    complete_func: sub(o, d) { mp.clang_complete(o, d); },
+    defs:       [
+        'word1', [
+            mp.syn_token_list(
+                [
+                    "auto", "break", "case", "catch", "class", "const",
+                    "const_cast", "continue", "default", "delete", "do",
+                    "dynamic_cast", "else", "enum", "explicit", "extern",
+                    "for", "friend", "goto", "if", "inline", "mutable",
+                    "namespace", "new", "operator", "private", "protected",
+                    "public", "register", "reinterpret_cast", "restrict",
+                    "return", "sizeof", "static", "static_cast", "struct",
+                    "switch", "template", "this", "throw", "try", "typedef",
+                    "typeid", "typename", "union", "using", "virtual",
+                    "volatile", "while", "not", "not_eq", "xor", "xor_eq",
+                    "or", "or_eq", "and", "and_eq", "bitor", "bitand", "compl"
+                ]
+            )
+        ],
+        'word2', [
+            mp.syn_token_list(
+                [
+                    "bool", "char", "double", "float", "int", "long",
+                    "short", "signed", "unsigned", "wchar_t", "size_t",
+                    "ssize_t", "off_t", "wchar_t", "ptrdiff_t", "void",
+                    "sig_atomic_t", "fpos_t", "clock_t", "time_t", "va_list",
+                    "jmp_buf", "FILE", "DIR", "div_t", "ldiv_t", "mbstate_t",
+                    "wctrans_t", "wint_t", "wctype_t", "complex", "int8_t",
+                    "int16_t", "int32_t", "int64_t", "uint8_t", "uint16_t",
+                    "uint32_t", "uint64_t", "int_least8_t", "int_least16_t",
+                    "int_least32_t", "int_least64_t", "uint_least8_t",
+                    "uint_least16_t", "uint_least32_t", "uint_least64_t",
+                    "int_fast8_t", "int_fast16_t", "int_fast32_t",
+                    "int_fast64_t", "uint_fast8_t", "uint_fast16_t",
+                    "uint_fast32_t", "uint_fast64_t", "intptr_t",
+                    "uintptr_t", "intmax_t", "uintmax_t"
+                ]
+            )
+        ],
+        'word3', [
+            '/[-=<>:\?\+\*\/\!\%&\|~\^\.\{\}\(\)\[]+/',
+            '/]/'
+        ],
+        'quotes', [
+            /* from http://ad.hominem.org/log/2005/05/quoted_strings.php */
+            "/\"([^\"\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^\"\\\\\n]*)*)\"/", /* double quoted strings */
+/*            "/\"([^\"\\\\\n]*(\\\\.[^\"\\\\\n]*)*)\"/", */
+            "/'([^'\\\\\n]*(\\\\.[^'\\\\\n]*)*)'/",     /* single-quoted strings */
+            "/\<-?[0-9]+\>/",                           /* numbers */
+            "/\<[0-9]+e[0-9]+\>/",                      /* numbers in exp format */
+            "/\<0[0-7]+\>/",                            /* octal numbers */
+            "/\<0x[0-9a-f]+\>/i",                       /* hex numbers */
+            "/\<__(DATE|FILE|LINE|STDC|TIME|STDC_HOSTED|STDC_VERSION|func)__\>/", /* ISO macros */
+            "/\<(true|false|NULL)\>/"                   /* symbolic constant names */
+        ],
+        'comments', [
+            [ '|/\*|', '|\*/|' ],                       /* C-like */
+            [ '|#if 0|', '#endif' ],                    /* CPP "comments" */
+            "/\/\/[^\n\x{ad}]*(\x{ad}\n[^\n]*)*/",      /* C++-like */
+            '/^\s*#\s*[a-z]+/m'                         /* CPP directives */
+        ],
+        'documentation', [
+            [ "|/\*\*\n|", '|\*/|' ],                   /* mp_doccer */
+            '/^/\*\*.*\*\*/$/m'                         /* section mark */
+        ]
+    ],
+    section:    [ '/(^\/\*\*.*\*\*\/$|^#pragma mark|^[A-Za-z_])/' ],
+    build_targets: [
+        "cc -c %s && echo Syntax OK"
+    ]
+};

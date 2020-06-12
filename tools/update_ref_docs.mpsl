@@ -1,0 +1,151 @@
+/*
+
+    update_ref_docs.mpsl
+
+    Updates some MP reference documents.
+
+    ttcdt <dev@triptico.com> et al.
+
+*/
+
+sub load_ref_document(file)
+/* loads a document and returns a structure with header,
+   data entries and signature */
+{
+    local f, l, d, k;
+    local r = {
+        'header'    => NULL,
+        'data'      => {},
+        'sig'       => ''
+    };
+
+    if ((f = open(file, "r")) == NULL)
+        return NULL;
+
+    d = [];
+    k = NULL;
+
+    while (l = read(f)) {
+        l = sregex(l, "/\r?\n$/");
+
+        /* is the line only dashes? */
+        if (regex(l, '/^-+$/')) {
+
+            /* pop last string */
+            local p = pop(d);
+
+            /* concat all data and reset */
+            local b = join(d, "\n");
+            d = [];
+
+            /* flush previous data: is this the first one? */
+            if (k == NULL) {
+                /* yes; everything is the header */
+                r.header = b;
+            }
+            else {
+                /* there is a previous one; store */
+                r.data[k] = b->sregex("/\n$/")->sregex("/^\n/");
+            }
+
+            k = p;
+
+            /* if it's the empty string, it's the
+               signature mark; we're done */
+            if (p == '') {
+                r.sig = join([ l, read(f) ], "\n");
+                break;
+            }
+        }
+        else
+            push(d, l);
+    }
+
+    close(f);
+
+    return r;
+}
+
+
+sub save_ref_document(file, r, hash, prefix, def)
+/* saves a parsed document filling empty entries from hash */
+{
+    local f;
+
+    if ((f = open(file, "w"))) {
+        f->write(r.header, "\n");
+
+        foreach (k, sort(map(hash, sub (v, i) { i; }))) {
+            if (prefix)
+                k = prefix + '.' + k;
+
+            f->write(k, "\n");
+            f->write(sregex(k, '/./g', '-'));
+            f->write("\n\n");
+
+            f->write(r.data[k] || def[k] || "To be written.");
+            f->write("\n\n");
+        }
+
+        f->write("\n", r.sig);
+
+        f->close();
+    }
+}
+
+
+sub update_ref_document(file, hash, prefix, def)
+{
+    local r;
+
+    if (r = load_ref_document(file))
+        save_ref_document(file, r, hash, prefix, def);
+}
+
+/*****************/
+
+update_ref_document('doc/mp_configuration.txt', mp.config, 'mp.config');
+
+local all_keycodes = mp.keycodes + mp_doc.keycodes;
+
+local kc = all_keycodes->omap(swap);
+
+local def = {};
+
+/* fill now the default descriptions */
+foreach (v, i, mp.actdesc) {
+    local l;
+
+    l = '_' + v + '_';
+
+    if (kc[k])
+        l = l + " (`" + kc[k] + "')";
+
+    l = l + "\n\nTo be written.";
+
+    def[k] = l;
+}
+
+update_ref_document('doc/mp_actions.txt', mp.actdesc, NULL, def);
+
+local f;
+
+if ((f = open('doc/mp_keycodes.txt', 'w')) != NULL) {
+    f->write("Minimum Profit Keycodes\n");
+    f->write("=======================\n\n");
+
+    f->write("Table with Minimum Profit's keycodes and their default assigned actions.\n\n");
+
+    local tbl = " +---------------------+--------------------------+\n";
+
+    f->write(tbl, sprintf(" | %19s | %24s |\n", 'Keycode', 'Action'), tbl);
+
+    foreach(k, sort(map(all_keycodes, sub (v, i) { i; } ))) {
+        if (type(all_keycodes[k]) != "object")
+            f->write(sprintf(" | %19s | %24s |\n", k, all_keycodes[k]), tbl);
+    }
+
+    f->write("\n");
+
+    f->close();
+}

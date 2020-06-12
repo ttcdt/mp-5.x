@@ -1,0 +1,93 @@
+/*
+
+    Parses .po files and dumps MPSL code.
+
+    ttcdt <dev@triptico.com> et al.
+
+*/
+
+sub convert_po_line(line)
+{
+    return line->sregex('/^\s*"/')->
+                sregex('/"$/')->
+                split()->
+                map(
+                    sub (e) {
+                        (ord(e) > 127) &&
+                        sprintf("\\x{%04x}", ord(e)) ||
+                        e;
+                    }
+                )->
+                join();
+}
+
+
+sub parse_po_file(pofile)
+{
+    local f;
+    local r = [];
+
+    /* only UTF-8 po files are supported */
+    encoding('UTF-8');
+
+    if ((f = open(pofile, "r")) != NULL) {
+
+        local l;
+        local i = 0;
+        local v = [];
+
+        while ((l = read(f)) != NULL) {
+
+            l = mp.chomp(l);
+
+            local s = regex(l, [ '/^(msgid|msgstr)*/', '/\s*\".*\"$/' ]);
+            s[1] = convert_po_line(s[1]);
+
+            if (s[0] == 'msgid') {
+                i = 0;
+                push(v, [[], []]);
+            }
+            else
+            if (s[0] == 'msgstr') {
+                i = 1;
+            }
+
+            if (s[1]) {
+                push(v[-1][i], s[1]);
+            }
+        }
+
+        push(r, "/* Built by po2mpsl - Don't modify, change the .po file instead */");
+        push(r, "__I18N__ = {");
+
+        foreach (l, v) {
+            if (size(l[1]))
+                push(r, "\t\"" + join(l[0]) + "\" => \"" + join(l[1]) + "\",");
+        }
+
+        push(r, "\t\"-\" => \"-\"\n};\n");
+
+        close(f);
+    }
+
+    /* back to default encoding */
+    encoding();
+
+    return join(r, "\n");
+}
+
+/* main */
+
+foreach (f, glob('po/*.po')) { /**/
+    local output = parse_po_file(f);
+
+    /* strip extension and path */
+    f = shift(split(f, '.po'));
+    f = pop(split(f, '/'));
+
+    local o = open('lang/' + f + '.mpsl', 'w');
+    write(o, output);
+    close(o);
+}
+
+mp.exit();

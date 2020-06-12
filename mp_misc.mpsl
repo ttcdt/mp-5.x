@@ -1,0 +1,361 @@
+/*
+
+    Minimum Profit - A Text Editor
+    Miscellaneous editor actions.
+
+    ttcdt <dev@triptico.com> et al.
+
+    This software is released into the public domain.
+    NO WARRANTY. See file LICENSE for details.
+
+*/
+
+/** editor actions **/
+
+mp.actions['eval']  = sub { 
+    local t = mp.form(
+        [
+            {
+                label:      L("Code to execute") + ':',
+                type:       'text',
+                history:    'eval'
+            }
+        ]
+    );
+
+    if (t != NULL) {
+        local x, r;
+
+        x = t[0];
+
+        if (! regex(x, '/;\s*$/'))
+            x = x + ';';
+
+        r = eval(x);
+
+        local d = mp.open("<dump>");
+        d->move_eof()->insert("> " + x + "\n");
+
+        if (ERROR != NULL) {
+            d->insert(L("Error: ") + ERROR + "\n");
+            ERROR = NULL;
+        }
+        else
+            dump(r);
+
+        d->insert("-----------------------\n");
+        d.txt.mod = 0;
+    }
+};
+
+mp_doc.actions['eval_doc']  = sub (d) {
+    local t = join(d->get_active_area(), "\n");
+
+    if (t != NULL) {
+        t = eval(t);
+
+        if (ERROR != NULL) {
+            mp.alert(L("Error: ") + ERROR);
+
+            /* try to move the cursor to the line
+               where the error was */
+            local l = ERROR->sscanf("<INLINE>:%d:%d:");
+
+            if (size(l) > 0) {
+                d->set_y(integer(l[0]) - 1);
+
+                if (size(l) > 1)
+                    d->set_x(integer(l[1]) - 1);
+            }
+
+            ERROR = NULL;
+        }
+    }
+};
+
+mp_doc.actions['insert_next_item'] = sub(doc) {
+    local n = 0;
+
+    foreach (l, doc.txt.lines) {
+        local r = regex(l, ['/^ \* /', '/[0-9]+/', '/: /']);
+
+        if (r[1] > n)
+            n = integer(r[1]);
+    }
+
+    doc->store_undo()->insert(' * ' + (n + 1) + ': ');
+};
+
+mp_doc.actions['insert_time_stamp'] = sub(doc) {
+    doc->store_undo()->insert(time() $ ('%t{' + mp.config.time_stamp_format + '}'));
+};
+
+mp_doc.actions['exec_action'] = sub {
+    local l = (mp.actions + mp_doc.actions)->map(index)->sort();
+
+    /* create a map of actions -> keycodes */
+    local inv = (mp_doc.keycodes + mp.keycodes)->omap(swap);
+
+    l = map(l, sub (e) {
+            local r = [];
+
+            /* add associated key, if any */
+            if (inv[e])
+                r->push(inv[e]);
+
+            /* add action description */
+            e = e + ' - ' + L(mp.actdesc[e] || '');
+
+            /* add references, if any */
+            if (count(r))
+                e = e + "\t[" + r->join(", ") + "]";
+
+            return e;
+        }
+    );
+
+    local r = mp.form(
+        [
+            {
+                label:  L("Select action to execute") + ':',
+                type:   'list',
+                list:   l
+            }
+        ]
+    );
+
+    if (r != NULL) {
+        local a = regex(l[r[0]], '/^[^ ]+/');
+
+        mp.process_action(a);
+    }
+};
+
+mp.actions['encoding']  = sub {
+    local l = EMBEDDED_ENCODINGS->omap(swap)->map(index)->sort();
+    ins(l, L("<current locale>"), 0);
+
+    local t = mp.form(
+        [
+            {
+                label:  L("Available encodings"),
+                type:   'list',
+                list:   l
+            }
+        ]
+    );
+
+    if (t != NULL) {
+        local e = t[0] && l[t[0]] || '';
+
+        if (encoding(e) == -1)
+            mp.alert(L("Invalid encoding ") + e);
+    }
+};
+
+mp.actions['zoom_in']   = sub {
+    mp.config.font_size += 1;
+    mp.update_ui();
+};
+
+mp.actions['zoom_out']  = sub {
+    if (mp.config.font_size > 4) {
+        mp.config.font_size -= 1;
+        mp.update_ui();
+    }
+};
+
+mp.actions['about'] = sub {
+    local msg =
+        sprintf(L("Minimum Profit %s - Programmer Text Editor"), mp.VERSION) +
+        "\nttcdt <dev@triptico.com> et al.\n\n" +
+        sprintf(L("Components: driver %s, MPDM %s, MPSL %s (%s)"),
+            (mp_drv.id || 'unknown'), MPDM.version, MPSL.VERSION, __VER__) + "\n" +
+        "\n"\
+        "This is free and unencumbered software released into the public domain.\n"\
+        "\n"\
+        "Anyone is free to copy, modify, publish, use, compile, sell, or\n"\
+        "distribute this software, either in source code form or as a compiled\n"\
+        "binary, for any purpose, commercial or non-commercial, and by any\n"\
+        "means.\n"\
+        "\n"\
+        "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\n"\
+        "EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF\n"\
+        "MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.\n"\
+        "IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR\n"\
+        "OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,\n"\
+        "ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR\n"\
+        "OTHER DEALINGS IN THE SOFTWARE.\n"\
+        "\n"\
+        "https://triptico.com/software/mp.html\n";
+
+    local d = mp.open("<about>");
+
+    if (size(d.txt.lines) == 1) {
+        d->insert(msg)->move_bof();
+        d.txt.mod = 0;
+        d.read_only = 1;
+    }
+};
+
+
+mp.actions['pipes'] = sub {
+    if (mp.load_on_demand(mp_pipes, "mp_toys.mpsl"))
+        mp.add(new(mp_pipes));
+};
+
+
+mp.actions['maze'] = sub {
+    if (mp.load_on_demand(mp_maze, "mp_toys.mpsl"))
+        mp.add(new(mp_maze));
+};
+
+
+mp.actions['puzzle'] = sub {
+    if (mp.load_on_demand(mp_puzzle, "mp_toys.mpsl"))
+        mp.add(new(mp_puzzle));
+};
+
+
+mp.actions['vcs'] = sub {
+    if (mp.load_on_demand(mp_doc_vcs, "mp_vcs.mpsl"))
+        mp.vcs_form();
+};
+
+
+mp.actions.check_for_updates = sub {
+    local d = mp.open("<updates>");
+
+    d->move_bof();
+    d.txt.mod   = 0;
+    d.read_only = 1;
+
+    mp.busy(1);
+
+    local c = [];
+    local f = connect("triptico.com", "www");
+
+    if (f != NULL) {
+        local l;
+
+        write(f, "GET /download/mp_release_notes HTTP/1.1\r\n");
+        write(f, "Host: triptico.com\r\n");
+        write(f, "User-Agent: Minimum Profit ",
+            mp.VERSION, " (", mp_drv.id, ") Update Checker\r\n");
+        write(f, "Connection: close\r\n\r\n");
+
+        /* ignore HTTP response */
+        while ((l = read(f)) != NULL) {
+            l = mp.chomp(l);
+
+            if (l == '')
+                break;
+        }
+
+        /* content */
+        /* drop first 3 lines */
+        read(f);
+        read(f);
+        read(f);
+
+        /* read until current version is found or EOF */
+        local st = 0;
+
+        while ((l = read(f)) != NULL) {
+            l = mp.chomp(l);
+
+            if (regex(l, "/^[0-9]+\.[0-9]+[\.]?[0-9]+$/")) {
+                st = mp.normalize_version(l) - mp.normalize_version(mp.VERSION);
+
+                if (st <= 0)
+                    break;
+            }
+
+            push(c, l);
+        }
+
+        close(f);
+
+        if (size(c) == 0) {
+            if (st < 0)
+                c = [L("You have a development version newer than any stable release."), ''];
+            else
+                c = [L("You already have the latest version."), ''];
+        }
+        else {
+            ins(c, "", 0);
+            ins(c, L("There are new versions available:"), 0);
+            push(c, "", L("Update Minimum Profit from http://triptico.com/software/mp.html"), "");
+        }
+    }
+    else {
+        c = [ L("Cannot connect -- please try later."), '' ];
+    }
+
+    mp.busy(0);
+
+    d.txt.lines = c;
+};
+
+
+/** default key bindings **/
+
+mp.keycodes['escape']           = 'eval';
+mp.keycodes['f12']              = 'zoom_in';
+mp.keycodes['ctrl-kp-plus' ]    = 'zoom_in';
+mp.keycodes['f11']              = 'zoom_out';
+mp.keycodes['ctrl-kp-minus' ]   = 'zoom_out';
+mp_doc.keycodes['ctrl-p']       = 'vcs';
+
+
+/** action descriptions **/
+
+mp.actdesc['eval']              = LL("Execute MPSL code...");
+mp.actdesc['eval_doc']          = LL("Execute document as MPSL");
+mp.actdesc['exec_action']       = LL("Execute action on document...");
+mp.actdesc['insert_next_item']  = LL("Insert next item");
+mp.actdesc['insert_time_stamp'] = LL("Insert time stamp");
+mp.actdesc['encoding']          = LL("Set charset encoding...");
+mp.actdesc['zoom_in']           = LL("Bigger font");
+mp.actdesc['zoom_out']          = LL("Smaller font");
+mp.actdesc['about']             = LL("About...");
+mp.actdesc['check_for_updates'] = LL("Check for updates...");
+mp.actdesc['pipes']             = LL("Play \"Pipes\"");
+mp.actdesc['maze']              = LL("Play \"Maze\"");
+mp.actdesc['puzzle']            = LL("Play \"Puzzle\"");
+mp.actdesc['vcs']               = LL("Version Control...");
+
+
+
+/** code **/
+
+sub dump(v)
+/* overwrite of the MPSL dump() function, dumping over a text document */
+{
+    local d = mp.open("<dump>");
+
+    d->move_eof()->insert(dumper(v));
+    d.txt.mod   = 0;
+    d.read_only = 1;
+    d.syntax    = mp.get_syntax("mpsl");
+
+    return NULL;
+}
+
+
+sub mp.add_keyseq(seq, keycode)
+{
+    local p = mp.keycodes.ansi;
+    local l = split(seq);
+    local v = pop(l);
+
+    /* split by character and store as a chain of hashes
+       with the keycode as the final, scalar value */
+    foreach (k, l) {
+        if (! p[k])
+            p[k] = {};
+        p = p[k];
+    }
+
+    p[v] = keycode;
+}

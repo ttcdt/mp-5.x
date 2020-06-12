@@ -1,0 +1,101 @@
+Minimum Profit internals
+========================
+
+This document describes some internal details of the mp implementation.
+
+The drawing process
+-------------------
+
+(This section documents the drawing process as of version 4.99.3).
+
+To ease the application of regular expressions to the on-screen part of a
+document, a rather complicated process is done. The document is stored in
+memory as a simple MPDM array of scalars, one for each line.
+
+                         -----------------
+                         ! First line    !
+                         -----------------
+ first line on screen -> ! Second line   !
+                         -----------------
+                         ! Third line    !
+                         -----------------
+                         ! ...           !
+                         -----------------
+ last line on screen --> ! Nth line      !
+                         -----------------
+                         ! Rest of doc.  |
+                         -----------------
+
+Or, as MPSL code,
+
+ doc.txt.lines = [
+     "First line",
+     "Second line",
+     "Third line",
+     "...",
+     "Nth line",
+     "Rest of doc."
+ ];
+
+This way, normal text editing operations are very simple. But applying
+regular expressions to these structures is impossible; to do that, the
+visible part of the document (plus some lines above the first visible
+one) is 'flattened' to a simple memory block. This is done by the
+drw_prepare() function.
+
+                     ------------------------------------------
+ string buffer ->    !Second line\nThird line\n...\nNth line\n!
+                     ------------------------------------------
+ 
+                     ------------------------------------------
+ attribute buffer -> !0000000000000000000000000000000000000000!
+ (0: "normal")       ------------------------------------------
+
+This flattened memory block is really two: one holding the characters
+(including carriage returns to separate the lines) and another holding the
+attributes, that will be reset to the 'normal' attribute.
+
+After this conversion (a slightly modified join), all syntax highlight
+regular expressions are matched to the character buffer, but filled in the
+attribute buffer. The different regular expressions are applied by the
+drw_words(), drw_multiline_regex(), drw_blocks(), drw_selection() and
+the drw_matching_paren() functions.
+
+                     ------------------------------------------
+ string buffer ->    !Second line\nThird line\n...\nNth line\n!
+ (unchanged)         ------------------------------------------
+ 
+                     ------------------------------------------
+ attribute buffer -> !1111110000000444440000000000005550000000!
+                     ------------------------------------------
+
+Once all attributes are applied to the text, a process is invoked that
+converts the flat buffer back to an MPDM array where each element is itself
+an array (for each line of text) of attribute / string pairs, done by the
+mp_draw() function. This way drivers are very simplified and need only to
+iterate the main array and draw each pair of attribute / string sequentially.
+
+                         --- -------- --- ---------
+ first line on screen -> !1! !Second! !0! ! line\n!
+                         --- -------- --- ---------
+                         --- ------- --- ---------
+                         !4! !Third! !0! ! line\n!
+                         --- ------- --- ---------
+                         --- -------
+                         !0! !...\n!
+                         --- -------
+                         --- ----- --- ---------
+ last line on screen --> !5! !Nth! !0! ! line\n!
+                         --- ----- --- ---------
+
+Or, as MPSL code,
+
+ info = [
+        [ 1, "Second", 0, " line\n" ],
+        [ 4, "Third", 0, " line\n" ],
+        [ 0, "...\n" ],
+        [ 5, "Nth", 0, " line\n" ]
+ ];
+
+----
+ttcdt <dev@triptico.com>

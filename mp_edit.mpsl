@@ -1,0 +1,907 @@
+/*
+
+    Minimum Profit - A Text Editor
+    Editing functions.
+
+    ttcdt <dev@triptico.com> et al.
+
+    This software is released into the public domain.
+    NO WARRANTY. See file LICENSE for details.
+
+*/
+
+/** editor actions **/
+
+mp_doc.actions['insert_line'] = sub (d) {
+    d->store_undo()->insert_newline();
+
+    if (d.syntax == NULL)
+        d->detect_syntax();
+
+    return d;
+};
+
+mp_doc.actions['insert_raw_string'] = sub (d) { d->store_undo()->insert(mp.raw_string); };
+mp_doc.actions['delete_line']       = sub (d) { d->store_undo()->delete_line(); };
+mp_doc.actions['insert_space']      = sub (d) { d->store_undo()->insert_space(); };
+mp_doc.actions['insert_tab']        = sub (d) { d->store_undo()->indent_block(1); };
+mp_doc.actions['insert_real_tab']   = sub (d) { d->store_undo()->unindent_block(1); };
+mp_doc.actions['delete']            = sub (d) { d->store_undo()->delete_char(); };
+mp_doc.actions['indent_block']      = sub (d) { d->store_undo()->indent_block(0); };
+mp_doc.actions['unindent_block']    = sub (d) { d->store_undo()->unindent_block(0); };
+mp_doc.actions['insert_page_break'] = sub (d) { d->store_undo()->insert("\x{000c}"); };
+mp_doc.actions['insert_m_dash']     = sub (d) { d->store_undo()->insert("\x{2014}"); };
+
+mp_doc.actions['delete_left']   = sub (d) {
+    if (d.txt.x + d.txt.y)
+        d->store_undo();
+
+        d->move_left();
+
+        if (mp.config.visual_wrap) {
+            if (d.txt.x && d.txt.lines[d.txt.y][d.txt.x] == "\x{ad}") {
+                d.txt.x -= 1;
+            }
+        }
+
+        d->delete_char();
+
+    return d;
+};
+
+
+mp_doc.actions['undo'] = sub (d) { d->undo(); };
+mp_doc.actions['redo'] = sub (d) { d->redo(); };
+
+mp_doc.actions['join_paragraph'] = sub (d) {
+    d->store_undo();
+
+    if (d.txt.mark) {
+        d->busy(1)->cut();
+
+        /* create a working document */
+        local p = new(mp_doc, { name: '<wrk>' });
+        p.txt.lines = mp.clipboard;
+
+        /* while not at EOF, word wrap everything */
+        while (p.txt.y < size(p.txt.lines) - 1) {
+            p->join_paragraph()->move_down()->move_down();
+        }
+
+        /* insert the content */
+        d->insert(p.txt.lines)->busy(0);
+    }
+    else
+        d->join_paragraph();
+
+    return d;
+};
+
+mp_doc.actions['word_wrap_paragraph'] = sub (d) {
+    if(mp.config.word_wrap == 0)
+        mp_doc.actions['join_paragraph'](d);
+    else {
+        d->store_undo();
+
+        if (d.txt.mark) {
+            d->busy(1)->cut();
+
+            /* create a working document */
+            local p = new(mp_doc, { name: '<wrk>' });
+            p.txt.lines = mp.clipboard;
+
+            /* while not at EOF, word wrap everything */
+            while (p.txt.y < size(p.txt.lines) - 1) {
+                p->word_wrap_paragraph()->move_down()->move_down();
+            }
+
+            /* insert the content */
+            d->insert(p.txt.lines)->busy(0);
+        }
+        else
+            d->word_wrap_paragraph();
+    }
+
+    return d;
+};
+
+mp.actions['line_options']  = sub {
+    /* convert special characters on end of line */
+    local lt = mp.backslash_codes(mp.config.eol, 1);
+
+    local t = mp.form(
+        [
+            {
+                label:      L("Word wrap on column (0, no word wrap)") + ':',
+                type:       'text',
+                value:      mp.config.word_wrap,
+                history:    'wordwrap'
+            },
+            {
+                label:      L("Automatic indentation") + ':',
+                type:       'checkbox',
+                value:      mp.config.auto_indent
+            },
+            {
+                label:      L("Line termination") + ':',
+                value:      lt,
+                type:       'text'
+            },
+            {
+                label:      L("Keep original end of lines") + ':',
+                value:      mp.config.keep_eol,
+                type:       'checkbox'
+            },
+            {
+                label:      L("Mark end of lines") + ':',
+                value:      mp.config.mark_eol,
+                type:       'checkbox'
+            },
+            {
+                label:      L("'Smart' move to beginning of line") + ':',
+                value:      mp.config.smart_bol,
+                type:       'checkbox'
+            },
+            {
+                label:      L("Show line numbers") + ':',
+                value:      mp.config.show_line_numbers,
+                type:       'checkbox'
+            }
+        ]
+    );
+
+    if (t != NULL) {
+        mp.config.word_wrap     = integer(t[0]);
+        mp.config.auto_indent   = t[1];
+        mp.config.eol           = mp.backslash_codes(t[2], 0);
+        mp.config.keep_eol      = t[3];
+        mp.config.mark_eol      = t[4];
+        mp.config.smart_bol     = t[5];
+        mp.config.show_line_numbers = t[6];
+    }
+};
+
+mp.actions['tab_options']   = sub {
+    local t = mp.form( [
+        { 'label'   => L("Tab size") + ':',
+          'type'    => 'text',
+          'value'   => mp.config.tab_size,
+          'history' => 'tabsize' },
+        { 'label'   => L("Convert tabs to spaces") + ':',
+          'type'    => 'checkbox',
+          'value'   => mp.config.tabs_as_spaces },
+        { 'label'   => L("Use previous line for tab columns") + ':',
+          'type'    => 'checkbox',
+          'value'   => mp.config.dynamic_tabs }
+    ] );
+
+    if (t != NULL) {
+        mp.config.tab_size       = integer(t[0]);
+        mp.config.tabs_as_spaces = t[1];
+        mp.config.dynamic_tabs   = t[2];
+    }
+};
+
+mp.actions['complete_options']   = sub {
+    if (mp.state.completion == NULL)
+        mp.state.completion = {};
+
+    local t = mp.form( [
+        { 'label'   => L("C/C++ clang options") + ':',
+          'type'    => 'text',
+          'value'   => mp.state.completion.c || "",
+          'history' => 'c_completion' }
+    ] );
+
+    if (t != NULL) {
+        mp.state.completion.c = t[0];
+    }
+};
+
+
+mp.actions['toggle_insert'] = sub {
+    mp.config.insert = !mp.config.insert;
+};
+
+/** default key bindings **/
+
+mp_doc.keycodes['enter']            = "insert_line";
+mp_doc.keycodes['tab']              = "insert_tab";
+mp_doc.keycodes['shift-tab']        = "insert_real_tab";
+mp_doc.keycodes['space']            = "insert_space";
+mp_doc.keycodes['delete']           = "delete";
+mp_doc.keycodes['backspace']        = "delete_left";
+mp_doc.keycodes['ctrl-i']           = "tab";
+mp_doc.keycodes['ctrl-m']           = "enter";
+mp_doc.keycodes['ctrl-y']           = "delete_line";
+mp_doc.keycodes['alt-cursor-right'] = "indent_block";
+mp_doc.keycodes['alt-cursor-left']  = "unindent_block";
+mp_doc.keycodes['ctrl-z']           = "undo";
+mp_doc.keycodes['f4']               = "word_wrap_paragraph";
+mp_doc.keycodes['insert']           = "toggle_insert";
+mp_doc.keycodes['insert-raw-string'] = "insert_raw_string";
+mp_doc.keycodes['alt-minus']        = "insert_m_dash";
+mp_doc.keycodes['alt-kp-minus']     = "insert_m_dash";
+
+/** action descriptions **/
+
+mp.actdesc['insert_line']           = LL("Insert line");
+mp.actdesc['delete_line']           = LL("Delete line");
+mp.actdesc['cut_line']              = LL("Cut line");
+mp.actdesc['insert_space']          = LL("Insert space");
+mp.actdesc['insert_tab']            = LL("Insert tab");
+mp.actdesc['insert_real_tab']       = LL("Insert real tab character");
+mp.actdesc['delete']                = LL("Delete character");
+mp.actdesc['delete_left']           = LL("Delete character to the left");
+mp.actdesc['indent_block']          = LL("Indent block");
+mp.actdesc['unindent_block']        = LL("Unindent block");
+mp.actdesc['undo']                  = LL("Undo");
+mp.actdesc['redo']                  = LL("Redo");
+mp.actdesc['join_paragraph']        = LL("Join a paragraph in one line");
+mp.actdesc['word_wrap_paragraph']   = LL("Word-wrap a paragraph");
+mp.actdesc['line_options']          = LL("Line options...");
+mp.actdesc['tab_options']           = LL("Tab options...");
+mp.actdesc['complete_options']      = LL("Code completion options...");
+mp.actdesc['toggle_insert']         = LL("Toggle insert/overwrite mode");
+mp.actdesc['insert_page_break']     = LL("Insert page break character (FF)");
+mp.actdesc['insert_m_dash']         = LL("Insert m-dash character");
+mp.actdesc['insert_raw_string']     = LL("Insert raw string");
+
+/** code **/
+/**
+ * mp_doc.indent_block - Indent the currently selected block.
+ * @doc: the document
+ * @insert_tab: if set to 1 and there is no selection, it inserts a tab instead
+ *
+ * If a selection exists, this increases indentation for the selected lines.
+ * Else, it inserts a tabulation
+ */
+sub mp_doc.indent_block(doc, insert_tab) 
+{
+    if (doc.txt.mark == NULL) {
+        if (insert_tab)
+            doc->insert_tab();
+        else
+            doc->set_x(0)->insert_tab();
+    }
+    else {
+        local currentY = doc.txt.y;
+        local currentX = doc.txt.x;
+        local startY   = doc.txt.mark.by;
+        /* If the selection ends on a first column, don't indent the last line, it's not the user's intend */ 
+        local endY     = doc.txt.mark.ey - (doc.txt.mark.ex == 0);
+        local times    = endY - startY + 1;
+        
+        doc->unmark()->set_y(startY);
+
+        /* use to be while d.txt.y <= endY, but that entered an endless loop when
+            you were indenting a block including the very last line in the file */
+        foreach (_, times)
+            doc->set_x(0)->insert_tab()->move_down();
+
+        doc->set_y(startY)->set_x(0)->mark();
+
+        doc->set_y(endY)->move_eol()->mark();
+
+        doc->set_y(currentY);
+        if (!currentX) doc->set_x(0);
+    }
+
+    return doc;
+};
+
+/**
+ * mp_doc.unindent_block - Unindent the currently selected block.
+ * @doc: the document
+ * @insert_real_tab: if set to 1 and there is no selection, it inserts a real tab instead
+ *
+ * If a selection exists, this decreases indentation for the selected lines.
+ * Else, it inserts a real tabulation
+ */
+sub mp_doc.unindent_block(doc, insert_real_tab) 
+{
+    if (doc.txt.mark == NULL) {
+        if (insert_real_tab) 
+            doc->insert("\t");
+        else 
+            doc->unindent_line();
+    }
+    else {
+        local currentY = doc.txt.y;
+        local currentX = doc.txt.x;
+        local startY   = doc.txt.mark.by;
+        /* If the selection ends on a first column, don't indent the last line, it's not the user's intend */ 
+        local endY     = doc.txt.mark.ey - (doc.txt.mark.ex == 0);
+        local times    = endY - startY + 1;
+
+        doc->unmark();
+
+        doc->set_y(startY);
+
+        /* use to be while d.txt.y <= endY, but that entered an endless loop when
+            you were unindenting a block including the very last line in the file */
+        foreach (_, times)
+            doc->unindent_line()->move_down();
+
+        doc->set_y(startY)->set_x(0)->mark();
+
+        doc->set_y(endY)->move_eol()->mark();
+
+        doc->set_y(currentY);
+        if (!currentX) doc->set_x(0);
+    }
+
+    return doc;
+};
+
+/**
+ * mp_doc.break_line - Breaks current line in two (inserts a newline).
+ * @doc: the document
+ * @col: column where the newline will be inserted 
+ *
+ * Breaks current line in two by inserting a newline character in between.
+ * If @col is not NULL, the newline will be inserted in that column; otherwise,
+ * the current x position will be used.
+ */
+sub mp_doc.break_line(doc, col)
+{
+    local txt = doc.txt;
+    local c, l1, l2;
+
+    /* if col is NULL, set it to be the x cursor */
+    if (col == NULL)
+        col = txt.x;
+
+    /* gets line where cursor is */
+    c = txt.lines[txt.y];
+
+    /* split line in to */
+    l1 = slice(c, 0, col);
+    l2 = slice(c, col, -1);
+
+    /* set first part as current line */
+    txt.lines[txt.y] = l1 || '';
+
+    /* move to next line */
+    txt.y += 1;
+
+    /* insert a new line here */
+    expand(txt.lines, txt.y, 1);
+
+    /* fix the x cursor position */
+    txt.x -= col;
+
+    /* if autoindenting... */
+    if (mp.config.auto_indent) {
+        /* extract leading blanks in the original line
+           to prepend them to the line to be inserted */
+        local i = regex(c, "/^[ \t]*[-\+\*]?[ \t]+/", 0);
+
+        /* substitute all non-tab characters with spaces */
+        i = sregex(i, "/[^\t]/g", " ");
+
+        /* delete any blank in the new line */
+        l2 = sregex(l2, "/^[ \t]*/");
+
+        /* concatenate */
+        l2 = i + l2;
+
+        /* the x position is further the length of that */
+        txt.x += size(i);
+    }
+
+    /* put second part there (or an empty string if NULL) */
+    txt.lines[txt.y] = l2 || '';
+
+    if (mp.config.visual_wrap)
+        mp.vw_wrap_y(txt.lines, txt.y, mp.vw_col());
+
+    txt.mod += 1;
+
+    return doc;
+}
+
+
+sub mp_doc.join_line(doc)
+/* joins the current line with the next one */
+{
+    local txt = doc.txt;
+
+    if (txt.y < size(txt.lines)) {
+        if (mp.config.visual_wrap) {
+            if (txt.x && txt.lines[txt.y][txt.x - 1] == "\x{ad}")
+                txt.x -= 1;
+
+            mp.vw_unwrap_y(txt.lines, txt.y);
+            mp.vw_unwrap_y(txt.lines, txt.y + 1);
+        }
+
+        /* concats current line with the next one */
+        txt.lines[txt.y] = txt.lines[txt.y] + txt.lines[txt.y + 1];
+
+        /* delete it */
+        del(txt.lines, txt.y + 1);
+
+        if (mp.config.visual_wrap)
+            mp.vw_wrap_y(txt.lines, txt.y + 1, mp.vw_col());
+
+        txt.mod += 1;
+    }
+
+    return doc;
+}
+
+
+sub mp_doc.delete_line(doc)
+/* deletes the current line */
+{
+    local txt = doc.txt;
+    local vx;
+
+    /* take current position */
+    vx = mp_c.x2vx(txt.lines[txt.y], txt.x);
+
+    /* if it's the only line, just replace it */
+    if (size(txt.lines) == 1)
+        txt.lines[0] = '';
+    else {
+        /* destroy the line */
+        del(txt.lines, txt.y);
+    }
+
+    /* fix if it was the last line */
+    if (txt.y >= size(txt.lines))
+        txt.y = size(txt.lines) - 1;
+
+    /* move to previous x position */
+    txt.x = mp_c.vx2x(txt.lines[txt.y], vx);
+
+    if (mp.config.visual_wrap)
+        mp.vw_wrap_y(txt.lines, txt.y, mp.vw_col());
+
+    txt.mod += 1;
+
+    return doc;
+}
+
+
+sub mp_doc.delete_char(doc)
+/* deletes the current char */
+{
+    local txt = doc.txt;
+
+    local o = doc->get_offset();
+
+    if (txt.mark != NULL) {
+        doc->delete_mark();
+        return;
+    }
+
+    if (mp.config.visual_wrap) {
+        if (txt.x && txt.lines[txt.y][txt.x - 1] == "\x{ad}")
+            txt.x -= 1;
+
+        mp.vw_unwrap_y(txt.lines, txt.y);
+    }
+
+    /* is it over the end of line? */
+    if (txt.x == size(txt.lines[txt.y]))
+        doc->join_line();
+    else {
+        local w = splice(txt.lines[txt.y], NULL, txt.x, 1);
+        txt.lines[txt.y] = w;
+    }
+
+    if (mp.config.visual_wrap)
+        mp.vw_wrap_y(txt.lines, txt.y, mp.vw_col());
+
+    doc->set_offset(o);
+
+    txt.mod += 1;
+
+    return doc;
+}
+
+
+sub mp_doc.delete_range(doc, bx, by, ex, ey, v)
+/* deletes a range of characters from a document */
+{
+    local txt = doc.txt;
+
+    /* move to the start of the range */
+    txt.x = bx;
+    txt.y = by;
+
+    if (by == ey) {
+        local w;
+
+        /* block is just one line; delete the middle part */
+        w = splice(txt.lines[by], NULL, bx, ex - bx);
+
+        txt.lines[by] = w;
+    }
+    else {
+        /* block has more than one line */
+        local w;
+
+        if (v == 0) {
+            /* delete using normal selection block */
+
+            /* delete from the beginning to the end of the first line */
+            w = splice(txt.lines[by], NULL, bx, -1);
+            txt.lines[by] = w;
+
+            /* delete from the beginning of the last line to
+               the end of the block */
+            w = splice(txt.lines[ey], NULL, 0, ex);
+            txt.lines[ey] = w;
+
+            /* collapse the lines in between */
+            collapse(txt.lines, by + 1, ey - by - 1);
+
+            /* finally join both lines */
+            doc->join_line();
+        }
+        else {
+            /* delete using vertical selection block */
+            while (by <= ey) {
+                w = splice(txt.lines[by], NULL, bx, ex - bx + 1);
+                txt.lines[by] = w;
+                by += 1;
+            }
+        }
+    }
+
+    txt.mod += 1;
+
+    return doc;
+}
+
+
+sub mp_doc.insert_string(doc, str)
+/* inserts a string into the cursor position */
+{
+    local txt = doc.txt;
+    local w;
+
+    if (txt.mark.vertical == 1) {
+        /* Need to perform vertical editing */
+        /* This insert the given string at all lines concerned by the mark itself (multiple time) */
+        /* Please notice that it does not remove the mark here, but modify it so it's only a single char wide */
+
+        if (txt.mark.bx != txt.mark.ex) {
+            /* Need to delete all previous text in the mark first */
+            local old_mark = { bx: txt.mark.bx, by: txt.mark.by, ey: txt.mark.ey };
+            doc->delete_range(txt.mark.bx, txt.mark.by,
+                txt.mark.ex, txt.mark.ey, txt.mark.vertical);
+
+            /* Restore a zero column wide vertical mark */
+            txt.mark.vertical = 1;
+            txt.mark.bx = old_mark.bx; 
+            txt.mark.by = old_mark.by;
+            txt.mark.ex = old_mark.bx; 
+            txt.mark.ey = old_mark.ey;
+        }
+
+        /* Then insert the string at the given position */
+        local s = txt.mark.by;
+        while (s <= txt.mark.ey) {
+            w = splice(txt.lines[s], str, txt.mark.bx, mp.config.insert && size(str) || 0);
+            txt.lines[s] = w;
+
+            s += 1;
+        }
+        txt.mark.bx += size(str);
+        txt.mark.ex += size(str);
+        txt.x += size(str);
+
+        txt.mod += 1;
+
+        return doc;
+    }
+    doc->delete_mark();
+
+    /* unwrap line */
+    if (mp.config.visual_wrap) {
+        if (txt.x && txt.lines[txt.y][txt.x - 1] == "\x{ad}")
+            txt.x -= 1;
+
+        mp.vw_unwrap_y(txt.lines, txt.y);
+    }
+
+    /* splice and change */
+    w = splice(txt.lines[txt.y], str, txt.x, mp.config.insert && size(str) || 0);
+    txt.lines[txt.y] = w;
+
+    /* move right */
+    txt.x += size(str);
+
+    /* re-wrap line */
+    if (mp.config.visual_wrap) {
+        local o = doc->get_offset();
+        mp.vw_wrap_y(txt.lines, txt.y, mp.vw_col());
+        doc->set_offset(o);
+    }
+
+    txt.mod += 1;
+
+    return doc;
+}
+
+
+sub mp_doc.insert(doc, a)
+/* inserts an array of text into a document */
+{
+    local txt = doc.txt;
+    local s;
+
+    /* if a is not an array, split it */
+    if (type(a) != "array")
+        a = split(a, "\n");
+
+    if ((s = size(a))) {
+        /* paste first line into current position */
+        doc->insert_string(a[0]);
+
+        /* more than just one line? */
+        if (s > 1) {
+            /* break current line in two */
+            doc->break_line();
+
+            /* insert last line */
+            doc->insert_string(a[s - 1]);
+        }
+
+        /* more than two lines? */
+        if (s > 2) {
+            local n = 1;
+
+            /* open room */
+            expand(txt.lines, txt.y, s - 2);
+
+            /* transfer middle lines */
+            while (n < s - 1) {
+                txt.lines[txt.y] = a[n];
+                txt.y += 1;
+                n += 1;
+            }
+        }
+    }
+
+    return doc;
+}
+
+sub mp_doc.append(doc, a)
+/* appends an array of lines to the document, bypassing indentation rules and current cursor position */
+{
+    local txt = doc.txt;
+
+    doc->delete_mark();
+
+    /* if a is not an array, split it */
+    if (type(a) != "array")
+        a = split(a, "\n");
+
+    if (size(a)) {
+        /* append now */
+        foreach (l, a)
+            txt.lines->push(l);
+
+        txt.mod += 1;
+    }
+
+    return doc;
+}
+
+
+
+sub mp_doc.wrap_words(doc)
+/* do the word wrapping */
+{
+    local txt = doc.txt;
+
+    if (mp.config.word_wrap) {
+        /* take the column where the cursor is */
+        local c = mp_c.x2vx(txt.lines[txt.y], txt.x);
+
+        if (c >= mp.config.word_wrap &&
+            regex(txt.lines[txt.y], "/^.{1," + mp.config.word_wrap + "}[ \t]/")) {
+            local w;
+
+            /* take the coordinates */
+            w = regex();
+
+            /* break the line there */
+            doc->break_line(w[1]);
+
+            /* delete the space at the end of the line */
+            txt.lines[txt.y - 1] = sregex(txt.lines[txt.y - 1], "/[ \t]$/", NULL);
+
+            txt.vx = 0;
+        }
+    }
+
+    return doc;
+}
+
+
+sub mp_doc.insert_space(doc)
+/* inserts a space, taking wordwrapping into account */
+{
+    doc->wrap_words()->insert(' ');
+}
+
+
+sub mp_doc.insert_tab(doc)
+/* inserts a tab */
+{
+    if (mp.config.dynamic_tabs) {
+        local y = doc.txt.y;
+
+        while (y > 0) {
+            y -= 1;
+            local l = splice(doc.txt.lines[y], NULL, 0, doc.txt.x);
+
+            if (l) {
+                doc->insert(regex(l, "/^[^ \t]*[ \t]*/")->sregex("/[^ \t]/g", ' '));
+                return doc;
+            }
+        }
+    }
+
+    if (mp.config.tabs_as_spaces) {
+        /* number of spaces to insert */
+        local n = mp.config.tab_size -
+            ((doc.txt.x) % mp.config.tab_size);
+
+        foreach (_, n)
+            doc->insert(' ');
+    }
+    else
+        doc->insert("\t");
+
+    return doc;
+}
+
+
+sub mp_doc.insert_newline(doc)
+/* inserts a newline */
+{
+    doc->wrap_words()->break_line();
+}
+
+
+sub mp_doc.keypress(doc, key)
+/* inserts from a keystroke (with undo) */
+{
+    if (size(key) == 1) {
+        local t = time();
+        if ((t - doc.last_insert) > 1) {
+            /** Only store undo if sufficient time elapsed */
+            doc->store_undo();
+        }
+        doc.last_insert = t;
+        doc->insert(key);
+    }
+    else
+    if (key != NULL) {
+        mp.message = {
+            timeout:    time() + 2,
+            string:     sprintf(L("Unbound keystroke '%s'"), key)
+        };
+    }
+
+    return doc;
+}
+
+
+/** undo **/
+
+sub mp_doc.store_undo(doc)
+/* stores the current txt in the undo queue */
+{
+    queue(doc.undo_q, clone(doc.txt), mp.config.undo_levels);
+    doc.redo_q = [];
+
+    return doc;
+}
+
+
+sub mp_doc.undo(doc)
+/* undoes last operation */
+{
+    local txt;
+
+    if (txt = pop(doc.undo_q)) {
+        queue(doc.redo_q, clone(doc.txt), mp.config.undo_levels);
+        doc.txt = txt;
+    }
+
+    return doc;
+}
+
+
+sub mp_doc.redo(doc)
+/* redoes last undid operation */
+{
+    local txt;
+
+    if (txt = pop(doc.redo_q)) {
+        queue(doc.undo_q, clone(doc.txt), mp.config.undo_levels);
+        doc.txt = txt;
+    }
+
+    return doc;
+}
+
+
+/** paragraphs **/
+
+sub mp_doc.join_paragraph(doc)
+/* joins current paragraph in just one line */
+{
+    local txt = doc.txt;
+    local l;
+
+    if (mp.config.visual_wrap)
+        mp.vw_unwrap_y(txt.lines, txt.y);
+
+    while ((l = txt.lines[txt.y + 1]) && size(l)) {
+        /* delete all leading blanks in the next line */
+        txt.lines[txt.y + 1] = sregex(txt.lines[txt.y + 1], "/^[ \t]+/");
+
+        /* move to end of line, add a space separator and join */
+        doc->move_eol()->insert(' ')->join_line();
+    }
+
+    if (mp.config.visual_wrap)
+        mp.vw_wrap_y(txt.lines, txt.y, mp.vw_col());
+
+    return doc;
+}
+
+
+sub mp_doc.word_wrap_paragraph(doc)
+/* word wraps current paragraph */
+{
+    local txt = doc.txt;
+
+    if (mp.config.word_wrap) {
+        doc->join_paragraph()->move_eol();
+
+        while (size(txt.lines[txt.y]) > mp.config.word_wrap) {
+            doc->insert_space()->move_left()->delete_char();
+        }
+    }
+
+    return doc;
+}
+
+/* indent/unindent support functions */
+
+sub mp_doc.unindent_line(d)
+/* Unindent the current line by 1 tab or the indent size */
+{
+    local l = split(d.txt.lines[d.txt.y]);
+
+    d->set_x(0);
+
+    if (cmp(l[0], "\t") == 0) {
+        d->delete_char();
+    }
+    else {
+        local i = 0;
+        while (i < mp.config.tab_size) {
+            if (cmp(l[i], " ") == 0) {
+                d->delete_char();
+            }
+            else {
+                break;
+            }
+
+            i += 1;
+        }
+    }
+
+    return d;
+}

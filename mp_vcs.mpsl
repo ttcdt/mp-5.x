@@ -1,0 +1,201 @@
+/*
+
+    Minimum Profit - A Text Editor
+    Version Control System support
+
+    ttcdt <dev@triptico.com> et al.
+
+    This software is released into the public domain.
+    NO WARRANTY. See file LICENSE for details.
+
+*/
+
+/** mp_doc commit subclass **/
+
+global mp_doc_vcs = new(mp_doc, { name: '.COMMIT_MESSAGE', no_state: 1 });
+
+
+/** data **/
+
+/* in opts: %F, full document name; %f, "basenamed" name */
+
+mp.vcs = {
+    git: {
+        id:     'Git',
+        check:  [ '.git', '../.git', '../../.git', '../../../.git' ],
+        opts:   {
+            "git add '%F'"      => NULL,
+            'git log'           => { unique_log: 1 },
+            "git log '%F'"      => { unique_log: 1 },
+            'git log -p'        => { unique_log: 1, diff: 1 },
+            "git log -p '%F'"   => { unique_log: 1, diff: 1 },
+            'git diff'          => { unique_log: 1, diff: 1 },
+            "git diff '%F'"     => { unique_log: 1, diff: 1 },
+            'git status'        => NULL,
+            "git blame '%F'"    => { unique_log: 1 },
+            "git stash"         => NULL,
+            "git stash apply"   => NULL,
+            "git push"          => NULL,
+            "git pull"          => NULL,
+            "git commit -a"     => { commit_cmd: "git commit -a -F '%s'" }
+        }
+    },
+    svn: {
+        id:     'SVN',
+        check:  [ '.svn', '../.svn', '../../.svn', '../../../.svn' ],
+        opts:   {
+            'svn diff'            => { unique_log: 1, diff: 1 },
+            'svn status'          => NULL,
+            'svn log'             => { unique_log: 1 },
+            'svn log --diff'      => { unique_log: 1, diff: 1 },
+            "svn diff '%f'"       => { unique_log: 1, diff: 1 },
+            "svn log '%f'"        => { unique_log: 1 },
+            "svn log '%f' --diff" => { unique_log: 1, diff: 1 },
+            "svn add '%f'"        => NULL,
+            "svn annotate '%f'"   => { unique_log: 1 },
+            "svn update"          => NULL,
+            "svn revert '%f'"     => NULL,
+            "svn commit"          => { commit_cmd: "svn commit -F '%s'" }
+        }
+    },
+    mercurial: {
+        id:     'Mercurial',
+        check:  [ '.hg', '../.hg', '../../.hg' ],
+        opts:   {
+            'hg diff'          => { unique_log: 1, diff: 1 },
+            'hg status'        => NULL,
+            'hg log'           => { unique_log: 1 },
+            "hg diff '%f'"     => { unique_log: 1, diff: 1 },
+            "hg log '%f'"      => { unique_log: 1 },
+            "hg add '%f'"      => NULL,
+            "hg push"          => NULL,
+            "hg pull"          => NULL,
+            "hg annotate '%f'" => { unique_log: 1 },
+            "hg commit -A"     => { commit_cmd: "hg commit -A -l '%s'" }
+        }
+    }
+};
+
+
+sub mp.vcs_form()
+{
+    local vcs = NULL;
+
+    /* find which VCS apply to current directory */
+    foreach (n, mp.vcs) {
+        foreach (dir, n.check) {
+            if (stat(dir) != NULL) {
+                vcs = n;
+                break;
+            }
+        }
+
+        if (vcs != NULL)
+            break;
+    }
+
+    if (vcs == NULL)
+        mp.alert(L("This directory is not under a supported version control system"));
+    else {
+        local opts = vcs.opts->map(index)->sort();
+        local cmd_list = opts->map(sub (e) {
+            e->sregex("/%f/g", regex(mp.active.name, "/[^\/\\]+$/"))->
+                sregex("/%F/g", mp.active.name);
+        });
+
+        local form = mp.form(
+            [
+                {
+                    label:  sprintf(L("Available %s commands"), vcs.id) + ':',
+                    type:   'list',
+                    list:   cmd_list,
+                    value:  mp.vcs_target
+                }
+            ]
+        );
+
+        if (form != NULL) {
+            mp.vcs_target = form[0];
+
+            local opt = vcs.opts[opts[mp.vcs_target]];
+            local cmd = cmd_list[mp.vcs_target];
+
+            if (opt.commit_cmd) {
+                /* create a commit message editor document */
+                local msg = new(mp_doc_vcs);
+
+                msg.vcs = {
+                    commit_cmd: opt.commit_cmd,
+                    log_name:   sprintf(L("<%s output>"), vcs.id)
+                };
+
+                mp.add(msg);
+            }
+            else {
+                local log;
+
+                /* unique log for this command? */
+                if (opt.unique_log) {
+                    log           = mp.open(sprintf(L("<%s output>"), cmd));
+                    log.txt.lines = [ '' ];
+                    log.txt.y     = 0;
+                }
+                else {
+                    /* common log */
+                    log = mp.open(sprintf(L("<%s output>"), vcs.id));
+
+                    log->move_eof();
+                    log->insert(cmd + ":\n\n");
+                }
+
+                log->actions.exec_command(cmd);
+
+                if (opt.unique_log) {
+                    if (opt.diff)
+                        log.syntax = mp.get_syntax("diff");
+
+                    log->move_bof();
+                }
+                else
+                    log->insert_newline();
+
+                log.txt.mod     = 0;
+                log.undo_q      = [];
+                log.read_only   = 1;
+            }
+        }
+    }
+};
+
+/** code **/
+
+sub mp_doc_vcs.query_close(doc)
+/* mp_doc.query_close overload for commit messages */
+{
+    local r;
+
+    /* call superclass query close */
+    if ((r = mp_doc.query_close(doc)) == 1) {
+        /* has the commit message been saved? */
+        if (stat(doc.name) != NULL) {
+            local cmd = sprintf(doc.vcs.commit_cmd, doc.name);
+            local log = mp.open(doc.vcs.log_name);
+
+            log->move_eof();
+            log->insert(cmd + ":\n\n");
+            log->actions.exec_command(cmd);
+            log->insert_newline();
+
+            log.txt.mod     = 0;
+            log.undo_q      = [];
+            log.read_only   = 1;
+
+            /* bring doc to active back */
+            mp.open(doc.name);
+        }
+
+        unlink(doc.name);
+    }
+
+    return r;
+}

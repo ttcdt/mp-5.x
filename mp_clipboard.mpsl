@@ -1,0 +1,414 @@
+/*
+
+    Minimum Profit - A Text Editor
+    Clipboard routines.
+
+    ttcdt <dev@triptico.com> et al.
+
+    This software is released into the public domain.
+    NO WARRANTY. See file LICENSE for details.
+
+*/
+
+/** editor actions **/
+
+mp_doc.actions += {
+    unmark:             sub (d) { d->unmark(); },
+    mark_tag:           sub (d) { d->start_selection(0); },
+    mark:               sub (d) { d->mark(); },
+    mark_tag_vertical:  sub (d) { d->start_selection(1); },
+    mark_vertical:      sub (d) { d->mark_vertical(); },
+    copy_mark:          sub (d) { d->busy(1)->copy()->unmark()->busy(0); },
+    paste_mark:         sub (d) { d->busy(1)->store_undo()->paste()->busy(0); },
+    cut_mark:           sub (d) { d->busy(1)->store_undo()->cut()->busy(0); },
+    delete_mark:        sub (d) { d->busy(1)->store_undo()->delete_mark()->busy(0); },
+    mark_all:           sub (d) { d->move_bof()->mark()->move_eof()->mark(); },
+    mouse_drag_mark:    sub (d) {
+        /* no selection yet? move to initial click and mark */
+        if (d.txt.mark == NULL)
+            d->mark();
+
+        /* move to drag position */
+        d->move_to_coords_xy(mp.mouse_to_x - mp.xoffset, mp.mouse_to_y);
+
+        /* and mark */
+        d->mark();
+
+        return d;
+    },
+    cut_lines_with_string: sub (d, str) {
+        if (str == NULL) {
+            local r = mp.form(
+                [
+                    {
+                        'label'   => L("Cut lines containing") + ':',
+                        'type'    => 'text',
+                        'history' => 'cut_lines_with_string'
+                    }
+                ]
+            );
+
+            if (r != NULL)
+                str = r[0];
+        }
+
+        if (str != NULL) {
+            d->busy(1)->store_undo()->cut_lines_with_string(str)->busy(0);
+        }
+
+        return d;
+    },
+    cut_line: sub (d) { d->busy(1)->store_undo()->cut_line()->busy(0); }
+};
+
+
+/** default key bindings **/
+
+mp_doc.keycodes += {
+    "f8" =>         "unmark",
+    "f9" =>         "mark_tag",
+    "ctrl-b" =>     "mark_tag_vertical",
+    "ctrl-c" =>     "copy_mark",
+    "ctrl-v" =>     "paste_mark",
+    "ctrl-x" =>     "cut_mark",
+    "mouse-drag" => "mouse_drag_mark"
+};
+
+/** action descriptions **/
+
+mp.actdesc += {
+    unmark:                   LL("Unmark block"),
+    mark_tag:                 LL("Mark beginning/end of block"),
+    mark:                     LL("Mark selection block"),
+    mark_tag_vertical:        LL("Mark vertical block"),
+    mark_vertical:            LL("Mark vertical selection block"),
+    copy_mark:                LL("Copy block"),
+    paste_mark:               LL("Paste block"),
+    cut_mark:                 LL("Cut block"),
+    delete_mark:              LL("Delete block"),
+    mouse_drag_mark:          LL("Mark using mouse dragging"),
+    mark_all:                 LL("Mark all"),
+    cut_lines_with_string:    LL("Cut lines containing a string...")
+};
+
+
+/** code **/
+
+sub mp_doc.unmark(doc)
+/* unmarks the block */
+{
+    /* just destroy the mark */
+    doc.txt.mark = NULL;
+    doc.txt.selecting_mode = NULL;
+
+    return doc;
+}
+
+sub mp_doc.start_selection(doc, vertical)
+/* start a toggle selection mode */
+{
+    local txt = doc.txt;
+
+    /* If there is no selection yet with keys */
+    if (txt.selecting_mode == NULL) {
+        /* Make one */
+        txt.selecting_mode = { trigger: vertical };
+    }
+    doc->mark();
+    if (vertical == 1) doc.txt.mark.vertical = 1;
+
+    return doc;
+}
+
+
+sub mp_doc.mark(doc)
+/* marks the start or end of the block */
+{
+    local txt = doc.txt;
+
+    if (txt.mark == NULL) {
+        /* no mark; create one */
+        txt.mark = {
+            ax:         txt.x,
+            bx:         txt.x,
+            ex:         txt.x,
+            ay:         txt.y,
+            by:         txt.y,
+            ey:         txt.y,
+            vertical:   0,
+            incomplete: 1
+        };
+    }
+    else {
+        /* mark exists; extend current one */
+        if (txt.mark.vertical == 0) {
+            /* normal selection */
+            if (txt.y < txt.mark.ay ||
+                (txt.y == txt.mark.ay && txt.x < txt.mark.ax)) {
+                /* move the beginning of the block */
+                txt.mark += {
+                    bx: txt.x,
+                    by: txt.y,
+                    ex: txt.mark.ax,
+                    ey: txt.mark.ay
+                };
+            }
+            else {
+                /* move the end of the block */
+                txt.mark += {
+                    ex: txt.x,
+                    ey: txt.y,
+                    bx: txt.mark.ax,
+                    by: txt.mark.ay
+                };
+            }
+        }
+        else {
+            /* vertical selection */
+            txt.mark.by = txt.mark.ay;
+            txt.mark.ey = txt.y;
+            if (txt.y < txt.mark.ay) {
+                txt.mark.by = txt.y;
+                txt.mark.ey = txt.mark.ay;
+            }
+
+            txt.mark.bx = txt.mark.ax;
+            txt.mark.ex = txt.x;
+            if (txt.x < txt.mark.ax) {
+                txt.mark.bx = txt.x;
+                txt.mark.ex = txt.mark.ax;
+            }
+        }
+
+        txt.mark.incomplete = 0;
+    }
+
+    /* if the block has zero size, unmark it */
+    if (txt.mark.incomplete == 0 &&
+        txt.mark.bx == txt.mark.ex &&
+        txt.mark.by == txt.mark.ey)
+        txt.mark = NULL;
+
+    return doc;
+}
+
+
+sub mp_doc.mark_vertical(doc)
+/* start vertical block selection */
+{
+    doc->mark();
+    doc.txt.mark.vertical = 1;
+
+    return doc;
+}
+
+
+sub mp_doc.get_active_area(doc)
+/* returns the active area: the selection or the full document */
+{
+    local m;
+
+    if ((m = doc.txt.mark) == NULL)
+        return doc.txt.lines;
+    else
+        return doc->get_range(m.bx, m.by, m.ex, m.ey, m.vertical);
+}
+
+
+/**
+ * mp_doc.copy - Copies the selected block to the clipboard
+ * @doc: the document
+ *
+ * Copies to the clipboard the content of the selected block,
+ * if one exists.
+ */
+sub mp_doc.copy(doc)
+{
+    if (doc.txt.mark) {
+        mp.clipboard = doc->get_active_area();
+        mp.clipboard_vertical = doc.txt.mark.vertical;
+
+        mp.vw_unwrap(mp.clipboard);
+
+        mp_drv.clip_to_sys();
+    }
+
+    return doc;
+}
+
+
+sub mp_doc.delete_mark(doc)
+/* deletes current selection */
+{
+    local txt = doc.txt;
+
+    /* no mark? done */
+    if (txt.mark != NULL) {
+        /* deletes the range */
+        if (txt.mark.bx != txt.mark.ex || txt.mark.by != txt.mark.ey)
+            doc->delete_range(txt.mark.bx, txt.mark.by,
+                txt.mark.ex, txt.mark.ey, txt.mark.vertical);
+
+        doc->unmark();
+    }
+
+    return doc;
+}
+
+
+sub mp_doc.cut(doc)
+/* cut (copy + delete) selected mark */
+{
+    doc->copy()->delete_mark();
+    mp_drv.clip_to_sys();
+
+    return doc;
+}
+
+
+/**
+ * mp_doc.paste - Pastes from the clipboard into a text or as a value
+ * @doc: the destination of the copy
+ *
+ * If @doc is NULL, returns the content of the clipboard as a
+ * scalar string; if it's not, is assumed to be a document and
+ * pastes the content of the clipboard into the cursor position.
+ */
+sub mp_doc.paste(doc)
+{
+    mp_drv.sys_to_clip();
+
+    if (doc == NULL)
+        return join(mp.clipboard, "\n");
+
+    if (size(mp.clipboard) == 0)
+        return doc;
+
+    local t = mp.config.auto_indent;
+    mp.config.auto_indent = 0;
+
+    /* is there a block? replace it */
+    if (doc.txt.mark != NULL) {
+        /* move there */
+        doc.txt.x = doc.txt.mark.bx;
+        doc.txt.y = doc.txt.mark.by;
+
+        /* and delete the block */
+        doc->delete_mark();
+    }
+
+    if (mp.clipboard_vertical == 0) {
+        /* normal selection in clipboard */
+        doc->insert(mp.clipboard);
+    }
+    else {
+        /* vertical selection in clipboard */
+        local txt = doc.txt;
+        local s = size(mp.clipboard);
+        local i = 0;
+        local w;
+        local e;
+
+        while (i < s) {
+            /* pad out to current x position */
+            e = txt.x - size(txt.lines[txt.y]);
+
+            foreach (_, e)
+                txt.lines[txt.y] = txt.lines[txt.y] + " ";
+
+            /* insert this line of the clipboard */
+            w = splice(txt.lines[txt.y], mp.clipboard[i], txt.x, 0);
+            txt.lines[txt.y] = w;
+
+            i += 1;
+            txt.y += 1;
+        }
+        txt.y -= 1;
+        txt.mod += 1;
+    }
+
+    mp.config.auto_indent = t;
+
+    return doc;
+}
+
+
+/**
+ * mp_doc.cut_lines_with_string - Cuts all lines matching a string
+ * @doc: the document
+ * @str: the string to be matched
+ *
+ * Cuts all lines from the document that matches @str, that is
+ * a regular expression. The deleted lines are left in the clipboard.
+ * If a block is selected, only lines inside it are cut.
+ */
+sub mp_doc.cut_lines_with_string(doc, str)
+{
+    local r = [];
+    local p;
+
+    if (str == NULL || str == '')
+        str = '^$';
+
+    str = '/' + str + '/';
+
+    if (doc.txt.mark) {
+        doc->cut();
+
+        /* create a temporary work document */
+        p = new(mp_doc, { name: '<wrk>' });
+        p.txt.lines = mp.clipboard;
+    }
+    else
+        p = doc;
+
+    p->move_bof();
+
+    while (p.txt.y < size(p.txt.lines) - 1) {
+        local l = p.txt.lines[p.txt.y];
+
+        if (regex(l, str) != NULL) {
+            push(r, l);
+            p->delete_line();
+        }
+        else
+            p->move_down();
+    }
+
+    /* if p is the working document, move content back to doc */
+    if (p.name == '<wrk>')
+        doc->insert(p.txt.lines);
+
+    mp.clipboard = r;
+    mp_drv.clip_to_sys();
+
+    return doc;
+}
+
+/**
+ * mp_doc.cut_line - Cut current line to clipboard
+ * @doc: the document
+ * 
+ * Cut the current line to the clipboard. 
+ */
+sub mp_doc.cut_line(doc)
+{
+    if (doc.txt.mark) {
+        doc->cut();
+        doc->unmark();
+
+        return doc;
+    }
+
+    doc.txt.x = 0;
+    doc->mark();
+    if (doc.txt.y < size(doc.txt.lines) - 1)
+        doc.txt.y += 1;
+    else 
+        doc->move_eol();
+    doc->mark();
+    doc->cut();
+    doc->unmark();
+
+    return doc;
+}

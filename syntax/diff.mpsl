@@ -1,0 +1,28 @@
+{
+    id:         'diff',
+    name:       'diff',
+    filenames:  [
+        '/\.diff$/i',
+        '/\.patch$/i'
+    ],
+    defs: [
+        "word1",    [ "/\n\+[^\n\x{ad}]*(\x{ad}\n[^\n]*)*/" ],
+        "word2",    [ "/\n\-[^\n\x{ad}]*(\x{ad}\n[^\n]*)*/" ],
+        'quotes',   [ '/^@@.+@@.*$/m' ]
+    ],
+    section:        [ '/^@@/' ],
+    detect:         sub (d) {
+        local r, n;
+
+        for (n = 0; n < 100; n += 1) {
+            if (regex(d.txt.lines[n], '/^--- /'))
+                break;
+        }
+
+        if (regex(d.txt.lines[n + 1], '/^\+\+\+ /') &&
+            regex(d.txt.lines[n + 2], '/^@@ /'))
+            r = 1;
+
+        return r;
+    }
+};

@@ -1,0 +1,22 @@
+{
+    'id'        =>  'xml',
+    'name'      =>  'XML / XGML',
+    'filenames' =>  [ '/\.xml$/i', '/\.sgml$/i' ],
+    'defs'      =>  [
+        'word1',    [ '/<[^>]+>/' ],
+        'word2',    [ '/<\?[^\?]+\?>/' ],
+        'quotes',   [
+            "/\"([^\"\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^\"\\\\\n]*)*)\"/",
+            "/'([^'\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^'\\\\\n]*)*)'/"
+        ],
+        'comments', [
+            [ '/<!--/', '/-->/' ]
+        ]
+    ],
+    'detect'    =>  sub (d) {
+        /* take the first line */
+        local f = d.txt.lines[0];
+
+        return regex(f, '/<\?xml/');
+    }
+};

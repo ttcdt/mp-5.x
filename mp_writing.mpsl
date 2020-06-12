@@ -1,0 +1,177 @@
+/*
+
+    Minimum Profit - A Text Editor
+    Tools for writing.
+
+    ttcdt <dev@triptico.com> et al.
+
+    This software is released into the public domain.
+    NO WARRANTY. See file LICENSE for details.
+
+*/
+
+/** editor actions **/
+
+mp_doc.actions['word_count'] = sub (d) {
+    local c = d->long_op(d.word_count);
+
+    mp.alert(sprintf(L("Lines: %d Words: %d"),
+        size(d->get_active_area()), c));
+};
+
+
+mp.actions['repeated_words_options'] = sub {
+    local r = mp.form(
+        [
+            {
+                label:      L("Number of letters at the start or end") + ':',
+                type:       'text',
+                value:      mp.config.rw_num_chars,
+                history:    'num_char'
+            },
+            {
+                label:      L("Maximum distance between words") + ':',
+                type:       'text',
+                value:      mp.config.rw_max_dist,
+                history:    'max_dist'
+            }
+        ]
+    );
+
+    if (r != NULL) {
+        mp.config.rw_num_chars  = r[0];
+        mp.config.rw_max_dist   = r[1];
+    }
+};
+
+
+mp_doc.actions['seek_repeated_word'] = sub (d) {
+    local c = d->long_op(mp_doc.repeated_words, mp.config.rw_num_chars, mp.config.rw_max_dist);
+
+    if (!c)
+        mp.alert(L("Text not found."));
+};
+
+/** default key bindings **/
+
+mp_doc.keycodes['f6'] = 'seek_repeated_word';
+
+/** action descriptions **/
+
+mp.actdesc['word_count']                = LL("Count words");
+mp.actdesc['repeated_words_options']    = LL("Repeated words options...");
+mp.actdesc['seek_repeated_word']        = LL("Search repeated word");
+
+/** data **/
+
+mp.config.rw_num_chars	= 4;
+mp.config.rw_max_dist	= 40;
+
+/** code **/
+
+sub mp_doc.word_count(doc)
+/* counts the number of words in doc */
+{
+    local w = 0;
+
+    foreach (l, doc->get_active_area())
+        w += size(mp.split_by_words(l, "/[^ \t]+/"));
+
+    return w;
+}
+
+
+/**
+ * mp_doc.repeated_words - Finds words starting or ending the same in a range.
+ * @doc: the document
+ * @num_chars: minimum length for the word to be tested
+ * @max_dist: maximum distance the word must have
+ *
+ * Finds words starting or ending the same to a maximum of @num_chars
+ * and that are less than @max_dist words apart. If a pair of these words
+ * is found, 1 is returned, the cursor positioned over the first one
+ * and both highlighted as spelling errors. Otherwise, 0 is returned
+ * and nothing is done.
+ */
+sub mp_doc.repeated_words(doc, num_chars, max_dist)
+{
+    local q = [];
+    local x = doc.txt.x;
+    local y = doc.txt.y;
+    local l;
+
+    /* build regexes */
+    local s_rx = sprintf('/^.{1,%d}/i', num_chars);
+    local e_rx = sprintf('/.{1,%d}$/i', num_chars);
+
+    /* if there were previous repeated words, no longer
+       consider them as 'typos' */
+    if (mp.last_repeated_words) {
+        del(mp.word_color, mp.last_repeated_words[0]);
+        del(mp.word_color, mp.last_repeated_words[1]);
+    }
+
+    while ((l = doc.txt.lines[y]) != NULL || size(q)) {
+        local w, w1;
+
+        if (l != NULL) {
+            /* process another word in the line */
+            if ((w = regex(l, mp.word_regex, x)) != NULL) {
+                /* get matching position */
+                local c = regex();
+
+                /* does the word measure at lest num_chars? */
+                if (size(w) >= num_chars) {
+                    /* enqueue this word, and dequeue another */
+                    w1 = queue(q, [
+                        w,
+                        c[0] + size(w),
+                        y,
+                        lc(regex(w, s_rx)),
+                        lc(regex(w, e_rx))
+                    ], max_dist);
+                }
+
+                /* move offset to next word */
+                x = c[0] + c[1];
+            }
+            else {
+                /* try another line */
+                y += 1;
+                x = 0;
+            }
+        }
+        else
+            /* dequeue */
+            w1 = shift(q);
+
+        /* has a word been dequeued? */
+        if (w1 != NULL) {
+            /* seek each word in the queue */
+            foreach (w2, q) {
+                /* does the word and any other in
+                   the queue match the regexes? */
+                if ((w1[3] == w2[3]) || (w1[4] == w2[4])) {
+                    /* add both to the word color hash */
+                    mp.word_color[w1[0]] =
+                    mp.word_color[w2[0]] =
+                        mp.colors.spell.attr;
+
+                    /* store for later removal */
+                    mp.last_repeated_words =
+                        [ w1[0], w2[0] ];
+
+                    /* move cursor there */
+                    doc->search_set_y(w1[2])->set_x(w1[1]);
+
+                    /* trigger a redraw */
+                    mp.redraw();
+
+                    return 1;
+                }
+            }
+        }
+    }
+
+    return 0;
+}

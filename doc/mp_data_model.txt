@@ -1,0 +1,255 @@
+Minimum Profit Data Model
+=========================
+
+This document describes all the MPSL data structures that build the Minimum
+Profit Text Editor, with examples showing how to change or update its
+behaviour.
+
+NOTE: As of version 5.2.7, this document is severely outdated.
+
+Documents
+---------
+
+Each open document is a hash, containing all the information about it,
+including its text, position, name and the list of changes. A new document
+is created by calling mp.new() or mp.open(). The keys stored in each
+document are the following:
+
+ * name: The name of the document (<unnamed> for unnamed documents).
+ * mtime: The last modification time of the file name.
+ * syntax: The optional syntax highlight definition that applies to it
+   (a value in the `mp.syntax' hash, may be NULL or undefined).
+ * txt: The _state_ of the document (see below).
+ * undo: A list of different values of `txt'. Every time the user changes
+   a document (inserting or deleting text, etc.), the previous value of
+   `txt' is pushed here. Every time the 'undo' action is executed, the
+   last value is popped from here and stored in the `txt' key and the
+   `redo' list.
+ * redo: A list of values popped from the `undo' key.
+ * read_only: If set to nonzero, the document is read-only and cannot
+   be modified.
+ * encoding: The encoding that was autodetected when loading the
+   document. If it's NULL or an empty string, no special encoding
+   was detected. If this field is set and the global encoding is not,
+   it's used as the file encoding when saving.
+ * eol: The end of line sequence the loaded document originally had.
+   Only set if `mp.config.keep_eol' is set.
+ * keypress: If this component is defined and is an executable function,
+   it's called with the document variable and the keypress identifier
+   as arguments after the keypress has been processed.
+ * paint: If this component is defined and is an executable function,
+   it's called with the document variable and an optimize boolean
+   argument _instead_ of the main document visualisation function. It
+   must return a valid display structure.
+ * post_paint: If this component is defined and is a list of executable
+   functions, they are called sequentially with the document and the
+   already processed display structure as arguments, one after the other.
+   These functions are used as display structure filters. A similar
+   but global list of display structure filtering functions can be
+   stored in `mp.post_paint'.
+
+The `txt' component contains the current state of the document:
+
+ * lines: The array of lines that form the document (the document itself).
+ * y: The Y position (line, from 0 to `size(txt.lines) - 1').
+ * x: The X position (column, from 0 to `size(txt.lines[txt.y]) - 1').
+ * mod: A modifier flag. If it's nonzero, the document has unsaved changes.
+ * vx: The first column (from 0) that is visible on screen.
+ * vy: The first line (from 0) that is visible on screen.
+
+The document list
+-----------------
+
+The list of open documents in stored in the `mp.docs' array. The subscript
+to the active one (the one returned by mp.active()) is stored in the
+`mp.active_i' variable. Setting this value effectively changes the active
+document (obviously, in the 0 .. `size(mp.docs()) - 1' range).
+
+Configuration data
+------------------
+
+The configuration is stored in the `mp.config' hash. Information about this
+structure can be found in the included document
+./mp_configuration.html (Minimum Profit Configuration Directives).
+
+Colors
+------
+
+Colors are defined in the `mp.colors' hash. The keys contain the name of
+the color in a syntax highlighting context (i.e. `comments' for the text
+inside source code comments, `quotes' for the text inside quotes, and so
+on), and the values are hashes containing the definition for that color in
+the different driver types. For now, only `gui' and `text' drivers exist,
+with another special key, `flags', for special effects.
+
+The color keys are:
+
+ * cursor: The color of the cursor.
+ * selection: The color of the selected block.
+ * comments: Text inside programming language comments.
+ * documentation: Text inside documentation marks.
+ * quotes: Text between quotes.
+ * matching: The color of the matching brace (if the cursor is over one).
+ * word1: 1st definition for special words (i.e. tokens).
+ * word2: 2nd definiton for special words (i.e. variables).
+ * tag: Color for tags (symbol names).
+ * spell: Color for mis-spelled words (if spelling is on).
+ * search: Color for the last matched string in searches.
+ * normal: Text outside any other context, or the base color if no syntax
+   highlight is selected.
+
+For each key, the value is a hash containing the following keys:
+
+ * text: a two element array containing the color names for background
+   and foreground. These strings match the colors in Curses terminal modes
+   and must be one of `black', `red', `green', `yellow', `blue',
+   `magenta', `cyan' and `white'. Another special value, `default', skips
+   setting a color.
+ * gui: A two element array containing the RGB color for background and
+   foreground. It's handy to set this values as hexadecimal numbers,
+   having 0x000000 for black and 0xffffff for white.
+ * flags: This is an optional array containing keywords for special
+   effects in colors. Acceptable values are `reverse', `bright' and
+   `underline' (not all drivers accept all these keywords).
+
+Syntax Highlighting
+-------------------
+
+The syntax highlight definitions are stored in the `mp.syntax' hash. Each
+key is the name of the syntax highlight (for example, `html'), and they
+value is the definition hash. This definition set can be assigned to a
+document `syntax' key and will be immediately applied.
+
+The keys in the definition hash are:
+
+ * id: The same as the key, as `perl' or `html'.
+ * name: A human-consuming name, that will be shown in the status line
+   (for example, "C / C++" or "Shell script").
+ * filenames: An array of regular expressions to be applied to the
+   document name for syntax detection.
+ * help: An array of system commands to be executed when the help system
+   is invoked by pressing `f1' over a word in a document. It must contain
+   a %s as a placeholder of the word (for example, "man %s" or
+   "perldoc -f %s").
+ * defs: An array of definitions.
+ * detect: An optional subroutine that accepts a document as the only
+   argument and that must return a boolean value. This subroutine will be
+   called when auto-detecting the syntax highlight.
+ * section: An array of regular expressions that defines a _section_ inside
+   a document. A section is a special area in the document, as a function
+   definition, for example. Lines matching this regexes will be shown
+   in the `section_list' action form.
+ * build_targets: An array of sprintf() format strings to be used as
+   build targets if a Makefile is not found in the current directory. They
+   should contain a %s format that will be expanded to the current document
+   file name.
+
+The syntax highlight definitions is a list containing color names (keys to
+the `mp.colors' hash) and an array. The array can contain single strings
+of regular expressions (matching string will have the color set), or an
+array of two regular expressions (setting the start and the end of the
+block to be coloured).
+
+This is a snippet for the `comments' definition in the C language syntax
+highlight. The first definition is a two array of regular expressions,
+matching the start and the end of a C style comment; all text between these
+marks will be coloured as a comment. The following one, a single string, is
+a regular expression that matches from two slashes to the end of the line:
+
+	/* more code above... */
+	'comments',	[
+		[ '|/\*|', '|\*/|' ],	/* C style */
+		'|//.*$|m',		/* C++ style */
+	]
+
+See the `mp_syntax.mpsl' for details and examples.
+
+Keycodes
+--------
+
+Keycodes are defined in the `mp.keycodes' hash. Each key contain the name
+of the keycode, as `ctrl-f' or `f3'. The value can be an executable value
+(that will be directly executed with the current document as only
+argument), a string containing the name of an action (that must be a key to
+the `mp.actions' hash), or another hash, that will contain itself keycodes
+as keys and executable values or action names as values (this mechanism can
+be nested ad infinitum), to implement keystroke chains in the Emacs style.
+
+Examples:
+
+	/* bind ctrl-f to the 'seek' action */
+	mp.keycodes['ctrl-f'] = 'seek';
+	
+	/* bind F5 to an anonymous subroutine */
+	mp.keycodes['f5'] = sub (d) {
+		mp.insert(d, "<form action = 'post'></form>");
+	};
+	
+	/* bind Ctrl-x Ctrl-f to 'open', and
+	   Ctrl-x Ctrl-s to 'save' */
+	mp.keycodes['ctrl-x'] = {
+		'ctrl-f'	=> 'open',
+		'ctrl-s'	=> 'save'
+	};
+
+Actions
+-------
+
+Actions are defined in the `mp.actions' hash. Each key contain the name of
+the action, as `seek' or `move_up'. Each value contain an executable
+value that accepts a document as the only argument.
+
+	mp.actions['sync'] = sub (d) {
+		/* save all modified documents */
+		foreach (d, grep(mp.docs, sub (e) { e.txt.mod; }))
+			mp.actions.save(d);
+	};
+
+Action descriptions
+~~~~~~~~~~~~~~~~~~~
+
+Action descriptions are strings stored in the `mp.actdesc' hash. Each key
+contain the name of the action and each value the translatable string for
+human consuming and will be used in the menu.
+
+Examples:
+
+	mp.actdesc['seek']	= LL("Search text...");
+	mp.actdesc['seek_next']	= LL("Search next");
+	mp.actdesc['sync']	= LL("Save modified texts");
+
+The menu
+--------
+
+The menu is stored in the `mp.menu' structure. The menu is an array of
+dropdown menu definitions. Each dropdown menu is a two-element array
+containing a string for the label (File, Edit, etc.) and another array of
+action names (keys to `mp.actions'). See the `mp_core.mpsl' source file
+where it's defined.
+
+Message notification
+--------------------
+
+If a non-obstrusive message must be notified to the user, the `mp.message'
+can be set and the message will be shown in the status line until a
+specified time is reached. This structure is a hash containing:
+
+ * string: The string to be shown in the status line.
+ * timeout: The time when the string will stop being showed.
+
+Example:
+
+	/* show a message for 4 seconds */
+	mp.message = {
+		'string'	=> "Unknown keystroke",
+		'timeout'	=> time() + 4
+	};
+
+The clipboard
+-------------
+
+The clipboard is stored in the `mp.clipboard' array, and it's a simple
+array of lines. Each copy and paste operation manipulates this.
+
+----
+ttcdt <dev@triptico.com>

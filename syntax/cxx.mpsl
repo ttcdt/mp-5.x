@@ -1,0 +1,1 @@
+mp.syntax.c || load("syntax/c.mpsl");

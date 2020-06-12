@@ -1,0 +1,111 @@
+NAME
+----
+
+ mp-5 - Minimum Profit Editor, a text editor for programmers
+
+SYNOPSIS
+--------
+
+ mp-5 [options] [+NNN] [file [file...]]
+
+DESCRIPTION
+-----------
+
+Minimum Profit (mp) is a text editor for programmers. Among its features
+are the following:
+
+ - Fully scriptable using a C-like scripting language.
+ - Unlimited undo levels.
+ - Complete Unicode support.
+ - Multiple files can be edited at the same time and blocks copied
+   and pasted among them.
+ - Syntax highlighting for many popular languages / file formats: C, C++,
+   Perl, Shell Scripts, Ruby, Php, Python, HTML...
+ - Creative use of tags: tags created by the external utility _ctags_
+   are used to move instantaneously to functions or variables inside
+   your current source tree. Tags are visually highlighted (underlined),
+   and symbol completion can be triggered to avoid typing your own function
+   names over and over.
+ - Intelligent help system: pressing F1 over any word of a text being edited
+   triggers the underlying system help (calling _man_ when editing C or Shell
+   files, _perldoc_ with Perl, _ri_ on Ruby, _winhelp_ on MS Windows...).
+ - Understandable interface: drop-down menus, reasonable default key bindings.
+ - Configurable keys, menus and colors.
+ - Text templates can be easily defined / accessed.
+ - Multiplatform: Console (curses and ANSI), Qt4, GTK+, KDE4, MS Windows.
+ - Automatic indentation, word wrapping, internal _grep_, learning /
+   repeating functions.
+ - Spellchecking support (via the ispell package).
+ - Multilingual.
+ - Password-protected, encrypted text files (using the ARCFOUR algorithm).
+ - It helps you abandon vi, emacs and other six-legged freaks definitely.
+
+OPTIONS
+-------
+
+The following options are avaiable:
+
+ * -t tag: Edits the file where tag is defined (see ctags(1)).
+ * -e mpsl_code: Executes MPSL code.
+ * -f mpsl_script: Executes an MPSL script.
+ * -d directory: Changes working directory.
+ * -x file: opens file in the hexadecimal viewer.
+ * NNN: Moves to line number NNN of last file.
+
+MPSL
+----
+
+MPSL (Minimum Profit Scripting Language) is a powerful programming
+language embedded in the Minimum Profit Text Editor (a huge part of the
+editor itself is written in MPSL). Its features are too large to be
+inserted here; please read the documentation.
+
+FILES
+-----
+
+ * /etc/mp.mpsl (system-wide configuration file).
+ * ~/.mp.mpsl (user configuration file).
+ * ~/.mp_templates (user text templates).
+
+ENVIRONMENT VARIABLES
+---------------------
+
+ * HOME (user home directory).
+ * LANG, LC_ALL (language settings).
+
+SEE ALSO
+--------
+
+ctags(1).
+
+The Minimum Profit documentation in /usr/share/doc/mp-5.
+
+AUTHORS, TODO, RELEASE_NOTES and README.
+
+Home page: https://triptico.com/software/mp.html
+
+LICENSE
+-------
+
+This is free and unencumbered software released into the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
+
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.

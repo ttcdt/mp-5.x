@@ -1,0 +1,81 @@
+%%Example templates
+Creating a template file for Minimum Profit is simple: create a
+text file in your home directory called .mp_templates and fill it
+with content in the same format as this file: a separator / label
+line starting with %% that will be used as the prompt in the
+"Insert template..." list, and a body, that can be anything, upto
+next label or the end of file.
+
+Also, if the template label starts with #!, the template body is
+assumed to be a piece of MPSL code that shall be executed and its
+return value inserted as the template.
+%%C Source header with license
+/*
+
+    PROGRAM_NAME PROGRAM_VERSION - PROGRAM_DESCRIPTION
+
+    Copyright (C) YEAR YOU <your@email>
+
+    This software is released into the public domain.
+    NO WARRANTY. See file LICENSE for details.
+
+*/
+%%Function documentation (in mp_doccer format)
+/**
+ * function - brief description
+ * @argument: description
+ * @another_argument: description
+ *
+ * Detailed description,
+ * possibly spanning several lines
+ */
+%%Semiautomatic reply to an email containing an MS Word attachment
+You sent me an attachment in Microsoft Word format, a secret proprietary
+format, so it is hard for me to read. If you send me plain text, HTML, or
+PDF, then I will read it.
+
+Distributing documents in Word format is bad for you and for others. You
+can't be sure what they will look like if someone views them with a
+different version of Word; they may not work at all.
+
+Receiving Word attachments is bad for you because they can carry viruses
+(see http://www.symantec.com/avcenter/venc/data/acro.html). Sending Word
+attachments is bad for you, because a Word document normally includes
+hidden information about the author, enabling those in the know to pry
+into the author's activities (maybe yours). Text that you think you
+deleted may still be embarrassingly present. See
+http://www.microsystems.com/Shares_Well.htm for more info.
+
+But above all, sending people Word documents puts pressure on them to use
+Microsoft software and helps to deny them any other choice. In effect, you
+become a buttress of the Microsoft monopoly. This pressure is a major
+obstacle to the broader adoption of free software. Would you please
+reconsider the use of Word format for communication with other people?
+
+Converting the file to HTML is simple. Open the document, click on File,
+then Save As, and in the 'Save As Type' strip box at the bottom of the
+box, choose HTML Document or Web Page. Then choose Save. You can then
+attach the new HTML document instead of your Word document. Note that
+versions of Word change in inconsistent ways -- if you see slightly
+different menu item names, please try them.
+
+To convert to plain text is almost the same -- instead of HTML Document,
+choose Text Only or Text Document as the 'Save As Type'.
+%%#! RSS entry
+/* as its name starts with #!, execute as MPSL */
+join(
+    [
+        "",
+        "<item>",
+        "  <title></title>",
+        "  <link>http://triptico.com</link>",
+        "  <pubDate>" ~ strftime("%a, %d %b %Y %T %z") ~ "</pubDate>",
+        "  <description>",
+        "<![CDATA[",
+        "]]>",
+        "</description>",
+        "</item>",
+        ""
+    ],
+    "\n"
+);

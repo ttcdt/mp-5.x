@@ -1,0 +1,56 @@
+{
+    'id'        =>  'sh',
+    'name'      =>  'Shell script',
+    'filenames' =>  [ '/\.sh$/i', '/makefile/i' ],
+    'help'      =>  [ "man %s" ],
+    'defs'      =>  [
+        'word1',    [
+            mp.syn_token_list( [
+                "if", "then", "else", "elif",
+                "fi", "case", "do", "done", "esac",
+                "for", "until", "while", "break",
+                "in", "source", "alias", "cd",
+                "continue", "echo", "eval", "exec",
+                "exit", "export", "kill", "logout",
+                "printf", "pwd", "read", "return",
+                "shift", "test", "trap", "ulimit",
+                "umask", "unset", "wait", "cp", "rm" ]),
+                '/[\{\}]/'
+
+        ],
+        'word2',    [
+            '/\<(local|let|set)\>/',
+                '/[-=<>:\?\+\*\!\%&\|]+/',
+                '/\$\w+/',
+                '/\$\{\w+\}/',
+                "/\<[0-9[:upper:]_]+\>/"                /* all-caps words */
+        ],
+        'quotes',   [
+            "/\"([^\"\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^\"\\\\\n]*)*)\"/",
+            "/'([^'\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^'\\\\\n]*)*)'/",
+            "/\<-?[0-9]+\>/",                           /* numbers */
+            "/\<0x[0-9a-f]+\>/i",                       /* hex numbers */
+            "/\([A-Za-z0-9_]+\)/",                      /* parens */
+            [ "/`/", "/`/" ],                           /* backticks */
+            [ "/<<[\"']?EOF[\"']?;$/m", "/^EOF$/m" ]    /* 'document here' */
+        ],
+        'comments', [
+            "/#[^\n\x{ad}]*(\x{ad}\n[^\n]*)*/"
+        ]
+    ],
+    'detect'    =>  sub (d) {
+        /* take the first line */
+        local f = d.txt.lines[0];
+
+        /* is it a 'she-bang' for usual shells? */
+        return regex(f, '/^#!\s*/bin/(sh|bash|csh|dash|ksh)/') ||
+               regex(f, '/^#!\s*/usr/bin/make -f/');
+    },
+    'section'       =>  [ '/(^\w+\(\))/', '/^[A-Za-z0-9_\.-]+:/' ],
+    'build_targets' => [
+        'sh %s',
+        'bash %s',
+        'bash -n %s && echo "Syntax OK"',
+        'shellcheck %s'
+    ]
+};

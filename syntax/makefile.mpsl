@@ -1,0 +1,1 @@
+mp.syntax.sh || load("syntax/sh.mpsl");

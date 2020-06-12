@@ -1,0 +1,8 @@
+{
+    'id'        =>  'mp_templates',
+    'name'      =>  'Minimum Profit template file',
+    'defs'      =>  [
+        'documentation',    [ '/^%%.*$/m' ]
+    ],
+    'section'   =>  [ '/^%%/' ]
+};

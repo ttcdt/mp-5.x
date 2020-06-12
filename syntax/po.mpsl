@@ -1,0 +1,12 @@
+{
+    'id'        =>  'po',
+    'name'      =>  'Gettext file',
+    'defs'      =>  [
+        'word1',    [ '/^msgid/m' ],
+        'word2',    [ '/^msgstr/m' ],
+        'comments', [ "/#.*$/m" ],
+        'quotes',   [
+            "/\"([^\"\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^\"\\\\\n]*)*)\"/"
+        ]
+    ]
+};

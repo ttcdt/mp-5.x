@@ -1,0 +1,232 @@
+/*
+
+    Minimum Profit - A Text Editor
+    Spellchecking code.
+
+    ttcdt <dev@triptico.com> et al.
+
+    This software is released into the public domain.
+    NO WARRANTY. See file LICENSE for details.
+
+*/
+
+/** editor actions **/
+
+mp.actions['toggle_spellcheck']     = sub { mp.ispell(-1); };
+mp.actions['ignore_last_misspell']  = sub { mp.ignore_last_misspell(); };
+
+mp_doc.actions['seek_misspelled']   = sub (d) {
+    d->long_op(d.search_misspelled) || mp.alert(L("Text not found."));
+};
+
+
+/** default key bindings **/
+
+mp_doc.keycodes['f5']   = 'seek_misspelled';
+
+/** action descriptions **/
+
+mp.actdesc['toggle_spellcheck']     = LL("Toggle spellchecking");
+mp.actdesc['seek_misspelled']       = LL("Search misspelled word");
+mp.actdesc['ignore_last_misspell']  = LL("Ignore last misspelled word");
+
+/** data **/
+
+/* spellchecking command */
+mp.config.ispell_cmd = "ispell -a";
+
+/* the spelling cache */
+mp.spelling_cache = {};
+
+/** code **/
+
+sub mp.open_ispell_pipe
+/* opens the pipe to ispell */
+{
+    local p, l;
+
+    /* open the pipe */
+    if ((p = popen(mp.config.ispell_cmd, "r+")) == NULL)
+        return NULL;
+
+    /* read the first line */
+    l = read(p);
+
+    /* check for the signature */
+    if (! regex(l, '/^@\(#\) International Ispell/')) {
+        pclose(p);
+        return NULL;
+    }
+
+    /* store the pipe */
+    mp.ispell_pipe = p;
+}
+
+
+sub mp.close_ispell_pipe
+/* closes the pipe to ispell */
+{
+    if (mp.ispell_pipe != NULL) {
+        /* close and delete */
+        pclose(mp.ispell_pipe);
+        mp.ispell_pipe = NULL;
+    }
+}
+
+
+/**
+ * mp.is_word_misspelled - Tests if a word is misspelled.
+ * @w: the word
+ *
+ * Tests if a word is misspelled. Returns a negative value if
+ * there was an error when querying the external spelling program,
+ * 1 if the word is misspelled, or 0 if not.
+ */
+sub mp.is_word_misspelled(w)
+{
+    local l;
+    local ret = 0;
+
+    if (exists(mp.spelling_cache, w))
+        return mp.spelling_cache[w];
+
+    if (mp.ispell_pipe == NULL) {
+        if (mp.open_ispell_pipe() == NULL) {
+            return -1;
+        }
+    }
+
+    /* NULL is never misspelled */
+    if (w == NULL)
+        return 0;
+
+    /* write the word */
+    write(mp.ispell_pipe, w + "\n");
+
+    /* wait for the response */
+    if ((l = read(mp.ispell_pipe)) == NULL) {
+        mp.close_ispell_pipe();
+        return -2;
+    }
+
+    local t = l;
+
+    /* drop all lines until an empty one */
+    while (t != "\n")
+        t = read(mp.ispell_pipe);
+
+    /* take first char of the response */
+    l = regex(l, '/^./');
+
+    /* if it's not a '*' nor a '+', it's misspelled */
+    if (l != '*' && l != '+')
+        ret = 1;
+
+    mp.spelling_cache[w] = ret;
+
+    return ret;
+}
+
+
+sub mp.ispell_word_color_func(w)
+/* mp.word_color_func() for ispell */
+{
+    local l, a;
+
+    a = -1;
+
+    /* attributes must exist before entering here */
+    if (mp.colors.spell.attr != NULL) {
+        ret = mp.is_word_misspelled(w);
+
+        /* error? disable further misspelling color */
+        if (ret < 0)
+            mp.word_color_func = NULL;
+        else
+        if (ret > 0)
+            a = mp.colors.spell.attr;
+    }
+
+    return a;
+}
+
+
+/**
+ * mp.ispell - Changes spelling highlight.
+ * @b: boolean value
+ *
+ * Changes the status of the highlighting of misspelled words.
+ * If @b is 0, it's disabled (default value); if it's 1,
+ * misspelled words will be highlighted using a special
+ * attribute color. If @b is -1, the status is toggled.
+ */
+sub mp.ispell(b)
+{
+    if (b == -1)
+        b = mp.word_color_func == NULL && 1 || 0;
+
+    if (b && mp.is_word_misspelled() != -1)
+        mp.word_color_func = mp.ispell_word_color_func;
+    else
+        mp.word_color_func = NULL;
+}
+
+
+/**
+ * mp.search_misspelled - Searches for the next misspelled word.
+ * @doc: the document to search
+ *
+ * Searches the document for the next misspelled word. If no
+ * more misspelled words can be found, returns 0 and does nothing;
+ * otherwise, the cursor is moved just after that word and
+ * returns 1.
+ */
+sub mp_doc.search_misspelled(doc)
+{
+    local txt = doc.txt;
+    local x = txt.x;
+    local y = txt.y;
+
+    while (y < size(txt.lines)) {
+        local l = txt.lines[y];
+        local w;
+
+        while ((w = regex(l, mp.word_regex, x)) != NULL) {
+            local n = regex();
+            local r = mp.is_word_misspelled(w);
+
+            /* error? fail immediately */
+            if (r < 0)
+                return 0;
+
+            x = n[0] + n[1];
+
+            if (r == 1) {
+                /* store word for later */
+                mp.last_misspelled_word = w;
+
+                doc->set_y(y)->set_x(x);
+
+                return 1;
+            }
+        }
+
+        x = 0;
+        y += 1;
+    }
+
+    return 0;
+}
+
+
+/**
+ * mp.ignore_last_misspell - Ignores last misspelled word.
+ *
+ * Ignores the last misspelled word found by mp.search_misspelled()
+ * by adding it to a whitelist, so it won't be found again.
+ */
+sub mp.ignore_last_misspell()
+{
+    if (mp.last_misspelled_word)
+        mp.spelling_cache[mp.last_misspelled_word] = 0;
+}

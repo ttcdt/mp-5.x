@@ -1,0 +1,188 @@
+all: Makefile LIBS $(TARGET) $(MORE_TARGETS) $(BUILDMO)
+
+build:
+	./build.sh
+
+clean:
+	rm -f $(TARGET) $(OBJS) mp*.tar *.o *.moc tags *.tar.gz *.exe *.zip .installer.c *.1 *.asc lex.yy.c y.tab.c y.tab.h *.a *-stress
+	$(MAKE) -C $(MPDM) clean
+	$(MAKE) -C $(MPSL) clean
+
+LIBS:
+	$(MAKE) -C $(MPDM) libmpdm.a
+	$(MAKE) -C $(MPSL) libmpsl.a
+
+PROJ=mp
+
+ADD_DOCS=AUTHORS README LICENSE RELEASE_NOTES mp_templates.sample
+GRUTATXT_DOCS=doc/mp_index.html doc/mp_cookbook.html doc/mp_internals.html \
+	doc/mp_configuration.html doc/mp_data_model.html \
+	doc/mp_man.html doc/mp_interactive_dialog_boxes.html \
+	doc/mp_actions.html doc/mp_keycodes.html \
+	doc/mp_encoding.html $(APPNAME).1
+MP_DOCCER_DOCS=doc/mp_api.txt
+G_AND_MP_DOCS=doc/mp_api.html
+
+OBJS=mp_core.o $(DRV_OBJS) $(MORE_OBJS)
+
+DIST_TARGET=/tmp/$(PROJ)-$(VERSION)
+
+version:
+	@echo $(VERSION)
+
+.c.o:
+	$(CC) $(CFLAGS) -I. `cat config.cflags` -c $<
+
+dep:
+	gcc `cat config.cflags` -MM *.c | \
+		sed -e 's;$(MPDM)/;$$(MPDM)/;g' \
+			-e 's;$(MPSL)/;$$(MPSL)/;g' > makefile.depend
+
+mp.tar: *.mpsl lang/*.mpsl syntax/*.mpsl
+	$(TAR) cvf $@ *.mpsl lang/*.mpsl syntax/*.mpsl
+
+mp.tar.o: mp.tar
+	$(LD) -r -b binary mp.tar -o $@
+
+$(APPNAME): $(OBJS) $(MPDM)/libmpdm.a $(MPSL)/libmpsl.a
+	$(CCLINK) $(CFLAGS) $(OBJS) `cat config.ldflags` -o $@
+
+mpv_kde4.o: mpv_kde4.cpp mpv_qk_common.moc
+	$(CPP) $(CFLAGS) -I. `cat config.cflags` -c $<
+
+mpv_qt4.o: mpv_qt4.cpp mpv_qk_common.moc
+	$(CPP) $(CFLAGS) -I. `cat config.cflags` -c $<
+
+mpv_qk_common.moc: mpv_qk_common.cpp
+	$(MOC) -o $@ $<
+
+mp_res.o: mp_res.rc
+	$(WINDRES) mp_res.rc mp_res.o
+
+mp-5.exe: mp_core.o $(MORE_OBJS) mpv_win32.o mp_res.o $(MPDM)/libmpdm.a $(MPSL)/libmpsl.a
+	$(CC) $(CFLAGS) mp_core.o $(MORE_OBJS) mpv_win32.o mp_res.o `cat config.ldflags` -o $@
+
+mp-5c.exe: mp_core.o $(MORE_OBJS) mpv_win32c.o mp_res.o $(MPDM)/libmpdm.a $(MPSL)/libmpsl.a
+	$(CC) $(CFLAGS) mp_core.o $(MORE_OBJS) mpv_win32c.o mp_res.o `grep -v mwindows config.ldflags` -o $@
+
+distclean: clean
+	rm -f config.h config.cflags config.ldflags \
+		makefile.opts Makefile po/minimum-profit.pot .build.sh
+
+docsclean:
+	rm -f $(MP_DOCCER_DOCS) doc/*.html
+
+realclean: distclean
+	$(MAKE) -C $(MPDM) realclean
+	$(MAKE) -C $(MPSL) realclean
+
+realdistclean: realclean
+
+.SUFFIXES: .html .txt .rhtml
+
+.txt.html:
+	grutatxt < $< > $@
+
+.rhtml.html:
+	cp $< $@
+
+doc/mp_man.html: doc/mp_man.txt
+	grutatxt -dl -t "Minimum Profit Man Page" < $< > $@
+
+doc/mp_api.txt: *.mpsl
+	mp_doccer *.mpsl -o doc/mp_api -f grutatxt \
+		-t "Minimum Profit API" \
+		-b "This reference documents version $(VERSION) of the MPSL API." \
+		-a 'ttcdt - dev@triptico.com'
+
+$(APPNAME).1: doc/mp_man.txt
+	grutatxt -m man -t "Minimum Profit" < doc/mp_man.txt > $(APPNAME).1
+
+docs: $(DOCS)
+	(cd $(MPDM); $(MAKE) docs)
+	(cd $(MPSL); $(MAKE) docs)
+
+distcopy: distclean docs
+	mkdir -p $(DIST_TARGET) ; \
+	$(TAR) cf - * | (cd $(DIST_TARGET) ; $(TAR) xf -) ; \
+	(cd $(MPDM) ; $(MAKE) distcopy DIST_TARGET=$(DIST_TARGET)/mpdm ) ; \
+	(cd $(MPSL) ; $(MAKE) distcopy DIST_TARGET=$(DIST_TARGET)/mpsl )
+
+dist: distcopy $(XGETTEXT_TARGETS) $(BUILDMO)
+	(cd /tmp ; $(TAR) czf - $(PROJ)-$(VERSION)/* ) > $(PROJ)-$(VERSION).tar.gz ; \
+	rm -rf $(DIST_TARGET)
+
+innosetup: mp-5.exe mp-5c.exe docs
+	rm -f *.dll
+	(DIR=`pwd` ; cd $(MPDM) ; make installdoc DOCDIR=$$DIR/doc)
+	(DIR=`pwd` ; cd $(MPSL) ; make installdoc DOCDIR=$$DIR/doc)
+	iscc /O. /Fmp-$(VERSION) mp.iss
+	cp mp-5.exe mp-5-portable.exe
+	cp mp-5c.exe mp-5c-portable.exe
+
+install-tar: mp.tar
+	./mkinstalldirs $(PREFIX)/share/$(APPNAME)
+	rm -f $(PREFIX)/share/$(APPNAME)/mp-dist.tar
+	install -m 644 mp.tar $(PREFIX)/share/$(APPNAME)/ || true
+
+install: $(INSTALL_MSG) installdoc $(INSTALLMO) $(MORE_INSTALL_TARGETS)
+	install -m 755 $(APPNAME) $(PREFIX)/bin/$(APPNAME)
+	./mkinstalldirs $(PREFIX)/share/man/man1
+	[ -f $(APPNAME).1 ] && install -m 644 $(APPNAME).1 $(PREFIX)/share/man/man1/$(APPNAME).1 || true
+	[ -d /usr/share/applications ] && cp minimum-profit.desktop /usr/share/applications || true
+	[ -d /usr/share/metainfo ] && cp metainfo.xml /usr/share/metainfo/com.triptico.minimum_profit.metainfo.xml || true
+	[ -d /usr/share/icons/hicolor/48x48/apps/ ] && cp minimum-profit.png /usr/share/icons/hicolor/48x48/apps/ || true
+
+installdoc:
+	./mkinstalldirs $(PREFIX)/share/doc/$(APPNAME)
+	( cd $(MPDM); $(MAKE) installdoc )
+	( cd $(MPSL); $(MAKE) installdoc )
+	install -m 644 doc/* $(PREFIX)/share/doc/$(APPNAME)
+	install -m 644 $(ADD_DOCS) $(PREFIX)/share/doc/$(APPNAME)
+	[ -f doc/mp_index.html ] && install -m 644 doc/mp_index.html $(PREFIX)/share/doc/$(APPNAME)/index.html || true
+
+uninstall: $(UNINSTALLMO)
+	rm -f $(PREFIX)/bin/$(APPNAME)
+	rm -rf $(PREFIX)/share/$(APPNAME)
+	rm -rf $(PREFIX)/share/doc/$(APPNAME)
+	rm -f $(PREFIX)/share/man/man1/$(APPNAME).1
+	rm -f /usr/share/applications/minimum-profit.desktop
+	rm -f /usr/share/icons/hicolor/48x48/apps/minimum-profit.png
+
+po/minimum-profit.pot:
+	xgettext -o $@ --language=C --keyword=L --keyword=LL mp*.c *.mpsl
+
+update-po:
+	for a in po/*.po ; do \
+		sed -i -e '/^#/d' $$a ; \
+		xgettext --omit-header -j -o $$a --language=C \
+			--keyword=L --keyword=LL mp*.c *.mpsl ; \
+	done
+
+.po.mo:
+	msgfmt -o $@ $<
+
+build-mo:
+	for i in po/*.po ; do \
+		B=`basename $$i .po` ; o=po/$$B.mo ; \
+		if [ $$i -nt $$o -o ! -f $$o ] ; then msgfmt -o $$o $$i ; fi ; \
+	done
+
+install-mo: build-mo
+	for a in po/*.mo ; do \
+		B=`basename $$a .mo` ; \
+		./mkinstalldirs $(PREFIX)/share/locale/$$B/LC_MESSAGES ; \
+		install -m 644 $$a $(PREFIX)/share/locale/$$B/LC_MESSAGES/minimum-profit.mo ; \
+	done
+
+uninstall-mo:
+	for a in po/*.mo ; do \
+		B=`basename $$a .mo` ; \
+		rm -f $(PREFIX)/share/locale/$$B/LC_MESSAGES/minimum-profit.mo ; \
+	done
+
+Makefile: VERSION makefile.in
+	./config.sh $(CONF_ARGS)
+
+validate-metainfo:
+	appstreamcli validate metainfo.xml

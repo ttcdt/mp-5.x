@@ -1,0 +1,608 @@
+/*
+
+    Minimum Profit - A Text Editor
+    Useless things.
+
+    ttcdt <dev@triptico.com> et al.
+
+    This software is released into the public domain.
+    NO WARRANTY. See file LICENSE for details.
+
+*/
+
+/** maze **/
+
+global mp_maze = new(mp_base, {
+    name:       '<maze>',
+    x:          0,
+    y:          0,
+    tx:         -1,
+    ty:         -1,
+    mode:       'RST',
+    game_map:   NULL,
+    brick:      mp.config.use_unicode && "\x{2592}" || "#",
+    hero:       "@",
+    spot:       "X",
+    dir:        [[0, -1], [1, 0], [0, 1], [-1, 0]],
+
+    check:  sub (maze, d) {
+        local ok = -1;
+        local py = y;
+        local px = x;
+        local cy, cx;
+        local pdir = d + 1;
+
+        cy = py + dir[d][0];
+        cx = px + dir[d][1];
+
+        if (game_map[cy][cx] != ' ')
+            ok = 0;
+
+        local cnt = 10000;
+
+        while (cnt && ok == -1) {
+            local o = game_map[cy][cx];
+
+            if (o == hero) {
+                /* found ourself */
+                ok = 0;
+            }
+            else
+            if (o == spot) {
+                /* found spot */
+                ok = 1;
+            }
+            else
+            if (o == brick) {
+                /* cannot continue; get back and turn left */
+                cy = py;
+                cx = px;
+
+                d = (d + 1) % 4;
+            }
+            else {
+                /* valid position */
+                py = cy;
+                px = cx;
+
+                /* turn right */
+                d = (d + 3) % 4;
+            }
+
+            cy = py + dir[d][0];
+            cx = px + dir[d][1];
+
+            cnt -= 1;
+        }
+
+        return ok == 1 && pdir || 0;
+    },
+
+    get_status: sub (maze) {
+        sprintf(L("Maze - help %s to find the treasure. As always, the %s marks the spot."), hero, spot);
+    },
+    init: sub (maze) {
+        if (mode == 'RST' || tx != mp.window.tx || ty != mp.window.ty) {
+            tx = mp.window.tx;
+            ty = mp.window.ty;
+
+            /* ensure odd size */
+            if (!(tx % 2))
+                tx -= 1;
+            if (!(ty % 2))
+                ty -= 1;
+
+            /* init */
+            game_map = map(ty, sub { map(tx, brick); });
+
+            /* build */
+            x = 1;
+            y = 1;
+            local stack = [];
+
+            for (;;) {
+                local d = [];
+
+                /* clear */
+                game_map[y][x] = ' ';
+
+                foreach (t, dir) {
+                    local ny = y + t[0] * 2;
+                    local nx = x + t[1] * 2;
+
+                    /* can space be opened in this direction?
+                       save as possible next position */
+                    if (nx > 0 && ny > 0 && game_map[ny][nx] == brick)
+                        push(d, t);
+                }
+
+                if (size(d)) {
+                    /* more than one way? stack this position */
+                    if (size(d) > 1)
+                        push(stack, [y, x]);
+
+                    /* pick one direction at random and move there */
+                    local m = random(d);
+
+                    y += m[0];
+                    x += m[1];
+
+                    game_map[y][x] = ' ';
+
+                    y += m[0];
+                    x += m[1];
+                }
+                else {
+                    /* no way from here; pop previous position */
+                    if ((d = pop(stack)) == NULL)
+                        break;
+
+                    y = d[0];
+                    x = d[1];
+                }
+            }
+
+            /* pick treasure position */
+            x = 1 + random(tx / 2) * 2;
+            y = 1 + random(ty / 2) * 2;
+
+            game_map[y][x] = spot;
+
+            /* pick hero position */
+            x = 1 + random(tx / 2) * 2;
+            y = 1 + random(ty / 2) * 2;
+
+            game_map[y][x] = hero;
+
+            mode = 'PLAY';
+            tx = mp.window.tx;
+            ty = mp.window.ty;
+        }
+    },
+    keypress: sub (maze, keycode) {
+        if (mode == 'WON') {
+            /* in WON mode, only enter is accepted */
+            if (keycode == 'enter') {
+                mode = 'RST';
+                maze->init();
+            }
+        }
+        else {
+            local py = y;
+            local px = x;
+            local phero = hero;
+
+            if (keycode == 'f1') {
+                local d = maze->check(0) ||
+                          maze->check(1) ||
+                          maze->check(2) ||
+                          maze->check(3);
+
+                phero = ['?', 'W', 'S', 'E', 'N']->get(d);
+            }
+
+            if (keycode == 'cursor-up')
+                y -= 1;
+            if (keycode == 'cursor-down')
+                y += 1;
+            if (keycode == 'cursor-left')
+                x -= 1;
+            if (keycode == 'cursor-right')
+                x += 1;
+
+            if (game_map[y][x] == spot) {
+                mode = 'WON';
+            }
+            else
+            if (game_map[y][x] == brick) {
+                y = py;
+                x = px;
+            }
+            else {
+                game_map[py][px] = ' ';
+                game_map[y][x]   = phero;
+            }
+        }
+    },
+    render: sub (maze) {
+        maze->init();
+
+        local c = mp.colors.normal.attr;
+        local out = map(game_map, sub(e) { [c, join(e)]; });
+
+        if (mode == 'WON') {
+            out[0] = [
+                mp.colors.cursor.attr,
+                L("You won! Press ENTER.")
+            ];
+        }
+
+        push(out, []);
+
+        return out;
+    }
+});
+
+
+/** pipes **/
+
+global mp_pipes = new(mp_base, {
+    name:         '<pipes>',
+    x:            0,
+    y:            1,
+    tx:           -1,
+    ty:           -1,
+    wx:           -1,
+    wy:           -1,
+    sx:           -1,
+    mode:         'RST',
+    game_map:     NULL,
+    attr:         NULL,
+    water_color:  mp.colors.matching.attr,
+    dry_color:    mp.colors.normal.attr,
+    cursor_color: mp.colors.cursor.attr,
+    theme:        "u_sqr",
+
+    get_status: sub (pipes) {
+        L("Pipes - carry water from top to bottom by turning the pipes");
+    },
+    init: sub (pipes) {
+        theme = mp.config.use_unicode && "u_sqr" || "ascii";
+
+        if (mode == 'RST' || tx != mp.window.tx || ty != mp.window.ty) {
+            tx = mp.window.tx;
+            ty = mp.window.ty;
+
+            /* render the pieces */
+            foreach (p, pieces) {
+                p.shape = [
+                    p.src[0]->map(sub (e) { themes[theme][e]; } )->join(),
+                    p.src[1]->map(sub (e) { themes[theme][e]; } )->join()
+                ];
+            }
+
+            wx = integer(tx / 3);
+            wy = integer(ty / 2);
+
+            sx = random(wx);
+
+            /* fill the map with only rotable pieces */
+            local rp = pieces->map()->grep(sub (e) { e.next; });
+
+            game_map = map(wy - 2, sub { map(wx, sub { random(rp); }); });
+
+            /* add first line */
+            ins(game_map, map(wx, sub { pieces['blank']; }), 0);
+            game_map[0][sx] = pieces['in_pipe'];
+
+            /* add last line */
+            push(game_map, map(wx, sub { pieces['blank']; }));
+            game_map[-1][5]      = pieces['out_pipe'];
+            game_map[-1][wx - 5] = pieces['out_pipe'];
+
+            mode = 'PLAY';
+
+            pipes->verify();
+        }
+
+        return pipes;
+    },
+    keypress: sub (pipes, keycode) {
+        if (mode == 'WON') {
+            if (keycode == 'enter') {
+                mode = 'RST';
+                pipes->init();
+            }
+        }
+        else {
+            local toggle = 0;
+
+            if (keycode == 'cursor-up' && y > 1)
+                y -= 1;
+            if (keycode == 'cursor-down'&& y < wy - 2)
+                y += 1;
+            if (keycode == 'cursor-left' && x > 0)
+                x -= 1;
+            if (keycode == 'cursor-right' && x < wx - 1)
+                x += 1;
+            if (keycode == 'enter')
+                toggle = 1;
+            if (keycode == 'mouse-left-button') {
+                local ty = integer(mp.mouse_y / 2);
+
+                if (ty >= 1 && ty < wy) {
+                    local tx = integer(mp.mouse_x / 3);
+
+                    if (tx >= 0 && tx < wx) {
+                        x = tx; y = ty;
+                        toggle = 1;
+                    }
+                }
+            }
+
+            if (toggle) {
+                local n = game_map[y][x];
+                game_map[y][x] = pieces[n.next];
+                pipes->verify();
+            }
+        }
+
+        return pipes;
+    },
+    verify: sub (pipes) {
+        /* reset attributes */
+        attr = map(wy + 1, sub { []; });
+
+        /* the water input is blue */
+        attr[0][sx] = water_color;
+
+        /* calculate the path */
+        local px = sx;
+        local py = 0;
+        local c = 'D'; /* downwards */
+        local p;
+
+        /* while there is a valid path */
+        while ((p = game_map[py][px]) && (c = p.out[c]) && dir[c]) {
+            /* mark as valid path */
+            attr[py][px] = water_color;
+
+            /* move in new direction */
+            px += dir[c][0];
+            py += dir[c][1];
+        }
+
+        if (c == 'WIN') {
+            attr[py][px] = water_color;
+            mode = 'WON';
+        }
+
+        return pipes;
+    },
+    render: sub (pipes) {
+        local out = [];
+
+        pipes->init();
+
+        foreach (line, n, game_map) {
+            local l0 = [];
+            local l1 = [];
+
+            foreach (piece, m, line) {
+                local s = piece.shape;
+                local c;
+
+                if (n == y && m == x)
+                    c = cursor_color;
+                else
+                    c = attr[n][m] || dry_color;
+
+                push(l0, c, s[0]);
+                push(l1, c, s[1]);
+            }
+
+            push(out, l0, l1);
+        }
+
+        /* add two more empty lines */
+        push(out, [], []);
+
+        if (mode == 'WON') {
+            out[0] = [
+                mp.colors.cursor.attr,
+                L("You won! Press ENTER.")
+            ];
+        }
+
+        return out;
+    },
+
+    dir: {
+        U:  [ 0, -1 ],
+        R:  [ 1,  0 ],
+        D:  [ 0,  1 ],
+        L:  [-1,  0 ]
+    },
+    themes: {
+        ascii: ["-",        "|",        "'",        "'",        ".",        ".",        " ", "/", "\\", " "],
+        u_sqr: ["\x{2500}", "\x{2502}", "\x{2518}", "\x{2514}", "\x{2510}", "\x{250c}", " ", "/", "\\", "\x{1f4a7}"],
+        u_rnd: ["\x{2500}", "\x{2502}", "\x{256f}", "\x{2570}", "\x{256e}", "\x{256d}", " ", "/", "\\", "\x{1f4a7}"]
+    },
+    pieces: {
+        left_up: {
+            src:    [[1, 6, 3], [3, 0, 0]],
+            out:    { D: 'R', L: 'U' },
+            next:   'up_right'
+        },
+        up_right: {
+            src:    [[5, 0, 0], [1, 6, 5]],
+            out:    { U: 'R', L: 'D' },
+            next:   'right_down'
+        },
+        right_down: {
+            src:    [[0, 0, 4], [4, 6, 1]],
+            out:    { U: 'L', R: 'D' },
+            next:   'down_left'
+        },
+        down_left: {
+            src:    [[2, 6, 1], [0, 0, 2]],
+            out:    { R: 'U', D: 'L' },
+            next:   'left_up'
+        },
+        up_down: {
+            src:    [[1, 6, 1], [1, 6, 1]],
+            out:    { U: 'U', D: 'D' },
+            next:   'left_right'
+        },
+        left_right: {
+            src:    [[0, 0, 0], [0, 0, 0]],
+            out:    { R: 'R', L: 'L' },
+            next:   'up_down'
+        },
+        blank: {
+            src:    [[6, 6, 6], [6, 6, 6]],
+            out:    {}
+        },
+        in_pipe: {
+            src:    [[1, 9, 1], [8, 6, 7]],
+            out:    { D: 'D' }
+        },
+        out_pipe: {
+            src:    [[1, 6, 1], [7, 6, 8]],
+            out:    { D: 'WIN' }
+        }
+    }
+});
+
+
+/** puzzle **/
+
+global mp_puzzle = new(mp_base, {
+    name:       "<puzzle>",
+    tx:         5,
+    ty:         4,
+    maze:       NULL,
+    maze_ok:    NULL,
+    mode:       "RST",
+    top_frame:  NULL,
+    mid_frame:  NULL,
+    bot_frame:  NULL,
+    spc_frame:  NULL,
+
+    shuffle: sub (puzzle, l) {
+        /* shuffles a list */
+        for (n = 0; n < size(l); n += 1) {
+            local i = n + random(size(l) - n);
+            local t = l[n];
+            l[n] = l[i];
+            l[i] = t;
+        }
+
+        return l;
+    },
+
+    get_status: sub (puzzle) {
+        sprintf(L("Puzzle - order the list by moving the blank"));
+    },
+
+    init: sub (puzzle) {
+        if (mode == "RST") {
+            /* create the maze */
+            maze_ok = map((tx * ty) - 1, sub (e) { e + 1; }) + [ NULL ];
+            maze    = puzzle->shuffle(clone(maze_ok));
+
+            mode = "PLAY";
+        }
+
+        if (top_frame == NULL) {
+            local h = mp.unicode("horiz") * 4;
+
+            spc_frame = mp.unicode("vert") + (("    |") * tx);
+
+            top_frame = mp.unicode("nwcorner") +
+                join([h] * tx, mp.unicode("ncorner")) +
+                mp.unicode("necorner");
+
+            mid_frame = mp.unicode("wcorner") +
+                join([h] * tx, mp.unicode("ccorner")) +
+                mp.unicode("ecorner");
+
+            bot_frame = mp.unicode("swcorner") +
+                join([h] * tx, mp.unicode("scorner")) +
+                mp.unicode("secorner");
+        }
+
+        return puzzle;
+    },
+
+    check: sub (puzzle) {
+        if (maze == maze_ok)
+            mode = "WON";
+
+        return puzzle;
+    },
+
+    keypress: sub (puzzle, keycode) {
+        if (mode == "WON") {
+            if (keycode == "enter") {
+                mode = "RST";
+                puzzle->init();
+            }
+        }
+        else {
+            /* find the position where the blank is */
+            local pos = maze->seek(NULL), npos = NULL;
+
+            if (keycode == "cursor-right" && (pos % tx) != 0) {
+                npos = pos - 1;
+            }
+            if (keycode == "cursor-left" && (pos % tx) != tx - 1) {
+                npos = pos + 1;
+            }
+            if (keycode == "cursor-down" && integer(pos / tx) != 0) {
+                npos = pos - tx;
+            }
+            if (keycode == "cursor-up" && integer(pos / tx) != ty - 1) {
+                npos = pos + tx;
+            }
+
+            if (npos != NULL) {
+                maze[pos]  = maze[npos];
+                maze[npos] = NULL;
+
+                puzzle->check();
+            }
+        }
+
+        return puzzle;
+    },
+
+    render: sub (puzzle) {
+        puzzle->init();
+
+        local out = [ " " ];
+
+        out->push(top_frame);
+
+        local x = 0;
+        local l = "";
+
+        foreach (e, maze) {
+            /* new line? */
+            if (x % tx == 0) {
+                out->push(spc_frame);
+                l = "|";
+            }
+
+            if (e == NULL)
+                l += "    " + mp.unicode("vert");
+            else
+                l += e $ " %2d " + mp.unicode("vert");
+
+
+            if (x % tx == tx - 1) {
+                out->push(l);
+                out->push(spc_frame);
+
+                if (x < (tx * ty) - 1)
+                    out->push(mid_frame);
+            }
+
+            x += 1;
+        }
+
+        out->push(bot_frame);
+
+        /* add the normal attr to all lines */
+        out = out->map(sub (e) { [mp.colors.normal.attr, e];}) + ([[]] * mp.window.ty);
+
+        if (mode == "WON") {
+            out[0] = [
+                mp.colors.cursor.attr,
+                L("You won! Press ENTER.")
+            ];
+        }
+
+        return out;
+    }
+});

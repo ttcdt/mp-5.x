@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.triptico.minimum_profit</id>
+  
+  <name>Minimum Profit</name>
+  <summary>A text editor for programmers</summary>
+  
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>Unlicense</project_license>
+  
+  <description>
+    <p>Minimum Profit (mp) is a text editor for programmers. Among its features are the following:</p>
+    <ul>
+    <li>Fully scriptable using a C-like scripting language.</li>
+    <li>Unlimited undo levels.</li>
+    <li>Complete Unicode support.</li>
+    <li>Multiple files can be edited at the same time and blocks copied and pasted among them.</li>
+    <li>Syntax highlighting for many popular languages / file formats: C, C++, Perl, Shell Scripts, Ruby, Php, Python, HTML...</li>
+    <li>Creative use of tags: tags created by the external utility 'ctags' are used to move instantaneously to functions or variables inside your current source tree. Tags are visually highlighted (underlined), and symbol completion can be triggered to avoid typing your own function names over and over.</li>
+    <li>Intelligent help system: pressing F1 over any word of a text being edited triggers the underlying system help (calling 'man' when editing C or Shell files, 'perldoc' with Perl, 'ri' on Ruby...).</li>
+    <li>Understandable interface: drop-down menus, reasonable default key bindings.</li>
+    <li>Configurable keys, menus and colors.</li>
+    <li>Text templates can be easily defined / accessed.</li>
+    <li>Multiplatform: Unix/Linux ANSI and Curses, Qt4/Qt5, GTK+, KDE4, MS Windows (both windowed and console).</li>
+    <li>Automatic indentation, word wrapping, internal 'grep', learning / repeating functions.</li>
+    <li>Spellchecking support (via the ispell package).</li>
+    <li>Multilingual.</li>
+    <li>Password-protected, encrypted text files (using the ARCFOUR algorithm).</li>
+    <li>It helps you abandon vi, emacs and other six-legged freaks definitely.</li>
+    </ul>
+  </description>
+
+  <releases>
+
+    <release version="5.40" type="stable" date="2020-06-13">
+      <description>
+      <p>Updated maintainers.</p>
+      </description>
+      <artifacts>
+        <artifact type="source">
+          <location>https://triptico.com/download/mp/mp-5.40.tar.gz</location>
+        </artifact>
+        <artifact type="binary" platform="win32">
+          <location>https://triptico.com/download/mp/mp-5.40.exe</location>
+        </artifact>
+      </artifacts>
+    </release>
+
+    <release version="5.39" type="stable" date="2020-06-01">
+      <description>
+      <p>New features:</p>
+      <ul>
+        <li>The usage of Unicode characters in text menus, games, etc. can be disabled by setting the configuration variable <code>mp.config.use_unicode</code> to 0.</li>
+      </ul>
+      <p>Other changes:</p>
+      <ul>
+        <li>Some internal optimizations to visual wrapping code.</li>
+      </ul>
+      </description>
+      <artifacts>
+        <artifact type="source">
+          <location>https://triptico.com/download/mp/mp-5.39.tar.gz</location>
+        </artifact>
+        <artifact type="binary" platform="win32">
+          <location>https://triptico.com/download/mp/mp-5.39.exe</location>
+        </artifact>
+      </artifacts>
+    </release>
+
+    <release version="5.38" type="stable" date="2020-05-17">
+      <description>
+      <p>New features:</p>
+      <ul>
+        <li>A new visual wrap mode, where lines longer than the application window wrap (with special marking) instead of disappearing to the right. It's implemented in the <code>toggle_visual_wrap</code> action (bound by default to <code>ctrl-k</code>) and can be activated from the configuration file by setting <code>mp.config.visual_wrap</code> to 1.</li>
+      </ul>
+      <p>Other changes:</p>
+      <ul>
+        <li>When hard word wrapping is not set, the <code>word_wrap_paragraph</code> action behaves like <code>join_paragraph</code> (i.e. word-wraps to an infinite column).</li>
+      </ul>
+      </description>
+      <artifacts>
+        <artifact type="source">
+          <location>https://triptico.com/download/mp/mp-5.38.tar.gz</location>
+        </artifact>
+        <artifact type="binary" platform="win32">
+          <location>https://triptico.com/download/mp/mp-5.38.exe</location>
+        </artifact>
+      </artifacts>
+    </release>
+
+    <release version="5.37" type="stable" date="2020-03-10">
+      <description>
+      <p>Bug fixes:</p>
+      <ul>
+        <li>Fixed compilation issues under FreeBSD and OpenBSD.</li>
+      </ul>
+      <p>New features:</p>
+      <ul>
+        <li>New game 'Puzzle'.</li>
+      </ul>
+      </description>
+      <artifacts>
+        <artifact type="source">
+          <location>https://triptico.com/download/mp/mp-5.37.tar.gz</location>
+        </artifact>
+        <artifact type="binary" platform="win32">
+          <location>https://triptico.com/download/mp/mp-5.37.exe</location>
+        </artifact>
+      </artifacts>
+    </release>
+  </releases>
+  
+  <launchable type="desktop-id">minimum_profit.desktop​</launchable>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://triptico.com/img/mp-5-qt4.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://triptico.com/img/mp-5-curses.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://triptico.com/img/mp-5-ansi.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://triptico.com/img/mp-5-ansi-256.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://triptico.com/img/mp-5-gtk3.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://triptico.com/img/mp-5-win32.png</image>
+    </screenshot>
+  </screenshots>
+</component>

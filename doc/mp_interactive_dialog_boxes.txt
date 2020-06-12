@@ -1,0 +1,187 @@
+Minimum Profit: Creating interactive dialog boxes
+=================================================
+
+This document is a reference to the mp.form() function and associated
+tools that ease interaction with the user from inside the Minimum Profit
+Text Editor.
+
+Alert boxes
+-----------
+
+Alert boxes are simple popups or message notifications that interrupts the
+user with a message. Their usage is trivial:
+
+ 	mp.alert("It's coffee time!!!");
+
+Confirmation boxes
+------------------
+
+Confirmation boxes are simple forms that show a message and ask for
+confirmation. The user response is returned as an integer value. Its use
+is also trivial:
+
+ 	local r = mp.confirm("File has changed. Save changes?");
+
+The returned values can be 1 if user said _yes_, 2 if user said _no_, and
+0, if used cancelled.
+
+Open and save file boxes
+------------------------
+
+Open and save file boxes are system-dependent dialog boxes that show a
+prompt and ask for a filename to open or save into. They both return the
+file name on confirmation or NULL on cancellation:
+
+ 	local r = mp.openfile("File to open:");
+ 
+ 	local s = mp.savefile("Save as:");
+
+Forms
+-----
+
+Forms can be created in MP by using the mp.form() function. It implements a
+simplified, common interface for GUI and text modes while trying to be as
+useful as possible.
+
+The following is an example taken from mp_search.mpsl:
+
+ 	local t = mp.form( [
+ 		{ 'label'	=> L("Text to seek:"),
+ 		  'type'	=> 'text',
+ 		  'history'	=> 'search' },
+ 		{ 'label'	=> L("Case sensitive") ~ ':',
+ 		  'type'	=> 'checkbox',
+ 		  'value'	=> mp.config.case_sensitive_search }
+ 	] );
+
+As can be seen, mp.form() accepts a list of hashes describing the fields
+to be shown to the user and returns an array with the filled values. On
+user cancellation, mp.form() return NULL; otherwise, an array with the
+same number of elements as the array sent as argument is returned, having
+each entered value in each element.
+
+The following _widget_ types exist:
+
+ * text: A field to enter text.
+ * password: A field to enter text, but hiding its input.
+ * checkbox: A field to enter yes/no values.
+ * list: A field to select an element from a given list of values.
+
+Every widget can have some common attributes:
+
+ * value: The initial value.
+ * label: A text string to be shown near the field, describing it.
+
+Other attributes can exist for each widget.
+
+Depending on the driver, a dialog box can show `OK' and `Cancel' buttons,
+and accept cancellation by hitting the `escape' hey.
+
+Text widgets
+~~~~~~~~~~~~
+
+Text widgets are used, unsurprisingly, for entering free text. No limit
+exist on the string size nor the accepted character set. If a `value'
+attribute is set, it's shown as the default value, allowing edition.
+
+The following additional attributes can be used in text widgets:
+
+ * history: A tag marking the history set. Every time a dialog is
+   accepted (i.e. not cancelled), the entered value is stored in the
+   history set named by this attribute. History is accesible by pressing
+   the `cursor-up' and `cursor-down' keys.
+
+Example:
+
+ 	local r = mp.form(
+ 		[
+ 			{
+ 	 		'type'	=> 'text',
+ 	 		'label'	=> 'Enter your name:'
+ 	 		}
+ 		]
+ 	);
+ 
+ 	if (r != NULL)
+ 		mp.alert('Your name is ' ~ r[0] ~ '!');
+
+Password widgets
+~~~~~~~~~~~~~~~~
+
+Password widgets are the same as text widgets, but its content is not
+shown. For each character, an asterisk or similar placeholder character is
+shown. No `history' attributes are allowed.
+
+Example:
+
+ 	local r = mp.form(
+ 		[
+ 			{
+ 			'type'	=> 'text',
+ 			'label'	=> 'Login:'
+ 			},
+ 			{
+ 			'type'	=> 'password',
+ 			'label'	=> 'Password:'
+ 			}
+ 		]
+ 	);
+ 
+ 	if (r != NULL)
+ 		login_into_system(r[0], r[1]);
+
+Checkbox widgets
+~~~~~~~~~~~~~~~~
+
+Checkbox widgets are used to set alternatives, i.e., values that can be
+true or false. Depending on the driver, they are shown as real checkboxes
+or [Y/N] questions. The initial `value' can be non-zero for _true_ and
+zero for _false_. On return, the value can be 1 or 0.
+
+ 	local r = mp.form(
+ 		[
+ 			{
+ 			'type'	=> 'text',
+ 			'label'	=> 'Tab size:',
+			'value'	=> 8
+ 			},
+ 			{
+ 			'type'	=> 'checkbox',
+ 			'label'	=> 'Convert to spaces:',
+			'value'	=> 0
+ 			}
+ 		]
+ 	);
+
+List widgets
+~~~~~~~~~~~~
+
+List widgets are used to select one from an array of values. The `value'
+attribute is the initially selected item from the supplied list.
+
+The additional attributes are:
+
+ * list: The mandatory list of values, as an array of strings.
+
+On return, the value is the subscript of the selected item.
+
+Example:
+
+ 	local r = mp.form(
+ 		[
+ 			{
+ 			'type'	=> 'list',
+ 			'label'	=> 'Which C source file to open:',
+ 			'list'	=> glob("*.c"),
+ 			'value'	=> 0
+ 			},
+ 			{
+ 			'type'	=> 'checkbox',
+ 			'label'	=> 'Read only:',
+ 			'value'	=> 0
+ 			}
+ 		]
+ 	);
+
+----
+ttcdt <dev@triptico.com>

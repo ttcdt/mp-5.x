@@ -1,0 +1,1 @@
+mp.syntax.diff || load("syntax/diff.mpsl");

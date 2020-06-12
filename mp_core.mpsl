@@ -1,0 +1,911 @@
+/*
+
+    Minimum Profit - A Text Editor
+
+    ttcdt <dev@triptico.com> et al.
+
+    This software is released into the public domain.
+    NO WARRANTY. See file LICENSE for details.
+
+*/
+
+/** startup: language first **/
+
+/* L(x) is the same as gettext(x) */
+L = gettext;
+
+/* LL(x) is the same as x */
+sub LL(x) { x; }
+
+/* set gettext() domain */
+gettext_domain('minimum-profit', APPDIR + 'locale');
+
+/* test if gettext() can do a basic translation */
+if (gettext('&File') == '&File' && ENV.LANG) {
+    /* no; try alternatives using the LANG variable */
+    local v = [ sregex(ENV.LANG, '!/!g') ]; /* es_ES.UTF-8 */
+    push(v, shift(split(v[-1], '.')));      /* es_ES */
+    push(v, shift(split(v[-1], '_')));      /* es */
+
+    foreach (l, v) {
+        eval('load("lang/' + l + '.mpsl");');
+
+        if (ERROR == NULL)
+            break;
+    }
+
+    ERROR = NULL;
+}
+
+/** main namespace **/
+
+global mp = {
+    VERSION:    mp_c.VERSION,
+
+    /* document list */
+    docs:       [],
+    active_i:   0,
+
+    /* configuration */
+    config:     {
+        undo_levels:            100,
+        word_wrap:              0,
+        auto_indent:            0,
+        tab_size:               4,
+        tabs_as_spaces:         1,
+        dynamic_tabs:           0,
+        unlink:                 1,
+        case_sensitive_search:  1,
+        global_replace:         0,
+        preread_lines:          60,
+        mark_eol:               0,
+        maximize:               0,
+        keep_eol:               1,
+        smart_bol:              1,
+        emacs_scrolling:        0,
+        no_text_mouse:          0,
+        show_line_numbers:      0,
+        double_page:            120,
+        eol:                    (mp_drv.id == 'win32' && "\r\n" || "\n"),
+        status_format:          "%m%n %x,%y [%l] %R%O%W %s %e %t",
+        time_stamp_format:      "%a, %d %b %Y %H:%M:%S %z",
+        visual_wrap:            0,
+        use_unicode:            1
+    },
+
+    /* regular expression matching a word (test fallback) */
+    word_regex:     "/[[:alnum:]_]+/i",
+
+    /* viewport size */
+    window:         {},
+
+    /* allowed color names (order matters, match the Unix curses one) */
+    color_names:    [
+        "default",
+        "black", "red", "green", "yellow",
+        "blue", "magenta", "cyan", "white"
+    ],
+
+    /* color definitions */
+    colors:         {
+        normal: {
+            text:   [ 'default', 'default' ],
+            gui:    [ 0x000000, 0xffffff ]
+        },
+        cursor: {
+            text:   [ 'default', 'default' ],
+            gui:    [ 0x000000, 0xffffff ],
+            flags:  [ 'reverse' ]
+        },
+        selection: {
+            text:   [ 'red', 'default' ],
+            gui:    [ 0xff0000, 0xffffff ],
+            flags:  [ 'reverse']
+        },
+        comments: {
+            text:   [ 'green', 'default' ],
+            gui:    [ 0x00cc77, 0xffffff ]
+        },
+        documentation: {
+            text:   [ 'cyan', 'default' ],
+            gui:    [ 0x8888ff, 0xffffff ]
+        },
+        quotes: {
+            text:   [ 'blue', 'default' ],
+            gui:    [ 0x0000ff, 0xffffff ],
+            flags:  [ 'bright' ]
+        },
+        matching: {
+            text:   [ 'black', 'cyan' ],
+            gui:    [ 0x000000, 0xffff00 ]
+        },
+        word1: {
+            text:   [ 'green', 'default' ],
+            gui:    [ 0x00aa00, 0xffffff ],
+            flags:  [ 'bright' ]
+        },
+        word2: {
+            text:   [ 'red', 'default' ],
+            gui:    [ 0xff6666, 0xffffff ],
+            flags:  [ 'bright' ]
+        },
+        word3: {
+            text:   [ 'default', 'default' ],
+            gui:    [ 0x000088, 0xffffff ],
+            flags:  [ 'bright' ]
+        },
+        tag: {
+            text:   [ 'cyan', 'default' ],
+            gui:    [ 0x8888ff, 0xffffff ],
+            flags:  [ 'underline' ]
+        },
+        spell: {
+            text:   [ 'red', 'default' ],
+            gui:    [ 0xff8888, 0xffffff ],
+            flags:  [ 'bright', 'underline' ]
+        },
+        search: {
+            text:   [ 'black', 'green' ],
+            gui:    [ 0x000000, 0x00cc77 ]
+        },
+        suggest: {
+            text:   [ 'black', 'white' ],
+            gui:    [ 0x000000, 0x808080 ],
+            flags:  [ 'bright' ]
+        }
+    },
+
+    /* hash of specially coloured words */
+    word_color: {},
+
+    /* generic keycodes */
+    keycodes:   {
+        ansi: {}
+    },
+
+    /* generic actions */
+    actions:    {},
+
+    /* action descriptions (generic and document specific) */
+    actdesc:    {},
+
+    /* form history */
+    history:    {},
+
+    /* state saved from run to run (window size, etc.) */
+    state:      {},
+
+    /* the menu */
+    menu:       [
+        [
+            LL("&File"), [
+                'new', 'open', 'open_recent', 'open_under_cursor', 'revert', '-',
+                'save', 'save_as', 'sync', 'export', '-',
+                'open_folder', 'hex_view', '-',
+                'set_password', '-',
+                'open_config_file', 'open_templates_file', '-',
+                'close', '-',
+                'suspend', 'exit'
+            ]
+        ],
+        [
+            LL("&Edit"), [
+                'undo', 'redo', '-',
+                'cut_mark', 'copy_mark', 'paste_mark', 'delete_mark',
+                'delete_line', 'cut_lines_with_string', '-',
+                'mark_tag', 'mark_tag_vertical', 'unmark', 'mark_all', '-',
+                'insert_template', '-',
+                'exec_command', 'filter_selection', '-',
+                'exec_action', 'eval', 'eval_doc'
+            ]
+        ],
+        [
+            LL("&Search"), [
+                'seek', 'seek_next', 'seek_prev', '-',
+                'replace', 'replace_tabs_with_spaces', 'replace_spaces_with_tabs', '-',
+                'complete', '-',
+                'grep'
+            ]
+        ],
+        [
+            LL("&Go to"), [
+                'next', 'prev',
+                'move_bof', 'move_eof', 'move_bol', 'move_eol',
+                'goto', 'move_word_right', 'move_word_left', '-',
+                'section_list', 'move_section_up', 'move_section_down',
+                '-', 'document_list'
+            ]
+        ],
+        [
+            LL("&Project"), [
+                'build', '-',
+                'vcs', '-',
+                'find_tag', 'complete_symbol', '-',
+                'save_session', 'load_session'
+            ]
+        ],
+        [
+            LL("&Writing") , [
+                'toggle_spellcheck',
+                'seek_misspelled', 'ignore_last_misspell', '-',
+                'seek_repeated_word', '-',
+                'word_count', '-',
+                'word_wrap_paragraph', 'join_paragraph', '-',
+                'insert_next_item', 'insert_time_stamp', 'insert_page_break'
+            ]
+        ],
+        [
+            LL("&Options"), [
+                'record_macro', 'play_macro', '-',
+                'toggle_visual_wrap',
+                'encoding', 'tab_options', 'line_options',
+                'repeated_words_options', 'complete_options', '-',
+                'zoom_in', 'zoom_out', '-',
+                'pipes', '-', 'check_for_updates', 'about'
+            ]
+        ]
+    ]
+};
+
+
+/** new color schemes **/
+
+/* don't remember where I took this one */
+/*
+mp.colors.normal.gui        = [ 0x000000, 0xeeeeee ];
+mp.colors.cursor.gui        = [ 0x000000, 0xeeeeee ];
+mp.colors.quotes.gui        = [ 0x006666, 0xeeeeee ];
+mp.colors.comments.gui      = [ 0x880000, 0xeeeeee ];
+mp.colors.word1.gui         = [ 0x000088, 0xeeeeee ];
+mp.colors.word2.gui         = [ 0x660066, 0xeeeeee ];
+mp.colors.word3.gui         = [ 0x666600, 0xeeeeee ];
+mp.colors.documentation.gui = [ 0x8888ff, 0xeeeeee ];
+*/
+
+/* Tomorrow: https://github.com/chriskempson/tomorrow-theme */
+/*
+mp.colors.normal.gui        = [ 0x4d4d4c, 0xffffff ];
+mp.colors.cursor.gui        = [ 0x4d4d4c, 0xffffff ];
+mp.colors.quotes.gui        = [ 0x3e999f, 0xffffff ];
+mp.colors.comments.gui      = [ 0x8e908c, 0xffffff ];
+mp.colors.word1.gui         = [ 0x4271ae, 0xffffff ];
+mp.colors.word2.gui         = [ 0xeab700, 0xffffff ];
+mp.colors.word3.gui         = [ 0xf5871f, 0xffffff ];
+mp.colors.documentation.gui = [ 0x8959a8, 0xffffff ];
+mp.colors.selection.gui     = [ 0xd6d6d6, 0x000000 ];
+*/
+
+/* Tomorrow Night Eighties: https://github.com/chriskempson/tomorrow-theme */
+/*
+mp.colors.normal.gui        = [ 0xcccccc, 0x2d2d2d ];
+mp.colors.cursor.gui        = [ 0xcccccc, 0x2d2d2d ];
+mp.colors.quotes.gui        = [ 0x66cccc, 0x2d2d2d ];
+mp.colors.comments.gui      = [ 0x999999, 0x2d2d2d ];
+mp.colors.word1.gui         = [ 0x6699cc, 0x2d2d2d ];
+mp.colors.word2.gui         = [ 0xffcc66, 0x2d2d2d ];
+mp.colors.word3.gui         = [ 0xf99157, 0x2d2d2d ];
+mp.colors.documentation.gui = [ 0xcc99cc, 0x2d2d2d ];
+mp.colors.selection.gui     = [ 0xf2777a, 0x000000 ];
+*/
+
+/* Tomorrow Night: https://github.com/chriskempson/tomorrow-theme */
+/*
+mp.colors.normal.gui        = [ 0xc5c8c6, 0x1d1f21 ];
+mp.colors.cursor.gui        = [ 0xc5c8c6, 0x1d1f21 ];
+mp.colors.quotes.gui        = [ 0x8abeb7, 0x1d1f21 ];
+mp.colors.comments.gui      = [ 0x969896, 0x1d1f21 ];
+mp.colors.word1.gui         = [ 0x81a2be, 0x1d1f21 ];
+mp.colors.word2.gui         = [ 0xf0c674, 0x1d1f21 ];
+mp.colors.word3.gui         = [ 0xde935f, 0x1d1f21 ];
+mp.colors.documentation.gui = [ 0xb294bb, 0x1d1f21 ];
+mp.colors.selection.gui     = [ 0xcc6666, 0x000000 ];
+*/
+
+/* Tomorrow Night Bright: https://github.com/chriskempson/tomorrow-theme */
+/*
+mp.colors.normal.gui        = [ 0xeaeaea, 0x000000 ];
+mp.colors.cursor.gui        = [ 0xeaeaea, 0x000000 ];
+mp.colors.quotes.gui        = [ 0x70c0b1, 0x000000 ];
+mp.colors.comments.gui      = [ 0x969896, 0x000000 ];
+mp.colors.word1.gui         = [ 0x7aa6da, 0x000000 ];
+mp.colors.word2.gui         = [ 0xe7c547, 0x000000 ];
+mp.colors.word3.gui         = [ 0xe7c547, 0x000000 ];
+mp.colors.documentation.gui = [ 0xc397d8, 0x000000 ];
+mp.colors.selection.gui     = [ 0xd54e53, 0x000000 ];
+*/
+
+/* Minimum Profit Classic */
+/*
+mp.colors.normal.gui        = [ 0x000000, 0xffffff ];
+mp.colors.cursor.gui        = mp.colors.normal.gui;
+mp.colors.selection.gui     = [ 0xff0000, 0xffffff ];
+mp.colors.comments.gui      = [ 0x00cc77, 0xffffff ];
+mp.colors.documentation.gui = [ 0x8888ff, 0xffffff ];
+mp.colors.quotes.gui        = [ 0x0000ff, 0xffffff ];
+mp.colors.matching.gui      = [ 0x000000, 0xffff00 ];
+mp.colors.word1.gui         = [ 0x00aa00, 0xffffff ];
+mp.colors.word2.gui         = [ 0xff6666, 0xffffff ];
+mp.colors.word3.gui         = [ 0x000088, 0xffffff ];
+mp.colors.tag.gui           = [ 0x8888ff, 0xffffff ];
+mp.colors.spell.gui         = [ 0xff8888, 0xffffff ];
+mp.colors.search.gui        = [ 0x000000, 0x00cc77 ];
+*/
+
+/* Minimum Profit Dark */
+
+mp.colors.normal.gui        = [ 0xf0f0f0, 0x1b1b1b ];
+mp.colors.cursor.gui        = mp.colors.normal.gui;
+mp.colors.selection.gui     = [ 0xf2777a, 0x000000 ];
+mp.colors.comments.gui      = [ 0x00cc77, 0x1b1b1b ];
+mp.colors.documentation.gui = [ 0x8888ff, 0x1b1b1b ];
+mp.colors.quotes.gui        = [ 0x629FCF, 0x1b1b1b ];
+mp.colors.matching.gui      = [ 0x000000, 0x00aaaa ];
+mp.colors.word1.gui         = [ 0x00aa00, 0x1b1b1b ];
+mp.colors.word2.gui         = [ 0xff6666, 0x1b1b1b ];
+mp.colors.word3.gui         = [ 0xe0e0e0, 0x1b1b1b ];
+mp.colors.tag.gui           = [ 0x8888ff, 0x1b1b1b ];
+mp.colors.spell.gui         = [ 0xff8888, 0x1b1b1b ];
+mp.colors.search.gui        = [ 0x000000, 0x00cc77 ];
+mp.colors.search.gui        = [ 0x000000, 0x00cc77 ];
+mp.colors.suggest.gui       = [ 0x000000, 0x808080 ];
+
+/** MP base class **/
+
+global mp_base = {
+    title:          NULL,
+    name:           'MP',
+    keycodes:       {},
+    actions:        {},
+    keypress:       sub (doc, key)  { doc; },
+    render:         sub (doc, opt)  { return []; },
+    pre_event:      sub (doc, key)  { key; },
+    post_event:     sub (doc, key)  { doc; },
+    query_close:    sub (doc)       { 1; },
+    get_name:       sub (doc)       { name; },
+    get_status:     sub (doc)       { name; },
+    busy:           sub (doc, b)    { mp.busy(b); return doc; },
+    state:          sub (doc)       { return NULL; }
+};
+
+
+/** MP document class **/
+
+global mp_doc = new(mp_base, {
+        name:       L("<unnamed>"),
+        txt: {
+            x:      0,
+            y:      0,
+            vx:     0,
+            vy:     0,
+            mod:    0,
+            lines:  [ '' ]
+        },
+        undo_q:     [],
+        redo_q:     [],
+        syntax:     NULL,
+
+        /* rendering function for MP docs in mp_core.c */
+        render:     mp_c.render
+    }
+);
+
+
+/** unicode **/
+
+mp.unicode_tbl = [
+    {
+        "ellipsis":  "...",
+        "pilcrow":   "P",
+        "middledot": ".",
+        "horiz":     "-",
+        "vert":      "|",
+        "arrowup":   "^",
+        "arrowdn":   "V",
+        "nwcorner":  ".",
+        "necorner":  ".",
+        "swcorner":  "'",
+        "secorner":  "'",
+        "ncorner":   "-",
+        "scorner":   "-",
+        "wcorner":   "|",
+        "ecorner":   "|",
+        "ccorner":   "+",
+        "tab":       "\x{ac}",
+        "formfeed":  "\x{a4}",
+        "unknown":   "?"
+    },
+    {
+        "ellipsis":  "\x{2026}",
+        "pilcrow":   "\x{00b6}",
+        "middledot": "\x{00b7}",
+        "horiz":     "\x{2500}",
+        "vert":      "\x{2502}",
+        "arrowup":   "\x{25b2}",
+        "arrowdn":   "\x{25bc}",
+        "nwcorner":  "\x{250c}",
+        "necorner":  "\x{2510}",
+        "swcorner":  "\x{2514}",
+        "secorner":  "\x{2518}",
+        "ncorner":   "\x{252c}",
+        "scorner":   "\x{2534}",
+        "wcorner":   "\x{251c}",
+        "ecorner":   "\x{2524}",
+        "ccorner":   "\x{253c}",
+        "tab":       "\x{2192}",
+        "formfeed":  "\x{21a1}",
+        "unknown":   "\x{fffd}"
+    }
+];
+
+sub mp.unicode(key) { return mp.unicode_tbl[mp.config.use_unicode][key] || "-"; }
+
+/** code **/
+
+/**
+ * mp.redraw - Triggers a redraw on the next cycle.
+ *
+ * Triggers a full document redraw in the next cycle.
+ */
+sub mp.redraw()
+{
+    /* just increment the redraw trigger */
+    mp.redraw_counter += 1;
+}
+
+
+sub mp.active()
+/* returns the active document */
+{
+    /* if there is a list of pending files to open, do it */
+    while (size(mp.active_pending))
+        mp.actions.open(NULL, pop(mp.active_pending));
+
+    /* empty document list? create a new, empty one */
+    if (size(mp.docs) == 0)
+        mp.actions.new();
+
+    if (mp.config.visual_wrap) {
+        local d = mp.docs[mp.active_i];
+
+        if (d->exists("vw_wrap")) {
+            if (d.txt.last_tx != mp.window.tx || d.txt.last_ty != mp.window.ty) {
+                d->vw_wrap();
+                d.txt.last_tx = mp.window.tx;
+                d.txt.last_ty = mp.window.ty;
+            }
+        }
+    }
+
+    /* get active document */
+    return mp.docs[mp.active_i];
+}
+
+
+sub mp.process_action(action)
+/* processes an action */
+{
+    local f, doc;
+
+    doc = mp.active();
+
+    f = doc.actions[action] || mp.actions[action];
+
+    if (f != NULL)
+        f(doc);
+    else {
+        mp.message = {
+            timeout:    time() + 2,
+            string:     sprintf(L("Unknown action '%s'"), action)
+        };
+    }
+
+    return doc;
+}
+
+
+sub mp.process_event(k)
+/* processes a key event */
+{
+    local doc = mp.active();
+
+    /* notify the document that an event is to be processed */
+    k = doc->pre_event(k);
+
+    if (k != NULL) {
+        /* get the action or next keycode from the possible sources */
+        local a = mp.keycodes_t[k] || doc.keycodes[k] || mp.keycodes[k];
+
+        mp.keycodes_t = NULL;
+    
+        /* get the action asociated to the keycode */
+        if (a != NULL) {
+            /* if it's a hash, store for further testing */
+            if (type(a) == "object")
+                mp.keycodes_t = a;
+            else {
+                /* if it's executable, run it */
+                if (is_exec(a))
+                    a(doc);
+                else
+                /* if it's an array, process it sequentially */
+                if (type(a) == "array")
+                    foreach(l, a)
+                        mp.process_action(l);
+                else
+                    mp.process_action(doc.keycodes[a] || mp.keycodes[a] || a);
+            }
+        }
+        else
+            doc->keypress(k);
+    
+        mp.shift_pressed = NULL;
+
+        doc->post_event(k);
+    }
+
+    return NULL;
+}
+
+
+sub mp.build_status_line()
+/* returns the string to be drawn in the status line */
+{
+    local r;
+
+    if (mp.message) {
+        r = mp.message.string;
+
+        /* is the message still active? */
+        if (mp.message.timeout <= time())
+            mp.message = NULL;
+    }
+    else
+        r = mp.active()->get_status();
+
+    return r;
+}
+
+
+sub mp.backslash_codes(s, d)
+/* encodes (d == 0) or decodes (d == 1) backslash codes
+   (like \n, \r, etc.) */
+{
+    local r;
+
+    if (d) {
+        r = s->sregex("/[\r\n\t]/g", { "\r" => '\r', "\n" => '\n', "\t" => '\t' });
+    }
+    else {
+        r = s->
+            sregex("/\\\\[rnt]/g", { '\r' => "\r", '\n' => "\n", '\t' => "\t" })->
+            sregex("/\\\\x\\{[0-9A-Za-z]+\\}/g", sub (e) {
+                    /* expand \x{HHHH} to character */
+                    e = ("0x" + e->regex("/[0-9A-Za-z]+/")) + 0;
+                    chr(e);
+                }
+            );
+    }
+
+    return r;
+}
+
+
+sub mp.long_op(func, a1, a2, a3, a4)
+/* executes a potentially long function */
+{
+    local r;
+
+    mp.busy(1);
+    r = func(a1, a2, a3, a4);
+    mp.busy(0);
+
+    return r;
+}
+
+
+sub mp.get_history(key)
+/* returns a history for the specified key */
+{
+    return mp.history[key] |= [];
+}
+
+
+sub mp.menu_label(action)
+/* returns a label for the menu for an action */
+{
+    local l = NULL;
+
+    /* if action is '-', it's a menu separator */
+    if (action != '-') {
+        l = L(mp.actdesc[action]) || action;
+
+        /* replace the ... with the Unicode character */
+        l = l->sregex("/\.\.\./", mp.unicode("ellipsis"));
+
+        /* search this action in mp_doc and global keycodes */
+        local ks = (mp_doc.keycodes + mp.keycodes)->
+            grep(sub(v) { v == action; })->map(index);
+
+        if (size(ks))
+            l = l + ' [' + join(ks, ', ') + ']';
+    }
+
+    return l;
+}
+
+
+sub mp.trim(str, max)
+/* trims the string to the last max characters, adding ellipsis if done */
+{
+    if (count(str) > max) {
+        local ell = L("...");
+        max -= count(ell);
+        str = ell + slice(str, -max, -1);
+    }
+
+    return str;
+}
+
+
+sub mp.get_doc_names(max)
+/* returns an array with the trimmed names of the documents */
+{
+    mp.docs->map(sub(e) { mp.trim(e->get_name(), (max || 32)); });
+}
+
+
+sub mp.usage()
+/* set mp.exit_message with an usage message (--help) */
+{
+    mp.exit_message = 
+        sprintf(L("Minimum Profit %s - Programmer Text Editor"), mp.VERSION) +
+        "\nttcdt <dev@triptico.com> et al.\n\n" +
+        L("Usage: mp-5 [options] [files...]\n"\
+            "\n"\
+            "Options:\n"\
+            "\n"\
+            " -t {tag}           Edits the file where tag is defined\n"\
+            " -e {mpsl_code}     Executes MPSL code\n"\
+            " -f {mpsl_script}   Executes MPSL script file\n"\
+            " -F {mpsl_script}   Executes MPSL script file and exits\n"\
+            " -d {directory}     Set current directory\n"\
+            " -x {file}          Opens file in the hexadecimal viewer\n"\
+            " -txt               Uses text mode instead of GUI\n"\
+            " +NNN               Moves to line number NNN of last file\n"\
+            " -ni                Non-interactive (to be used with -e or -f)"\
+            "\n");
+}
+
+
+sub mp.process_cmdline()
+/* process the command line arguments (ARGV) */
+{
+    local o, nl;
+
+    /* skip ARGV[0] */
+    mp.binary_name = shift(ARGV);
+
+    /* files requested to be opened */
+    mp.active_pending = [];
+
+    while (o = shift(ARGV)) {
+        if (o == '-h' || o == '--help') {
+            mp.usage();
+            mp_c.exit();
+            return;
+        }
+        else
+        if (o == '-e') {
+            /* execute code */
+            local c = shift(ARGV);
+
+            if (! regex(c, '/;\s*$/'))
+                c = c + ';';
+
+            eval(c);
+        }
+        else
+        if (o == '-f' || o == '-F') {
+            /* execute script */
+            local s = shift(ARGV);
+
+            if (stat(s) == NULL)
+                ERROR = sprintf(L("Cannot open '%s'"), s);
+            else {
+                eval(sub { local INC = NULL; load(s); } );
+            }
+
+            /* the rest of ARGV are assumed to be arguments
+               to the script, so stop processing them as if
+               they were MP arguments */
+            break;
+        }
+        else
+        if (o == '-d')
+            chdir(shift(ARGV));
+        else
+        if (o == '-t')
+            mp.open_tag(shift(ARGV));
+        else
+        if (o == '-x')
+            mp.actions.hex_view(NULL, shift(ARGV));
+        else
+        if (o == '-txt')
+            mp.config.text_mode = 1;
+        else
+        if (o == '-ni') {
+            /* do nothing */
+            ;
+        }
+        else
+        if (regex(o, '/^\+[0-9]+$/')) {
+            nl = o + 0;
+        }
+        else {
+            if (nl) {
+                push(mp.active_pending, o + ':' + nl + ':');
+                nl = NULL;
+            }
+            else
+                push(mp.active_pending, o);
+        }
+    }
+
+    if (ERROR) {
+        mp.exit_message = ERROR;
+        ERROR = NULL;
+        mp_c.exit();
+        return;
+    }
+
+    /* if no files are to be loaded, try a session */
+    if (size(mp.active_pending) == 0 && mp.config.auto_sessions) {
+        mp.load_session();
+    }
+}
+
+
+sub mp.load_profile()
+/* loads ~/.mp.mpsl */
+{
+    /* if /etc/mp.mpsl exists, execute it */
+    if (stat('/etc/mp.mpsl') != NULL) {
+        eval( sub {
+            local INC = [ '/etc' ];
+            load('mp.mpsl');
+        });
+    }
+
+    /* if ~/.mp.mpsl exists, execute it */
+    if (ERROR == NULL && stat(HOMEDIR + '.mp.mpsl') != NULL) {
+        eval( sub {
+            local INC = [ HOMEDIR ];
+            load(".mp.mpsl");
+        });
+    }
+
+    /* errors? show in a message */
+    if (ERROR != NULL) {
+        mp.message = {
+            'timeout'   => time() + 20,
+            'string'    => ERROR
+        };
+
+        ERROR = NULL;
+    }
+}
+
+
+sub mp.normalize_version(vs)
+/* converts a version string to something usable with cmp() */
+{
+    local l = vs->sregex('/-.+$/')->split('.');
+
+    return l[0] + '.' +  l[1] + l[2];
+}
+
+
+sub mp.assert_version(found, minimal, package)
+/* asserts that 'found' version of 'package' is at least 'minimal',
+   or generate a warning otherwise */
+{
+    if (real(found) < real(minimal)) {
+        mp.alert(sprintf(L("WARNING: %s version found is %s, but %s is needed"),
+                package, found, minimal));
+    }
+}
+
+
+sub mp.test_versions()
+/* tests component versions */
+{
+    mp.assert_version(MPDM.version, 2.64, 'MPDM');
+    mp.assert_version(MPSL.VERSION, 2.57, 'MPSL');
+}
+
+
+sub mp.load_state()
+{
+    /* read state file */
+    local j = open(HOMEDIR + ".mp_state.json", "r")->join();
+
+    if (j) {
+        /* parse as json and take the first scanned value */
+        j = j->sscanf("%j")->shift();
+
+        /* must be an object; otherwise, drop it */
+        if (type(j) != "object")
+            j = NULL;
+    }
+
+    mp.state = j || {};
+
+    mp.history = mp.state.history || {};
+}
+
+
+sub mp.save_state()
+{
+    del(mp.history, "[NULL]");
+    mp.state.history = mp.history;
+
+    open(HOMEDIR + ".mp_state.json", "w")->write(fmt("%j", mp.state))->close();
+}
+
+
+sub mp.exit()
+{
+    mp_c.exit();
+}
+
+
+/** modules **/
+
+local mp_modules = [
+    'drv',
+    'move',
+    'edit',
+    'file',
+    'clipboard',
+    'search',
+    'tags',
+    'syntax',
+    'macro',
+    'templates',
+    'spell',
+    'misc',
+    'crypt',
+    'session',
+    'build',
+    'writing'
+];
+
+foreach (m, mp_modules) {
+    eval('load("mp_' + m + '.mpsl");');
+
+    if (ERROR != NULL) {
+        local log = mp.open(L("<internal errors>"));
+        log->move_eof();
+        log->insert(ERROR + "\n");
+        log->move_bof();
+
+        log.txt.mod   = 0;
+        log.undo_q    = [];
+        log.read_only = 1;
+
+        ERROR = NULL;
+    }
+}
+
+/** main **/
+
+if (ERROR == NULL) {
+    mp.load_profile();
+    mp.load_state();
+    mp_drv.startup();
+    mp.process_cmdline();
+    mp.test_versions();
+    mp_drv.main_loop();
+    mp_drv.shutdown();
+    mp.save_state();
+}

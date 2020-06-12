@@ -1,0 +1,9 @@
+/* Locates keycodes assigned to non-existent actions */
+
+foreach (l, keys(mp.keycodes)) {
+    /* if the keycode is defined, is not directly executable
+       and is not defined in the action table... */
+    if (mp.keycodes[l] && !is_exec(mp.keycodes[l]) &&
+        !exists(mp.actions, mp.keycodes[l]))
+        print(l, ":", mp.keycodes[l], "?");
+}

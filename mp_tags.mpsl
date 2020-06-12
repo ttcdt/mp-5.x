@@ -1,0 +1,265 @@
+/*
+
+    Minimum Profit - A Text Editor
+    Tags.
+
+    ttcdt <dev@triptico.com> et al.
+
+    This software is released into the public domain.
+    NO WARRANTY. See file LICENSE for details.
+
+*/
+
+/* default ctags command */
+mp.config.ctags_cmd = "ctags *";
+
+/** editor actions **/
+
+mp_doc.actions['find_tag'] = sub(d) {
+    local tag = d->get_word();
+
+    /* ask for it, taking the word under the cursor */
+    local r = mp.form(
+        [
+            {
+                label:      L("Tag to seek") + ':',
+                type:       'text',
+                history:    'find_tag',
+                value:      tag
+            }
+        ]
+    );
+
+    if (r != NULL)
+        mp.open_tag(r[0]);
+};
+
+
+mp_doc.actions['complete'] = sub(d) {
+    /* check if we have a more specific completion system for this syntax and call it if it's the case */
+    if (d.syntax.complete_func != NULL) {
+        if (d.syntax->complete_func(d) == 1)
+            return NULL;
+    }
+
+    local w = d->get_word();
+
+    if (w) {
+        local words = {};
+
+        d->busy(1);
+
+        /* create a unique list of words */
+        foreach (l, d.txt.lines)
+            words += mp.split_by_words(l)->omap(swap);
+
+        /* delete current word from the set because
+           the user wouldn't want to complete a complete word */
+        del(words, w);
+
+        d->busy(0);
+
+        d->complete(map(words, index));
+    }
+};
+
+
+mp_doc.actions['complete_symbol'] = sub(d) {
+    mp.long_op(mp.load_tags, 1);
+
+    if (!d->complete(map(mp.tags, index), L("Select symbol") + ':'))
+        mp.alert(L("No matching symbol found."));
+};
+
+
+
+/** default key bindings **/
+
+mp_doc.keycodes['ctrl-t'] = "find_tag";
+mp_doc.keycodes['ctrl-space'] = "complete";
+
+/** action descriptions **/
+
+mp.actdesc['find_tag']            = LL("Search tag...");
+mp.actdesc['complete']            = LL("Complete...");
+mp.actdesc['complete_symbol']     = LL("Symbol completion...");
+mp.actdesc['complete_with_clang'] = LL("Completion with clang...");
+
+/** code **/
+
+sub mp.load_tags(force)
+/* load a 'tags' file */
+{
+    local f, a;
+
+    if ((f = open("tags", "r")) == NULL) {
+        /* if force is set, execute the ctags command */
+        if (!force || (f = popen(mp.config.ctags_cmd, "r")) == NULL)
+            return;
+
+        /* read (and discard) a line from it */
+        read(f);
+        pclose(f);
+
+        /* try again */
+        if ((f = open("tags", "r")) == NULL)
+            return;
+    }
+
+    /* deletes all currently stored tags from the word/color cache */
+    foreach (v, i, mp.tags)
+        del(mp.word_color, i);
+
+    /* reset current tags */
+    mp.tags = {};
+
+    /* get the attribute for tags */
+    a = mp.colors.tag.attr;
+
+    while ((l = read(f))) {
+        local t = split(l, "\t");
+        local l, r;
+
+        /* clean the regex 'markup' for the label */
+        l = sregex(t[2], '@^/\^@', '');
+        l = sregex(l, '@\$/;"$@', '') + ' [' + t[1] + ']';
+
+        /* clean the regex itself */
+        r = sregex(t[2], '@/;"$@');
+        r = sregex(r, '@^/@');
+
+        /* escape all troublesome characters */
+        r = sregex(r, "/([\(\)\*\?\[\{\}]|\])/g", sub (m) { "\\" + m; });
+
+        /* store the tag information */
+        mp.tags[t[0]] = {
+            tag:    t[0],
+            file:   t[1],
+            regex:  r,
+            label:  l
+        };
+
+        /* store the word as specially-colored */
+        mp.word_color[t[0]] = a;
+    }
+
+    close(f);
+}
+
+
+sub mp.open_tag(tag)
+/* opens a tag (uses GUI) */
+{
+    local doc, a, t;
+
+    /* force loading of the tags file */
+    mp.long_op(mp.load_tags, 1);
+
+    /* greps all tags containing the tag, and returns the
+       values from mp.tags */
+    t = mp.tags->map(index)->grep(regcomp('/' + tag + '/'))->map(mp.tags);
+
+    /* no tags? */
+    if (size(t) == 0)
+        mp.alert(L("Tag not found."));
+    else {
+        /* only one? get the first one */
+        if (size(t) == 1)
+            a = 0;
+        else {
+            /* build a list to ask the user */
+            local l = map(t, sub(e) { e.label; });
+
+            local r = mp.form(
+                [
+                    {
+                        label:  L("Select tag") + ':',
+                        type:   'list',
+                        list:   l
+                    }
+                ]
+            );
+
+            if (r != NULL)
+                a = r[0];
+        }
+
+        if (a != NULL) {
+            tag = t[a];
+
+            /* open the file */
+            doc = mp.long_op(mp.open, tag.file);
+
+            /* move up and search */
+            doc->move_bof();
+            doc->long_op(mp_doc.search, tag.regex);
+        }
+    }
+}
+
+
+sub mp_doc.complete(d, list, label)
+/* completes the current word given a list (uses GUI) */
+{
+    local ret = 0;
+    local word = d->get_word();
+
+    if (word) {
+        local l, a;
+
+        /* takes all list elements starting with word */
+        l = list->grep(regcomp('/^' + word + '/'))->sort();
+
+        if (size(l)) {
+            if (size(l) == 1)
+                a = 0;
+            else {
+                /* more than one; ask user */
+                local r = mp.form(
+                    [
+                        {
+                            label:  label || L("Completion") + ':',
+                            type:   'list',
+                            list:   l
+                        }
+                    ], 
+                    { 'y' => (d.txt.y - d.txt.vy) + 1, 'lines' => 5, 'x' => d.txt.x, 'color' => mp.colors.suggest.attr }
+                );
+
+                if (r != NULL)
+                    a = r[0];
+            }
+
+            if (a != NULL) {
+                /* accepted; substitute current word */
+                d->store_undo();
+
+                /* split line by words to take the offset of current word */
+                local r = d->split_line_by_words();
+                local offset = r[1][r[2]];
+                local ll = l[a]->split("\t");
+
+
+                /* substitute current word with newly selected word */
+                local w = splice(d.txt.lines[d.txt.y], ll[0], offset, size(word));
+
+                /* change line and x cursor */
+                d.txt.lines[d.txt.y] = w;
+                d.txt.x = offset + size(ll[0]);
+
+                d.txt.mod += 1;
+
+                ret = 1;
+            }
+        }
+        else {
+            mp.message = {
+                timeout:    time() + 2,
+                string:     L("No completion found")
+            };
+        }
+    }
+
+    return ret;
+}
+

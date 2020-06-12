@@ -1,0 +1,372 @@
+/*
+
+    Minimum Profit - A Text Editor
+    Support for the mptxt format.
+
+    ttcdt <dev@triptico.com> et al.
+
+    This software is released into the public domain.
+    NO WARRANTY. See file LICENSE for details.
+
+*/
+
+global mp_mptxt = {
+    parse_para: sub (doc) {
+        /* parses a text document as paragraphs */
+
+        local tdoc = [];
+        local mode = 'para';
+        local data = [];
+        local pc = 0;
+        local pl = NULL;
+        local lines;
+
+        if (mp.config.visual_wrap)
+            lines = clone(doc.txt.lines)->mp.vw_unwrap();
+        else
+            lines = doc.txt.lines;
+
+        foreach (l, lines) {
+            local p_mode = mode;
+    
+            /** mode selection **/
+    
+            /* space surrounded lines is centered */
+            if (l->regex("/^ .+ $/")) {
+                l = l->slice(1, -2);
+    
+                mode = 'center';
+            }
+            else
+            /* space-leaded lines is verbatim */
+            if (l->regex("/^ /")) {
+                l = l->slice(1, -1);
+    
+                mode = 'verbatim';
+            }
+            else
+            /* page break */
+            if (l == "\x{000c}") {
+                mode = 'page';
+            }
+            else
+            /* section break (empty paragraph) */
+            if (l == "" && pl == "") {
+                mode = 'break';
+            }
+            /* default paragraph */
+            else {
+                mode = 'para';
+            }
+    
+            /* mode change or paragraph break */
+            if (p_mode != mode || l == "") {
+                /* test for first vs. rest of default paragraphs */
+                if (p_mode == 'para') {
+                    if (pc == 0)
+                        p_mode = 'first';
+    
+                    pc += 1;
+                }
+                else
+                    pc = 0;
+    
+                /* store previously saved data, if any */
+                if (count(data))
+                    tdoc->push([p_mode, data]);
+    
+                data = [];
+            }
+    
+            /* store line */
+            if (l != "" || pl == "")
+                data->push(l);
+    
+            pl = l;
+        }
+
+        return tdoc;
+    },
+    parse_styles: sub (tdoc) {
+        /* parses styles into the list of paragraphs */
+        local mptxt = [];
+
+        foreach (p, tdoc) {
+            local p_type = p[0];
+            local p_data = p[1]->join("\n");
+            local styles = mp_mptxt.styles(p_data, []);
+
+            mptxt->push([p_type, styles]);
+        }
+
+        return mptxt;
+    },
+    parse: sub (doc) {
+        return doc->mp_mptxt.parse_para()->mp_mptxt.parse_styles();
+    },
+    export: sub (doc, format) {
+        local ret = NULL;
+
+        exporter = mp_mptxt.exporters[format];
+
+        /* if an exporter for that format exists, parse as mptxt and do it */
+        if (exporter) {
+            mptxt = mp_mptxt.parse(doc);
+            ret = exporter(mptxt);
+        }
+
+        return ret;
+    },
+    encodings: {
+        "troff": "iso8859-1"
+    },
+    exporters: {
+        "html": sub (mptxt) {
+            /* html exporter */
+
+            local title = mp.config.html_title;
+
+            local ret = [
+                "<!doctype html>\n",
+                "<html>\n",
+                "<head>\n",
+                "<meta name=\"generator\" content=\"Minimum Profit " + mp.VERSION, "\"/>\n",
+                "<title>" + title + "</title>\n",
+                "<style>.center { text-align: center }</style>\n",
+                "</head>\n",
+                "<body>\n"
+            ];
+
+            foreach (p, mptxt) {
+                local mode = p[0];
+                local data = p[1];
+                local str  = "";
+
+                foreach (s, data) {
+                    local style = s[0];
+                    local text  = s[1];
+
+                    /* convert problematic characters */
+                    text = text->sregex("/[&<>]/g", {
+                        "&" => '\&amp;',
+                        "<" => '\&lt;',
+                        ">" => '\&gt;'
+                        }
+                    );
+
+                    if (style == "strong")
+                        str += "<strong>" + text + "</strong>";
+                    else
+                    if (style == "em")
+                        str += "<em>" + text + "</em>";
+                    else
+                    if (style == "url")
+                        str += "<a href=\"" + text + "\">" + text + "</a>";
+                    else
+                        str += text;
+                }
+
+                if (mode == 'page')
+                    ret->push("<p style='page-break-after: always'></p>\n");
+                else
+                if (mode == 'first')
+                    ret->push("<p class='first'>\n" + str + "\n</p>\n");
+                else
+                if (mode == 'para')
+                    ret->push("<p class='para'>\n" + str + "\n</p>\n");
+                else
+                if (mode == 'verbatim')
+                    ret->push("<pre class='verbatim'>\n" + str + "\n</pre>\n");
+                else
+                if (mode == 'center')
+                    ret->push("<p class='center'>\n" + str->split("\n")->join("<br/>\n") + "\n</p>\n");
+                else
+                if (mode == 'break')
+                    ret->push("<p class='break'>\n&nbsp;\n</p>\n");
+            }
+
+            ret->push("</body>\n</html>\n");
+
+            return ret;
+        },
+        "rtf": sub (mptxt) {
+            /* rtf exporter */
+
+            local ret = [
+                '{\rtf1\ansi\plain' + "\r\n",
+                '{\*\generator Minimum Profit ' + mp.VERSION + "}\r\n",
+                /* page size (a4) */
+                '\paperw11906\paperh16838' + "\r\n",
+                /* font table (font faces) */
+                '{\fonttbl',
+                '{\f0\froman\fprq2\fcharset0 ' + mp.config.rtf_font_face + ';}',
+                '{\f1\fmodern\fprq2\fcharset0 ' + mp.config.rtf_mono_font_face + ';}',
+                "}\r\n",
+                /* page numbers in the footer */
+                '{\footer \qc{\field{\*\fldinst  PAGE }{\fldrslt 1}}}' + "\r\n"
+            ];
+
+            local tfont = '\f0\fs' + string(mp.config.rtf_font_size * 2);
+            local mfont = '\f1\fs' + string(mp.config.rtf_mono_font_size * 2);
+
+            local rem = NULL;
+
+            foreach (p, mptxt) {
+                local mode = p[0];
+                local data = p[1];
+                local str  = "";
+
+                foreach (s, data) {
+                    local style = s[0];
+                    local text  = s[1];
+
+                    /* convert non-ASCII characters to unicode */
+                    text = text->escape("\n", "\x{7f}", "\\u%d?");
+
+                    if (style == "strong")
+                        str += '{\b ' + text + "}";
+                    else
+                    if (style == "em")
+                        str += '{\i ' + text + "}";
+                    else
+                    if (style == "url")
+                        str += '{\field{\*\fldinst HYPERLINK "' + text + '" }' +
+                            '{\fldrslt {\ul1 ' + text + '}{}}}';
+                    else
+                        str += text;
+                }
+
+                if (mode == 'page')
+                    ret->push("\r\n\\page");
+                else {
+                    if (rem)
+                        ret->push(rem);
+
+                    ret->push(mp.config.rtf_style_default);
+
+                    rem = "\r\n\\par\r\n";
+                }
+
+                if (mode == 'first')
+                    ret->push(mp.config.rtf_style_first + tfont + "\r\n" +
+                        str->split("\n")->join(" \r\n"));
+                else
+                if (mode == 'para')
+                    ret->push(mp.config.rtf_style_para + tfont + "\r\n" +
+                        str->split("\n")->join(" \r\n"));
+                else
+                if (mode == 'verbatim')
+                    ret->push(mp.config.rtf_style_verbatim + mfont + "\r\n" +
+                        str->split("\n")->join("\\line\r\n"));
+                else
+                if (mode == 'center')
+                    ret->push(mp.config.rtf_style_center + tfont + "\r\n" +
+                        str->split("\n")->join("\\line\r\n"));
+                else
+                if (mode == 'break')
+                    ret->push(mp.config.rtf_style_first + tfont + "\r\n");
+            }
+
+            if (rem)
+                ret->push(rem);
+
+            ret->push("}\r\n");
+
+            return ret;
+        },
+        "troff": sub (mptxt) {
+            /* troff exporter */
+
+            local ret = [
+                ".de hd\n'sp 0.8i\n..\n.wh 0 hd\n",
+                ".de fo\n.tl ''%'\n..\n.wh -0.2i fo\n",
+                ".pl " + mp.config.troff_page_height + "i\n",
+                ".ps " + mp.config.troff_font_size + "\n",
+                ".vs " + mp.config.troff_font_size * 2 + "\n",
+                ".\\\"generator Minimum Profit " + mp.VERSION + "\n"
+            ];
+
+            foreach (p, mptxt) {
+                local mode = p[0];
+                local data = p[1];
+                local str  = "";
+
+                foreach (s, data) {
+                    local style = s[0];
+                    local text  = s[1];
+
+                    /* convert special characters */
+                    text = text->sregex("/\x{2014}/g", '\(em');
+
+                    if (style == "strong")
+                        str += '\fB' + text + "\fP";
+                    else
+                    if (style == "em")
+                        str += '\fI' + text + "\fP";
+                    else
+                    if (style == "url")
+                        str += text;
+                    else
+                        str += text;
+                }
+
+                if (mode == 'page')
+                    ret->push(".bp\n");
+                else
+                if (mode == 'first')
+                    ret->push(str + "\n\n");
+                else
+                if (mode == 'para')
+                    ret->push("\t" + str + "\n\n");
+                else
+                if (mode == 'verbatim')
+                    ret->push(".nf\n" + str + "\n.fi\n\n");
+                else
+                if (mode == 'center')
+                    ret->push(".ce " + integer(count(str->split("\n"))) +
+                        "\n" + str + "\n.ce 0\n\n");
+                else
+                if (mode == 'break')
+                    ret->push("\n\n");
+            }
+
+            return ret;
+        }
+    }
+};
+
+
+sub mp_mptxt.styles(str, styles)
+/* split a string by styles (strong, em, etc.) */
+{
+    local sep;
+
+    if ((sep = str->regex("/\*[^\*]+\*/"))) {
+        local t = str->split(sep);
+
+        mp_mptxt.styles(t[0], styles);
+        styles->push(["strong", sep->slice(1, -2)]);
+        mp_mptxt.styles(t[1], styles);
+    }
+    else
+    if ((sep = str->regex("/_[^_]+_/"))) {
+        local t = str->split(sep);
+
+        mp_mptxt.styles(t[0], styles);
+        styles->push(["em", sep->slice(1, -2)]);
+        mp_mptxt.styles(t[1], styles);
+    }
+    else
+    if ((sep = str->regex("/(http|ftp)s?:\/\/[^ ,\t]+/"))) {
+        local t = str->split(sep);
+
+        mp_mptxt.styles(t[0], styles);
+        styles->push(["url", sep]);
+        mp_mptxt.styles(t[1], styles);
+    }
+    else {
+        styles->push(["normal", str]);
+    }
+
+    return styles;
+}
