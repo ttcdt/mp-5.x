@@ -614,9 +614,9 @@ extern "C" int qt5_drv_detect(int *argc, char ***argv)
         if ((display = getenv("DISPLAY")) && *display) {
             mpdm_t drv;
 
-            int _argc = 0;
-            char *_argv[] = { NULL };
-            app = new QApplication(_argc, _argv);
+            /* _argc cannot disappear */
+            static int _argc = 0;
+            app = new QApplication(_argc, NULL);
 
             drv = mpdm_set_wcs(mpdm_root(), MPDM_O(), L"mp_drv");
             mpdm_set_wcs(drv, MPDM_S(L"qt5"), L"id");

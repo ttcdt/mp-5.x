@@ -40,7 +40,7 @@
         /* color all => as word2 */
         'word2',    [ '/=>/' ],
         /* color curly brackets as word */
-        'word',     [ '/[{}]/' ],
+        'word1',    [ '/[{}]/' ],
         'comments', [
             "/#[^\n\x{ad}]*(\x{ad}\n[^\n]*)*/"
         ],

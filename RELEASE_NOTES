@@ -1,6 +1,13 @@
 Minimum Profit Release Notes
 ============================
 
+5.41
+----
+
+ - Bug fixes:
+    - Fixed crash in Qt5 startup.
+    - Fixed typo in Perl syntax highlight.
+
 5.40
 ----
 

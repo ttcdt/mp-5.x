@@ -32,6 +32,24 @@
 
   <releases>
 
+    <release version="5.41" type="stable" date="2020-06-23">
+      <description>
+      <p>Bug fixes:</p>
+      <ul>
+        <li>Fixed crash in Qt5 startup.</li>
+        <li>Fixed typo in Perl syntax highlight.</li>
+      </ul>
+      </description>
+      <artifacts>
+        <artifact type="source">
+          <location>https://triptico.com/download/mp/mp-5.41.tar.gz</location>
+        </artifact>
+        <artifact type="binary" platform="win32">
+          <location>https://triptico.com/download/mp/mp-5.41.exe</location>
+        </artifact>
+      </artifacts>
+    </release>
+
     <release version="5.40" type="stable" date="2020-06-13">
       <description>
       <p>Updated maintainers.</p>
