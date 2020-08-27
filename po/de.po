@@ -10,23 +10,23 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: mp_core.mpsl:179
+#: mp_core.mpsl:181
 msgid "&File"
 msgstr "&Datei"
 
-#: mp_core.mpsl:190
+#: mp_core.mpsl:192
 msgid "&Edit"
 msgstr "&Bearbeiten"
 
-#: mp_core.mpsl:201
+#: mp_core.mpsl:203
 msgid "&Search"
 msgstr "&Suchen"
 
-#: mp_core.mpsl:209
+#: mp_core.mpsl:211
 msgid "&Go to"
 msgstr "&Gehe zu"
 
-#: mp_core.mpsl:236
+#: mp_core.mpsl:239
 msgid "&Options"
 msgstr "&Optionen"
 
@@ -91,7 +91,7 @@ msgstr "Fehler beim Ausführen der benutzerdefinierten Funktion!"
 msgid "Line to go to"
 msgstr "Gehe zu Zeil"
 
-#: mp_core.mpsl:372 mp_file.mpsl:31 mp_file.mpsl:607 mp_session.mpsl:49
+#: mp_core.mpsl:375 mp_file.mpsl:31 mp_file.mpsl:612 mp_session.mpsl:49
 #: mp_session.mpsl:57
 msgid "<unnamed>"
 msgstr "<unbenannt>"
@@ -188,7 +188,7 @@ msgstr "N"
 msgid " [Y/N]"
 msgstr "[J/N]"
 
-#: mp_tui.mpsl:532
+#: mp_tui.mpsl:540
 msgid " [ENTER]"
 msgstr "[ENTER]"
 
@@ -239,11 +239,11 @@ msgstr ""
 "Modi für die Syntax-Hervorhebung:\n"
 "\t"
 
-#: mpv_gtk.c:1891 mp_tui.mpsl:428
+#: mpv_gtk.c:1891 mp_tui.mpsl:430
 msgid "Yes"
 msgstr "Ja"
 
-#: mpv_gtk.c:1892 mp_tui.mpsl:429
+#: mpv_gtk.c:1892 mp_tui.mpsl:431
 msgid "No"
 msgstr "Nein"
 
@@ -359,7 +359,7 @@ msgstr "Zeilen sortieren"
 msgid "Suspend application"
 msgstr "Editor-Schlafmodus"
 
-#: mp_file.mpsl:481
+#: mp_file.mpsl:486
 msgid "Save modified texts"
 msgstr "Alle geänderten Dateien speichern"
 
@@ -369,7 +369,7 @@ msgstr "Zeilenumbruch..."
 msgid "Show clipboard"
 msgstr "Zwischenablage zeigen"
 
-#: mp_search.mpsl:240
+#: mp_search.mpsl:239
 msgid "Search next"
 msgstr "Weitersuchen"
 
@@ -386,18 +386,18 @@ msgstr "Log-Datei zeigen"
 msgid "Break hardlinks on write"
 msgstr "Hardlinks beim Speichern trennen"
 
-#: mp_file.mpsl:468
+#: mp_file.mpsl:473
 msgid "Save as..."
 msgstr "Speichern unter..."
 
-#: mp_search.mpsl:242
+#: mp_search.mpsl:241
 msgid "Replace..."
 msgstr "Ersetzen..."
 
 msgid "Replace in all..."
 msgstr "Ersetzen in allen Dokumenten..."
 
-#: mp_file.mpsl:467
+#: mp_file.mpsl:472
 msgid "Save..."
 msgstr "Speichern..."
 
@@ -416,18 +416,18 @@ msgstr "Block einfügen"
 msgid "Play macro"
 msgstr "Makro ausführen"
 
-#: mp_file.mpsl:471
+#: mp_file.mpsl:476
 msgid "Previous"
 msgstr "Vorheriges Dokument fokusieren"
 
 msgid "Reopen..."
 msgstr "Erneut öffnen..."
 
-#: mp_file.mpsl:470
+#: mp_file.mpsl:475
 msgid "Next"
 msgstr "Nächstes Dokument fokusieren"
 
-#: mp_file.mpsl:472
+#: mp_file.mpsl:477
 msgid "Open..."
 msgstr "Öffnen..."
 
@@ -439,7 +439,7 @@ msgstr "Wort nach links"
 msgid "Word right"
 msgstr "Wort nach rechts"
 
-#: mp_file.mpsl:466
+#: mp_file.mpsl:471
 msgid "New"
 msgstr "Neu"
 
@@ -455,7 +455,7 @@ msgstr "Seite nach unten"
 msgid "Page up"
 msgstr "Seite nach oben"
 
-#: mp_search.mpsl:244
+#: mp_search.mpsl:243
 msgid "Move to previous instance of current char"
 msgstr "Zum vorherigen Vorkommen des aktuellen Buchstabens"
 
@@ -463,15 +463,15 @@ msgstr "Zum vorherigen Vorkommen des aktuellen Buchstabens"
 msgid "Character right"
 msgstr "Buchstabe nach rechts"
 
-#: mp_file.mpsl:484
+#: mp_file.mpsl:489
 msgid "Open file under cursor"
 msgstr "Datei über dem Kursor öffnen"
 
-#: mp_search.mpsl:239
+#: mp_search.mpsl:238
 msgid "Search text..."
 msgstr "Suchen..."
 
-#: mp_search.mpsl:243
+#: mp_search.mpsl:242
 msgid "Move to next instance of current char"
 msgstr "Zum nächsten Vorkommen des aktuellen Buchstabens"
 
@@ -498,7 +498,7 @@ msgstr "Zum Anfang der Zeile"
 msgid "Select last succesful search"
 msgstr "Letzte erfolgreiche Suche markieren"
 
-#: mp_drv.mpsl:26 mp_tui.mpsl:502
+#: mp_drv.mpsl:26 mp_tui.mpsl:508
 msgid "Menu"
 msgstr "Menü"
 
@@ -560,7 +560,7 @@ msgstr "Groß- in Kleinbuchstabe und umgekehrt"
 msgid "Flip word case"
 msgstr "Groß- in Kleinbuchstaben und umgekehrt (Wort)"
 
-#: mp_file.mpsl:482
+#: mp_file.mpsl:487
 msgid "Run system command..."
 msgstr "System-Kommando ausführen"
 
@@ -571,7 +571,7 @@ msgstr "Editorfunktion ausführen..."
 msgid "Document list"
 msgstr "Liste der Dokumente"
 
-#: mp_file.mpsl:480
+#: mp_file.mpsl:485
 msgid "Edit configuration file"
 msgstr "Konfigurationsdatei bearbeiten"
 
@@ -579,7 +579,7 @@ msgstr "Konfigurationsdatei bearbeiten"
 msgid "Edit templates file"
 msgstr "Vorlagendatei bearbeiten"
 
-#: mp_file.mpsl:473
+#: mp_file.mpsl:478
 msgid "Exit"
 msgstr "Beenden"
 
@@ -607,11 +607,10 @@ msgstr "Block kopieren"
 msgid "Cut block"
 msgstr "Block ausschneiden+kopieren"
 
-#: mp_misc.mpsl:321
 msgid "About..."
 msgstr "Über..."
 
-#: mp_file.mpsl:475
+#: mp_file.mpsl:480
 msgid "Close"
 msgstr "Schließen"
 
@@ -624,7 +623,7 @@ msgstr "Zeichen über dem Kursor löschen"
 msgid "Delete to the end of word"
 msgstr "Löschen bis zum Ende des Wortes"
 
-#: mp_search.mpsl:246
+#: mp_search.mpsl:245
 msgid "Grep (find inside) files..."
 msgstr "Grep-Suche in Dateien..."
 
@@ -663,7 +662,7 @@ msgstr ""
 msgid "Save file as"
 msgstr ""
 
-#: mp_file.mpsl:137 mp_file.mpsl:427
+#: mp_file.mpsl:137 mp_file.mpsl:432
 msgid "File to open"
 msgstr ""
 
@@ -678,19 +677,19 @@ msgstr "Fehler: "
 msgid "Exit value:\n"
 msgstr ""
 
-#: mp_misc.mpsl:313
+#: mp_misc.mpsl:329
 msgid "Execute MPSL code..."
 msgstr ""
 
-#: mp_misc.mpsl:314
+#: mp_misc.mpsl:330
 msgid "Execute document as MPSL"
 msgstr ""
 
-#: mp_misc.mpsl:319
+#: mp_misc.mpsl:335
 msgid "Bigger font"
 msgstr ""
 
-#: mp_misc.mpsl:320
+#: mp_misc.mpsl:336
 msgid "Smaller font"
 msgstr ""
 
@@ -717,7 +716,7 @@ msgstr ""
 msgid "Grep"
 msgstr "Grep-Suche"
 
-#: mp_search.mpsl:241
+#: mp_search.mpsl:240
 msgid "Search previous"
 msgstr ""
 
@@ -779,16 +778,16 @@ msgstr ""
 msgid "Tab options..."
 msgstr ""
 
-#: mp_file.mpsl:250 mp_file.mpsl:316
+#: mp_file.mpsl:250 mp_file.mpsl:321
 msgid "System command"
 msgstr "System-Kommando"
 
-#: mp_file.mpsl:304
+#: mp_file.mpsl:309
 #, c-format
 msgid "Error reading from command '%s'"
 msgstr ""
 
-#: mp_file.mpsl:476
+#: mp_file.mpsl:481
 msgid "Revert"
 msgstr ""
 
@@ -801,7 +800,7 @@ msgstr ""
 msgid "Lines: %d Words: %d"
 msgstr ""
 
-#: mp_misc.mpsl:318
+#: mp_misc.mpsl:334
 msgid "Set charset encoding..."
 msgstr ""
 
@@ -813,7 +812,7 @@ msgstr ""
 msgid "Toggle spellchecking"
 msgstr ""
 
-#: mp_tui.mpsl:825
+#: mp_tui.mpsl:835
 msgid "Please, wait..."
 msgstr ""
 
@@ -841,7 +840,7 @@ msgstr ""
 msgid "Save session"
 msgstr ""
 
-#: mp_core.mpsl:448
+#: mp_core.mpsl:499
 #, c-format
 msgid "Unknown action '%s'"
 msgstr ""
@@ -851,22 +850,22 @@ msgstr ""
 msgid "Unbound keystroke '%s'"
 msgstr ""
 
-#: mp_file.mpsl:748
+#: mp_file.mpsl:753
 #, c-format
 msgid "New file '%s'"
 msgstr ""
 
-#: mp_search.mpsl:486
+#: mp_search.mpsl:485
 #, c-format
 msgid "%d replaces"
 msgstr ""
 
-#: mp_core.mpsl:663
+#: mp_core.mpsl:714
 #, c-format
 msgid "Cannot open '%s'"
 msgstr ""
 
-#: mp_core.mpsl:763
+#: mp_core.mpsl:814
 #, c-format
 msgid "WARNING: %s version found is %s, but %s is needed"
 msgstr ""
@@ -879,7 +878,7 @@ msgstr ""
 msgid "Mark end of lines"
 msgstr ""
 
-#: mp_file.mpsl:477
+#: mp_file.mpsl:482
 msgid "Close all"
 msgstr ""
 
@@ -887,7 +886,7 @@ msgstr ""
 msgid "Build project..."
 msgstr ""
 
-#: mp_file.mpsl:535
+#: mp_file.mpsl:540
 msgid "Read-only document"
 msgstr ""
 
@@ -951,11 +950,11 @@ msgstr ""
 msgid "Keep original end of lines"
 msgstr ""
 
-#: mp_file.mpsl:485
+#: mp_file.mpsl:490
 msgid "Hexadecimal viewer..."
 msgstr ""
 
-#: mp_file.mpsl:486
+#: mp_file.mpsl:491
 msgid "Open dropped files"
 msgstr ""
 
@@ -963,7 +962,7 @@ msgstr ""
 msgid "Use previous line for tab columns"
 msgstr ""
 
-#: mp_misc.mpsl:316
+#: mp_misc.mpsl:332
 msgid "Insert next item"
 msgstr ""
 
@@ -971,7 +970,7 @@ msgstr ""
 msgid "Toggle insert/overwrite mode"
 msgstr ""
 
-#: mp_file.mpsl:483
+#: mp_file.mpsl:488
 msgid "Filter selection through system command..."
 msgstr ""
 
@@ -983,7 +982,7 @@ msgstr ""
 msgid "Select action to execute"
 msgstr ""
 
-#: mp_misc.mpsl:315
+#: mp_misc.mpsl:331
 msgid "Execute action on document..."
 msgstr ""
 
@@ -1029,42 +1028,41 @@ msgstr ""
 msgid "<%s output>"
 msgstr ""
 
-#: mp_misc.mpsl:326
+#: mp_misc.mpsl:343
 msgid "Version Control..."
 msgstr ""
 
-#: mp_misc.mpsl:323
+#: mp_misc.mpsl:340
 msgid "Play \"Pipes\""
 msgstr ""
 
 msgid "You won! Press any key."
 msgstr ""
 
-#: mp_misc.mpsl:283
+#: mp_misc.mpsl:299
 msgid "You already have the latest version."
 msgstr ""
 
-#: mp_misc.mpsl:287
+#: mp_misc.mpsl:303
 msgid "There are new versions available:"
 msgstr ""
 
-#: mp_misc.mpsl:288
+#: mp_misc.mpsl:304
 msgid "Update Minimum Profit from http://triptico.com/software/mp.html"
 msgstr ""
 
-#: mp_misc.mpsl:292
+#: mp_misc.mpsl:308
 msgid "Cannot connect -- please try later."
 msgstr ""
 
-#: mp_misc.mpsl:322
 msgid "Check for updates..."
 msgstr ""
 
-#: mp_core.mpsl:218
+#: mp_core.mpsl:220
 msgid "&Project"
 msgstr ""
 
-#: mp_core.mpsl:226
+#: mp_core.mpsl:228
 msgid "&Writing"
 msgstr ""
 
@@ -1095,12 +1093,12 @@ msgstr ""
 msgid "'%s' has changed. Are you sure?"
 msgstr ""
 
-#: mp_file.mpsl:506
+#: mp_file.mpsl:511
 #, c-format
 msgid "'%s' was changed externally. Reload?"
 msgstr ""
 
-#: mp_file.mpsl:549
+#: mp_file.mpsl:554
 #, c-format
 msgid "'%s' has changed. Save changes?"
 msgstr "Datei '%s' wurde geändert. Änderungen speichern?"
@@ -1118,7 +1116,7 @@ msgstr ""
 msgid "Available encodings"
 msgstr ""
 
-#: mp_misc.mpsl:281
+#: mp_misc.mpsl:297
 msgid "You have a development version newer than any stable release."
 msgstr ""
 
@@ -1126,7 +1124,7 @@ msgstr ""
 msgid "Folder to open"
 msgstr ""
 
-#: mp_file.mpsl:478
+#: mp_file.mpsl:483
 msgid "Open folder..."
 msgstr ""
 
@@ -1180,7 +1178,7 @@ msgstr ""
 msgid "# deleted '%s'"
 msgstr ""
 
-#: mp_misc.mpsl:317
+#: mp_misc.mpsl:333
 msgid "Insert time stamp"
 msgstr ""
 
@@ -1192,7 +1190,7 @@ msgstr ""
 msgid "Build target"
 msgstr ""
 
-#: mp_build.mpsl:137
+#: mp_build.mpsl:140
 #, c-format
 msgid "Error executing '%s'"
 msgstr ""
@@ -1217,7 +1215,7 @@ msgstr ""
 msgid "Mark vertical selection block"
 msgstr ""
 
-#: mp_file.mpsl:474
+#: mp_file.mpsl:479
 msgid "Suspend"
 msgstr ""
 
@@ -1229,7 +1227,7 @@ msgstr ""
 msgid "Search wrapped"
 msgstr ""
 
-#: mp_search.mpsl:245
+#: mp_search.mpsl:244
 msgid "Move to the matching bracket"
 msgstr ""
 
@@ -1263,23 +1261,22 @@ msgstr ""
 msgid "Insert raw string"
 msgstr ""
 
-#: mp_search.mpsl:211
+#: mp_search.mpsl:210
 #, c-format
 msgid "%d lines replaced"
 msgstr ""
 
-#: mp_search.mpsl:247
+#: mp_search.mpsl:246
 msgid "Replace tabs with spaces"
 msgstr ""
 
-#: mp_search.mpsl:248
+#: mp_search.mpsl:247
 msgid "Replace spaces with tabs"
 msgstr ""
 
 msgid "Maze - help %s to find the treasure. As always, the X marks the spot."
 msgstr ""
 
-#: mp_core.mpsl:591
 msgid "..."
 msgstr ""
 
@@ -1287,7 +1284,7 @@ msgstr ""
 msgid "Recent files"
 msgstr ""
 
-#: mp_file.mpsl:487
+#: mp_file.mpsl:492
 msgid "Open recent files..."
 msgstr ""
 
@@ -1296,11 +1293,11 @@ msgstr ""
 msgid "<hex view of %s>"
 msgstr ""
 
-#: mp_misc.mpsl:324
+#: mp_misc.mpsl:341
 msgid "Play \"Maze\""
 msgstr ""
 
-#: mp_core.mpsl:611 mp_misc.mpsl:170
+#: mp_core.mpsl:662 mp_misc.mpsl:170
 #, c-format
 msgid "Minimum Profit %s - Programmer Text Editor"
 msgstr ""
@@ -1326,7 +1323,7 @@ msgstr ""
 msgid "# nothing changed."
 msgstr ""
 
-#: mp_core.mpsl:837
+#: mp_core.mpsl:888
 msgid "<internal errors>"
 msgstr ""
 
@@ -1335,7 +1332,7 @@ msgstr ""
 msgid "Maze - help %s to find the treasure. As always, the %s marks the spot."
 msgstr ""
 
-#: mp_toys.mpsl:216 mp_toys.mpsl:391 mp_toys.mpsl:589
+#: mp_toys.mpsl:216 mp_toys.mpsl:393 mp_toys.mpsl:602
 msgid "You won! Press ENTER."
 msgstr ""
 
@@ -1351,7 +1348,7 @@ msgstr ""
 msgid "Unknown export format '%s'. Available: [%s]"
 msgstr ""
 
-#: mp_file.mpsl:469
+#: mp_file.mpsl:474
 msgid "Export..."
 msgstr ""
 
@@ -1367,7 +1364,7 @@ msgid ""
 "(Not one of: [%s])"
 msgstr ""
 
-#: mp_core.mpsl:613
+#: mp_core.mpsl:664
 msgid ""
 "Usage: mp-5 [options] [files...]\n"
 "\n"
@@ -1405,7 +1402,7 @@ msgstr ""
 msgid "Completion"
 msgstr ""
 
-#: mp_misc.mpsl:325
+#: mp_misc.mpsl:342
 msgid "Play \"Puzzle\""
 msgstr ""
 
@@ -1413,10 +1410,26 @@ msgstr ""
 msgid "No completion found"
 msgstr ""
 
-#: mp_toys.mpsl:483
+#: mp_toys.mpsl:485
 msgid "Puzzle - order the list by moving the blank"
 msgstr ""
 
-#: mp_file.mpsl:488
+#: mp_file.mpsl:493
 msgid "Toggle visual wrap"
+msgstr ""
+
+#: mp_misc.mpsl:207
+msgid "Internal error"
+msgstr ""
+
+#: mp_misc.mpsl:337
+msgid "About"
+msgstr ""
+
+#: mp_misc.mpsl:338
+msgid "Check for updates"
+msgstr ""
+
+#: mp_misc.mpsl:339
+msgid "Release notes"
 msgstr ""

@@ -173,8 +173,10 @@ mp.actions['grep']  = sub {
 
             l->move_bof();
 
-            l.txt.mod = 0;
-            l.read_only = 1;
+            l->set_read_only();
+
+            /* special keycode */
+            l.keycodes.enter = "open_under_cursor";
         }
     }
 };

@@ -566,7 +566,6 @@ sub mp_doc.query_close(doc)
 sub mp.save_th(f, doc)
 /* mp.save() helper */
 {
-    local nl = 0;
     local eol = mp.config.keep_eol && doc.eol || mp.config.eol;
     local lines;
 
@@ -578,13 +577,12 @@ sub mp.save_th(f, doc)
         lines = doc.txt.lines;
 
     /* save as a plain text file */
-    foreach (l, lines) {
+    foreach (l, nl, lines) {
         /* write a line separator if it's not the first line */
         if (nl)
             write(f, eol);
 
         write(f, l);
-        nl += 1;
     }
 
     doc.disk_op = 0;

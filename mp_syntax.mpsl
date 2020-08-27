@@ -35,8 +35,8 @@ sub mp_doc.actions.help(d) {
 
         hd.txt.lines    = h;
         hd.txt.y        = 0;
-        hd.read_only    = 1;
         hd.syntax       = d.syntax;
+        hd->set_read_only();
     }
 }
 

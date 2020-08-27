@@ -14,7 +14,7 @@ mp.config.make_opts = '';
 
 /** editor actions **/
 
-mp.actions['build']	= sub {
+mp.actions['build'] = sub {
     local t, target;
 
     if ((t = mp.build_get_targets()) == NULL)
@@ -92,6 +92,9 @@ sub mp.build_execute(target)
     log.txt.lines = [];
     log.txt.y = 0;
 
+    /* special keycode */
+    log.keycodes.enter = "open_under_cursor";
+
     /* very very special cases: MPSL */
     if (syntax == "MPSL" && (regex(target, "/^check/") || regex(target, "/^execute/"))) {
         local op = target->split(" ");
@@ -137,8 +140,8 @@ sub mp.build_execute(target)
             mp.alert(sprintf(L("Error executing '%s'"), target));
     }
 
-    log.txt.mod = 0;
-    log.read_only = 1;
+    log->set_read_only();
+
     log.syntax = mp.get_syntax('make_output');
 
     log.txt.vy = 0;

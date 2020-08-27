@@ -32,6 +32,30 @@
 
   <releases>
 
+    <release version="5.42" type="stable" date="2020-08-28">
+      <description>
+      <p>New features:</p>
+      <ul>
+        <li>Speed improvements in ANSI and ncurses drivers. This will be
+        specially noticed in slow systems like the oldest Raspberry Pies.</li>
+        <li>In build (makefile) and grep logs, the ENTER key activates
+        the <code>open_under_cursor</code> action.</li>
+      </ul>
+      <p>Bugfixes:</p>
+      <ul>
+        <li>Fixed a rounding error in emacs-style scrolling.</li>
+      </ul>
+      </description>
+      <artifacts>
+        <artifact type="source">
+          <location>https://triptico.com/download/mp-5.tar.gz</location>
+        </artifact>
+        <artifact type="binary" platform="win32">
+          <location>https://triptico.com/download/mp-5-portable-64.exe</location>
+        </artifact>
+      </artifacts>
+    </release>
+
     <release version="5.41" type="stable" date="2020-06-23">
       <description>
       <p>Bug fixes:</p>
@@ -42,10 +66,10 @@
       </description>
       <artifacts>
         <artifact type="source">
-          <location>https://triptico.com/download/mp/mp-5.41.tar.gz</location>
+          <location>https://triptico.com/download/mp-5.41.tar.gz</location>
         </artifact>
         <artifact type="binary" platform="win32">
-          <location>https://triptico.com/download/mp/mp-5.41.exe</location>
+          <location>https://triptico.com/download/mp-5-portable-64.exe</location>
         </artifact>
       </artifacts>
     </release>

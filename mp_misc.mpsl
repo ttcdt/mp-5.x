@@ -193,8 +193,25 @@ mp.actions['about'] = sub {
 
     if (size(d.txt.lines) == 1) {
         d->insert(msg)->move_bof();
-        d.txt.mod = 0;
-        d.read_only = 1;
+        d->set_read_only();
+    }
+};
+
+
+mp.actions['release_notes'] = sub {
+    local t = resource("RELEASE_NOTES");
+
+    if (t == NULL) {
+        mp.message = {
+            timeout:    time() + 2,
+            string:     sprintf(L("Internal error"))
+        };
+    }
+    else {
+        local d = mp.open("<release notes>");
+
+        d.txt.lines = t->split("\n");
+        d->move_bof()->set_read_only();
     }
 };
 
@@ -227,8 +244,7 @@ mp.actions.check_for_updates = sub {
     local d = mp.open("<updates>");
 
     d->move_bof();
-    d.txt.mod   = 0;
-    d.read_only = 1;
+    d->set_read_only();
 
     mp.busy(1);
 
@@ -318,8 +334,9 @@ mp.actdesc['insert_time_stamp'] = LL("Insert time stamp");
 mp.actdesc['encoding']          = LL("Set charset encoding...");
 mp.actdesc['zoom_in']           = LL("Bigger font");
 mp.actdesc['zoom_out']          = LL("Smaller font");
-mp.actdesc['about']             = LL("About...");
-mp.actdesc['check_for_updates'] = LL("Check for updates...");
+mp.actdesc['about']             = LL("About");
+mp.actdesc['check_for_updates'] = LL("Check for updates");
+mp.actdesc['release_notes']     = LL("Release notes");
 mp.actdesc['pipes']             = LL("Play \"Pipes\"");
 mp.actdesc['maze']              = LL("Play \"Maze\"");
 mp.actdesc['puzzle']            = LL("Play \"Puzzle\"");
@@ -335,8 +352,7 @@ sub dump(v)
     local d = mp.open("<dump>");
 
     d->move_eof()->insert(dumper(v));
-    d.txt.mod   = 0;
-    d.read_only = 1;
+    d->set_read_only();
     d.syntax    = mp.get_syntax("mpsl");
 
     return NULL;

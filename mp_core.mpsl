@@ -231,7 +231,8 @@ global mp = {
                 'seek_repeated_word', '-',
                 'word_count', '-',
                 'word_wrap_paragraph', 'join_paragraph', '-',
-                'insert_next_item', 'insert_time_stamp', 'insert_page_break'
+                'insert_next_item', 'insert_time_stamp',
+                'insert_page_break', 'insert_m_dash'
             ]
         ],
         [
@@ -241,7 +242,7 @@ global mp = {
                 'encoding', 'tab_options', 'line_options',
                 'repeated_words_options', 'complete_options', '-',
                 'zoom_in', 'zoom_out', '-',
-                'pipes', '-', 'check_for_updates', 'about'
+                'pipes', '-', 'check_for_updates', 'release_notes', 'about'
             ]
         ]
     ]
@@ -437,7 +438,7 @@ mp.unicode_tbl = [
     }
 ];
 
-sub mp.unicode(key) { return mp.unicode_tbl[mp.config.use_unicode][key] || "-"; }
+sub mp.unicode(key) { return mp.unicode_tbl[!!mp.config.use_unicode][key] || "-"; }
 
 /** code **/
 
@@ -638,7 +639,7 @@ sub mp.trim(str, max)
 /* trims the string to the last max characters, adding ellipsis if done */
 {
     if (count(str) > max) {
-        local ell = L("...");
+        local ell = mp.unicode("ellipsis");
         max -= count(ell);
         str = ell + slice(str, -max, -1);
     }
@@ -819,15 +820,20 @@ sub mp.assert_version(found, minimal, package)
 sub mp.test_versions()
 /* tests component versions */
 {
-    mp.assert_version(MPDM.version, 2.64, 'MPDM');
-    mp.assert_version(MPSL.VERSION, 2.57, 'MPSL');
+    mp.assert_version(MPDM.version, 2.67, 'MPDM');
+    mp.assert_version(MPSL.VERSION, 2.59, 'MPSL');
 }
 
 
 sub mp.load_state()
 {
+    local f = open(HOMEDIR + ".mp_state.json", "r");
+    f->flock(1);
+
     /* read state file */
-    local j = open(HOMEDIR + ".mp_state.json", "r")->join();
+    local j = f->join();
+
+    f->close();
 
     if (j) {
         /* parse as json and take the first scanned value */
@@ -849,7 +855,10 @@ sub mp.save_state()
     del(mp.history, "[NULL]");
     mp.state.history = mp.history;
 
-    open(HOMEDIR + ".mp_state.json", "w")->write(fmt("%j", mp.state))->close();
+    local f = open(HOMEDIR + ".mp_state.json", "w");
+    f->flock(2);
+
+    f->write(fmt("%j", mp.state))->close();
 }
 
 
@@ -889,9 +898,7 @@ foreach (m, mp_modules) {
         log->insert(ERROR + "\n");
         log->move_bof();
 
-        log.txt.mod   = 0;
-        log.undo_q    = [];
-        log.read_only = 1;
+        log->set_read_only();
 
         ERROR = NULL;
     }

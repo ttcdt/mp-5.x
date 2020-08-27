@@ -415,6 +415,8 @@ sub mp.tui.list(prompt, data, pos, flags)
         }
     }
 
+    mp.tui.full_refresh = 1;
+
     return pos;
 }
 
@@ -491,10 +493,14 @@ sub mp.tui.draw_scrollbar(doc)
 }
 
 
-sub mp.tui.draw(doc)
+sub mp.tui.draw(doc, opt)
 {
+    /* full refresh needed? disable line optimization */
+    if (mp.tui.full_refresh)
+        opt = 0;
+
     /* draw the document part */
-    mp.tui.doc_draw(doc);
+    mp.tui.doc_draw(doc, opt);
 
     /* draws the scrollbar */
     mp.tui.draw_scrollbar(doc);
@@ -520,6 +526,8 @@ sub mp.tui.draw(doc)
     }
 
     mp.tui.refresh();
+
+    mp.tui.full_refresh = 0;
 }
 
 
@@ -613,6 +621,8 @@ sub mp_drv.form(widgets, flags)
         push(r, r1);
         y += 1;
     }
+
+    mp.tui.full_refresh = 1;
 
     return r;
 }
@@ -808,7 +818,7 @@ sub mp_drv.menu()
         }
 
         mp.tui.attr(mp.color.normal.attr);
-        mp.tui.draw(mp.active());
+        mp.tui.draw(mp.active(), 0);
     }
 
     mp.tui.attr(mp.color.normal.attr);
@@ -829,7 +839,7 @@ sub mp_drv.busy(onoff)
 sub mp_drv.main_loop()
 {
     while (!mp_c.exit_requested()) {
-        mp.tui.draw(mp.active());
+        mp.tui.draw(mp.active(), 1);
 
         local key = mp.tui.getkey();
         mp.process_event(key);

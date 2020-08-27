@@ -100,7 +100,8 @@ sub mp_doc_dir.save(doc)
         log.txt.lines->push(L("# nothing changed."));
 
     mp.add(log);
-    log.read_only = 1;
+
+    log->set_read_only();
 
     doc.txt.mod = 0;
 

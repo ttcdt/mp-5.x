@@ -293,7 +293,7 @@ sub mp_doc.move_up(doc)
 /* moves one line up */
 {
     if (mp.config.emacs_scrolling && doc.txt.y == doc.txt.vy) {
-        doc.txt.vy -= (mp.window.ty / 2);
+        doc.txt.vy -= integer(mp.window.ty * 3 / 4);
     }
 
     doc->set_y(doc.txt.y - 1);
@@ -334,7 +334,7 @@ sub mp_doc.move_down(doc)
 /* moves one line down */
 {
     if (mp.config.emacs_scrolling && doc.txt.y >= doc.txt.vy + (mp.window.ty - 2)) {
-        doc.txt.vy += (mp.window.ty / 2);
+        doc.txt.vy += integer(mp.window.ty * 3 / 4);
     }
 
     doc->set_y(doc.txt.y + 1);

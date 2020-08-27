@@ -835,6 +835,17 @@ sub mp_doc.redo(doc)
 }
 
 
+sub mp_doc.set_read_only(doc)
+/* sets the document as read-only */
+{
+    doc.txt.mod   = 0;
+    doc.read_only = 1;
+    doc.undo_q    = [];
+
+    return doc;
+}
+
+
 /** paragraphs **/
 
 sub mp_doc.join_paragraph(doc)

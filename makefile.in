@@ -4,7 +4,7 @@ build:
 	./build.sh
 
 clean:
-	rm -f $(TARGET) $(OBJS) mp*.tar *.o *.moc tags *.tar.gz *.exe *.zip .installer.c *.1 *.asc lex.yy.c y.tab.c y.tab.h *.a *-stress
+	rm -f $(TARGET) $(OBJS) mp*.tar *.o *.moc tags *.tar.gz *.exe *.zip .installer.c *.1 *.asc lex.yy.c y.tab.c y.tab.h *.a *-stress *.sig
 	$(MAKE) -C $(MPDM) clean
 	$(MAKE) -C $(MPSL) clean
 
@@ -39,7 +39,7 @@ dep:
 			-e 's;$(MPSL)/;$$(MPSL)/;g' > makefile.depend
 
 mp.tar: *.mpsl lang/*.mpsl syntax/*.mpsl
-	$(TAR) cvf $@ *.mpsl lang/*.mpsl syntax/*.mpsl
+	$(TAR) cvf $@ *.mpsl lang/*.mpsl syntax/*.mpsl RELEASE_NOTES
 
 mp.tar.o: mp.tar
 	$(LD) -r -b binary mp.tar -o $@
@@ -109,7 +109,7 @@ distcopy: distclean docs
 	(cd $(MPSL) ; $(MAKE) distcopy DIST_TARGET=$(DIST_TARGET)/mpsl )
 
 dist: distcopy $(XGETTEXT_TARGETS) $(BUILDMO)
-	(cd /tmp ; $(TAR) czf - $(PROJ)-$(VERSION)/* ) > $(PROJ)-$(VERSION).tar.gz ; \
+	(cd /tmp ; $(TAR) czf - $(PROJ)-$(VERSION)/* ) > $(PROJ)-5.tar.gz ; \
 	rm -rf $(DIST_TARGET)
 
 innosetup: mp-5.exe mp-5c.exe docs

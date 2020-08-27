@@ -159,9 +159,7 @@ sub mp.vcs_form()
                 else
                     log->insert_newline();
 
-                log.txt.mod     = 0;
-                log.undo_q      = [];
-                log.read_only   = 1;
+                log->set_read_only();
             }
         }
     }
@@ -186,9 +184,7 @@ sub mp_doc_vcs.query_close(doc)
             log->actions.exec_command(cmd);
             log->insert_newline();
 
-            log.txt.mod     = 0;
-            log.undo_q      = [];
-            log.read_only   = 1;
+            log->set_read_only();
 
             /* bring doc to active back */
             mp.open(doc.name);

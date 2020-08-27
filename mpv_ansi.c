@@ -429,30 +429,33 @@ static mpdm_t ansi_getkey(mpdm_t args, mpdm_t ctxt)
 static mpdm_t ansi_doc_draw(mpdm_t args, mpdm_t ctxt)
 {
     mpdm_t d;
-    int n, m;
+    int n, m, o;
 
     d = mpdm_get_i(args, 0);
-    d = mpdm_ref(mp_draw(d, 0));
+    o = mpdm_ival(mpdm_get_i(args, 1));
+    d = mpdm_ref(mp_draw(d, o));
 
     for (n = 0; n < mpdm_size(d); n++) {
         mpdm_t l = mpdm_get_i(d, n);
 
-        ansi_gotoxy(0, n);
+        if (l != NULL) {
+            ansi_gotoxy(0, n);
 
-        for (m = 0; m < mpdm_size(l); m++) {
-            int attr;
-            mpdm_t s;
+            for (m = 0; m < mpdm_size(l); m++) {
+                int attr;
+                mpdm_t s;
 
-            /* get the attribute and the string */
-            attr = mpdm_ival(mpdm_get_i(l, m++));
-            s = mpdm_get_i(l, m);
+                /* get the attribute and the string */
+                attr = mpdm_ival(mpdm_get_i(l, m++));
+                s = mpdm_get_i(l, m);
 
-            ansi_set_attr(attr);
-            ansi_print_v(s);
+                ansi_set_attr(attr);
+                ansi_print_v(s);
+            }
+
+            /* delete to end of line */
+            printf("\033[K");
         }
-
-        /* delete to end of line */
-        printf("\033[K");
     }
 
     mpdm_unref(d);
