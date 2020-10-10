@@ -38,11 +38,18 @@ dep:
 		sed -e 's;$(MPDM)/;$$(MPDM)/;g' \
 			-e 's;$(MPSL)/;$$(MPSL)/;g' > makefile.depend
 
-mp.tar: *.mpsl lang/*.mpsl syntax/*.mpsl
+mp.tar: *.mpsl lang/*.mpsl syntax/*.mpsl RELEASE_NOTES
 	$(TAR) cvf $@ *.mpsl lang/*.mpsl syntax/*.mpsl RELEASE_NOTES
 
 mp.tar.o: mp.tar
 	$(LD) -r -b binary mp.tar -o $@
+
+mp.zip: *.mpsl lang/*.mpsl syntax/*.mpsl RELEASE_NOTES
+	rm -f $@
+	zip -r $@ *.mpsl lang/*.mpsl syntax/*.mpsl RELEASE_NOTES
+
+mp.zip.o: mp.zip
+	$(LD) -r -b binary mp.zip -o $@
 
 $(APPNAME): $(OBJS) $(MPDM)/libmpdm.a $(MPSL)/libmpsl.a
 	$(CCLINK) $(CFLAGS) $(OBJS) `cat config.ldflags` -o $@
@@ -122,6 +129,7 @@ innosetup: mp-5.exe mp-5c.exe docs
 
 install-tar: mp.tar
 	./mkinstalldirs $(PREFIX)/share/$(APPNAME)
+	chmod 755 $(PREFIX)/share/$(APPNAME)
 	rm -f $(PREFIX)/share/$(APPNAME)/mp-dist.tar
 	install -m 644 mp.tar $(PREFIX)/share/$(APPNAME)/ || true
 
@@ -129,12 +137,14 @@ install: $(INSTALL_MSG) installdoc $(INSTALLMO) $(MORE_INSTALL_TARGETS)
 	install -m 755 $(APPNAME) $(PREFIX)/bin/$(APPNAME)
 	./mkinstalldirs $(PREFIX)/share/man/man1
 	[ -f $(APPNAME).1 ] && install -m 644 $(APPNAME).1 $(PREFIX)/share/man/man1/$(APPNAME).1 || true
-	[ -d /usr/share/applications ] && cp minimum-profit.desktop /usr/share/applications || true
-	[ -d /usr/share/metainfo ] && cp metainfo.xml /usr/share/metainfo/com.triptico.minimum_profit.metainfo.xml || true
-	[ -d /usr/share/icons/hicolor/48x48/apps/ ] && cp minimum-profit.png /usr/share/icons/hicolor/48x48/apps/ || true
+	[ -d /usr/share/applications ] && install -m 644 minimum-profit.desktop /usr/share/applications || true
+	[ -d /usr/share/metainfo ] && install -m 644 metainfo.xml /usr/share/metainfo/com.triptico.minimum_profit.metainfo.xml || true
+	[ -d /usr/share/icons/hicolor/48x48/apps/ ] && install -m 644 minimum-profit.png /usr/share/icons/hicolor/48x48/apps/ || true
 
 installdoc:
 	./mkinstalldirs $(PREFIX)/share/doc/$(APPNAME)
+	chmod 755 $(PREFIX)/share/doc/
+	chmod 755 $(PREFIX)/share/doc/$(APPNAME)
 	( cd $(MPDM); $(MAKE) installdoc )
 	( cd $(MPSL); $(MAKE) installdoc )
 	install -m 644 doc/* $(PREFIX)/share/doc/$(APPNAME)
@@ -181,7 +191,7 @@ uninstall-mo:
 		rm -f $(PREFIX)/share/locale/$$B/LC_MESSAGES/minimum-profit.mo ; \
 	done
 
-Makefile: VERSION makefile.in
+Makefile: makefile.in
 	./config.sh $(CONF_ARGS)
 
 validate-metainfo:

@@ -1329,31 +1329,11 @@ mpdm_t mp_c_set_offset(mpdm_t args, mpdm_t ctxt)
 }
 
 
-#ifndef CONFOPT_EXTERNAL_TAR
-
-#ifdef CONFOPT_EMBED_NOUNDER
-
-extern const char binary_mp_tar_start;
-extern const char binary_mp_tar_end;
-#define TAR_START binary_mp_tar_start
-#define TAR_END binary_mp_tar_end
-
-#else /* CONFOPT_EMBED_NOUNDER */
-
-extern const char _binary_mp_tar_start;
-extern const char _binary_mp_tar_end;
-#define TAR_START _binary_mp_tar_start
-#define TAR_END _binary_mp_tar_end
-
-#endif /* CONFOPT_EMBED_NOUNDER */
-
-static mpdm_t find_in_embedded_tar(mpdm_t args, mpdm_t ctxt)
+static mpdm_t find_in_embedded_arch(mpdm_t args, mpdm_t ctxt)
 /* searches for embedded MPSL code */
 {
-    return mpsl_find_in_embedded_tar(mpdm_get_i(args, 0), &TAR_START, &TAR_END);
+    return mpdm_read_arch_mem_s(mpdm_get_i(args, 0), ARCH_START, ARCH_END);
 }
-
-#endif /* CONFOPT_EXTERNAL_TAR */
 
 
 mpdm_t ni_drv_startup(mpdm_t v)
@@ -1427,17 +1407,16 @@ void mp_startup(int argc, char *argv[])
     if ((ptr = getenv("MP_LIBRARY_PATH")) != NULL)
         mpdm_push(INC, MPDM_MBS(ptr));
 
-#ifdef CONFOPT_EXTERNAL_TAR
+    /* add code library as embedded archive */
+    mpdm_push(INC, MPDM_X(find_in_embedded_arch));
+
+    /* add code library as externally installed zip */
+    mpdm_push(INC, mpdm_strcat_wcs(
+        mpdm_get_wcs(mpdm_root(), L"APPDIR"), L"/mp.zip"));
+
     /* add code library as externally installed tar */
     mpdm_push(INC, mpdm_strcat_wcs(
         mpdm_get_wcs(mpdm_root(), L"APPDIR"), L"/mp.tar"));
-
-#else /* CONFOPT_EXTERNAL_TAR */
-
-    /* add code library as embedded tar */
-    mpdm_push(INC, MPDM_X(find_in_embedded_tar));
-
-#endif /* CONFOPT_EXTERNAL_TAR */
 
     if (!ni_drv_detect(&argc, &argv) && !TRY_DRIVERS()) {
         printf("No usable driver found; exiting.\n");

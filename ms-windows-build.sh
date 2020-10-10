@@ -4,7 +4,7 @@ set -e
 
 [ -f Makefile ] && make realdistclean
 
-./config.sh --without-zlib --mingw32-prefix=i686-w64-mingw32 --mingw32
+./config.sh --mingw32-prefix=i686-w64-mingw32 --mingw32
 
 make
 
@@ -13,7 +13,7 @@ mv mp-5c.exe .32c
 
 make realdistclean
 
-./config.sh --without-zlib --mingw32-prefix=x86_64-w64-mingw32 --mingw32
+./config.sh --mingw32-prefix=x86_64-w64-mingw32 --mingw32
 
 make
 

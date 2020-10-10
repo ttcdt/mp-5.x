@@ -1,8 +1,8 @@
-mp_core.o: mp_core.c config.h $(MPDM)/mpdm.h $(MPSL)/mpsl.h mp.h
-mpv_ansi.o: mpv_ansi.c config.h $(MPDM)/mpdm.h $(MPSL)/mpsl.h mp.h
-mpv_curses.o: mpv_curses.c config.h $(MPDM)/mpdm.h $(MPSL)/mpsl.h mp.h 
-mpv_gtk.o: mpv_gtk.c config.h $(MPDM)/mpdm.h $(MPSL)/mpsl.h mp.h mp.xpm
-mpv_win32.o: mpv_win32.c config.h $(MPDM)/mpdm.h $(MPSL)/mpsl.h mp.h
-mpv_win32c.o: mpv_win32c.c config.h $(MPDM)/mpdm.h $(MPSL)/mpsl.h mp.h
-mpv_qt4.o: mpv_qt4.cpp mpv_qk_common.cpp config.h $(MPDM)/mpdm.h $(MPSL)/mpsl.h mp.h
-mpv_kde4.o: mpv_kde4.cpp mpv_qk_common.cpp config.h $(MPDM)/mpdm.h $(MPSL)/mpsl.h mp.h
+mp_core.o: mp_core.c config.h VERSION $(MPDM)/mpdm.h $(MPSL)/mpsl.h mp.h
+mpv_ansi.o: mpv_ansi.c config.h VERSION $(MPDM)/mpdm.h $(MPSL)/mpsl.h mp.h
+mpv_curses.o: mpv_curses.c config.h VERSION $(MPDM)/mpdm.h $(MPSL)/mpsl.h mp.h 
+mpv_gtk.o: mpv_gtk.c config.h VERSION $(MPDM)/mpdm.h $(MPSL)/mpsl.h mp.h mp.xpm
+mpv_win32.o: mpv_win32.c config.h VERSION $(MPDM)/mpdm.h $(MPSL)/mpsl.h mp.h
+mpv_win32c.o: mpv_win32c.c config.h VERSION $(MPDM)/mpdm.h $(MPSL)/mpsl.h mp.h
+mpv_qt4.o: mpv_qt4.cpp mpv_qk_common.cpp config.h VERSION $(MPDM)/mpdm.h $(MPSL)/mpsl.h mp.h
+mpv_kde4.o: mpv_kde4.cpp mpv_qk_common.cpp config.h VERSION $(MPDM)/mpdm.h $(MPSL)/mpsl.h mp.h

@@ -1,6 +1,13 @@
 Minimum Profit Release Notes
 ============================
 
+5.43
+----
+
+ - New features:
+    - The MPSL source is deployed in .zip format, so the disk
+      footprint is smaller.
+
 5.42
 ----
 

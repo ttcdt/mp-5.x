@@ -32,6 +32,23 @@
 
   <releases>
 
+    <release version="5.43" type="stable" date="2020-10-11">
+      <description>
+      <p>New features:</p>
+      <ul>
+        <li>The MPSL source is deployed in .zip format, so the disk footprint is smaller.</li>
+      </ul>
+      </description>
+      <artifacts>
+        <artifact type="source">
+          <location>https://triptico.com/download/mp-5.tar.gz</location>
+        </artifact>
+        <artifact type="binary" platform="win32">
+          <location>https://triptico.com/download/mp-5-portable-64.exe</location>
+        </artifact>
+      </artifacts>
+    </release>
+
     <release version="5.42" type="stable" date="2020-08-28">
       <description>
       <p>New features:</p>

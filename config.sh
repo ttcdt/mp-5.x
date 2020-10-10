@@ -24,7 +24,7 @@ WITHOUT_KDE4=1
 # No msgfmt by default
 WITHOUT_MSGFMT=1
 
-WITH_EXTERNAL_TAR=0
+WITH_EXTERNAL_ARCH=0
 
 # store command line args for configuring the libraries
 CONF_ARGS="$*"
@@ -44,7 +44,9 @@ while [ $# -gt 0 ] ; do
     --without-qt5)       WITHOUT_QT5=1 ;;
 
     --without-ansi)      WITHOUT_ANSI=1 ;;
-    --with-external-tar) WITH_EXTERNAL_TAR=1 ;;
+    --with-external-arch) WITH_EXTERNAL_ARCH=1 ;;
+    --with-external-tar) WITH_EXTERNAL_ARCH=1 ;;
+    --without-zip)       WITHOUT_ZIP=1 ;;
     --help)              CONFIG_HELP=1 ;;
 
     --mingw32-prefix=*)     MINGW32_PREFIX=`echo $1 | sed -e 's/--mingw32-prefix=//'`
@@ -86,9 +88,11 @@ if [ "$CONFIG_HELP" = "1" ] ; then
     echo "--with-null-hash        Tell MPDM to use a NULL hashing function."
     echo "--mingw32-prefix=PREFIX Prefix name for mingw32 ($MINGW32_PREFIX)."
     echo "--mingw32               Build using the mingw32 compiler."
-    echo "--with-external-tar     Store code in external tar (vs. embedded)."
+    echo "--with-external-arch    Store code in external archive (vs. embedded)."
+    echo "--with-external-tar     Same as --with-external-arch."
     echo "--with-zlib             Enable Zlib support."
     echo "--without-zlib          Disable Zlib support."
+    echo "--without-zip           Disable generation of archive in ZIP format."
 
     echo
     echo "Environment variables:"
@@ -138,7 +142,7 @@ fi
 [ "$WINDRES" = "" ] && WINDRES="windres"
 
 # add version
-cat VERSION >> config.h
+echo "#include \"VERSION\"" >> config.h
 
 # add installation prefix and application name
 echo "#define CONFOPT_PREFIX \"$PREFIX\"" >> config.h
@@ -543,9 +547,33 @@ else
     echo "No"
 fi
 
+# zip
+
+echo -n "Testing for zip... "
+
+if [ "$WITHOUT_ZIP" = "1" ] ; then
+    echo "Disabled"
+else
+    if command -v zip > /dev/null ; then
+        echo "Yes"
+    else
+        echo "No"
+        WITHOUT_ZIP=1
+    fi
+fi
+
+if [ "$WITHOUT_ZIP" = "1" ] ; then
+    ARCH_OBJ="mp.tar.o"
+    ARCH_SYM="mp_tar"
+else
+    ARCH_OBJ="mp.zip.o"
+    ARCH_SYM="mp_zip"
+    echo "#define CONFOPT_WITH_ZIP 1" >> config.h
+fi
+
 # test for embeddable binaries
 echo -n "Testing for embeddable binaries... "
-if [ "$WITH_EXTERNAL_TAR" = "1" ] ; then
+if [ "$WITH_EXTERNAL_ARCH" = "1" ] ; then
     echo "Disabled"
 else
     echo "test" > tmp.bin
@@ -567,17 +595,25 @@ else
 
     if [ $? = 0 ] ; then
         echo "Yes (with underscores)"
-        MORE_OBJS="mp.tar.o ${MORE_OBJS}"
+        MORE_OBJS="${ARCH_OBJ} ${MORE_OBJS}"
+        echo "extern const char _binary_${ARCH_SYM}_start;" >> config.h
+        echo "extern const char _binary_${ARCH_SYM}_end;" >> config.h
+        echo "#define ARCH_START &_binary_${ARCH_SYM}_start" >> config.h
+        echo "#define ARCH_END &_binary_${ARCH_SYM}_end" >> config.h
     else
         $CC $CFLAGS -DCONFOPT_EMBED_NOUNDER .tmp.c tmp.bin.o -o .tmp.o 2>> .config.log
 
         if [ $? = 0 ] ; then
             echo "Yes (without underscores)"
-            MORE_OBJS="mp.tar.o ${MORE_OBJS}"
+            MORE_OBJS="${ARCH_OBJ} ${MORE_OBJS}"
             echo "#define CONFOPT_EMBED_NOUNDER 1" >> config.h
+            echo "extern const char binary_${ARCH_SYM}_start;" >> config.h
+            echo "extern const char binary_${ARCH_SYM}_end;" >> config.h
+            echo "#define ARCH_START &binary_${ARCH_SYM}_start" >> config.h
+            echo "#define ARCH_END &binary_${ARCH_SYM}_end" >> config.h
         else
             echo "No"
-            WITH_EXTERNAL_TAR=1
+            WITH_EXTERNAL_ARCH=1
             LD=""
         fi
     fi
@@ -585,8 +621,11 @@ else
     rm -f tmp.bin tmp.bin.o
 fi
 
-if [ "$WITH_EXTERNAL_TAR" = "1" ] ; then
-    echo "#define CONFOPT_EXTERNAL_TAR 1" >> config.h
+if [ "$WITH_EXTERNAL_ARCH" = "1" ] ; then
+    echo "#define CONFOPT_EXTERNAL_ARCH 1" >> config.h
+    echo "#define ARCH_START NULL" >> config.h
+    echo "#define ARCH_END NULL" >> config.h
+    MORE_TARGETS="mp.tar"
     MORE_INSTALL_TARGETS="install-tar $MORE_INSTALL_TARGETS"
 fi
 

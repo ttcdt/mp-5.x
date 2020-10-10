@@ -394,7 +394,7 @@ sub mp_doc.break_line(doc, col)
     txt.lines[txt.y] = l2 || '';
 
     if (mp.config.visual_wrap)
-        mp.vw_wrap_y(txt.lines, txt.y, mp.vw_col());
+        mp.vw_wrap(txt.lines, mp.vw_col(), txt.y);
 
     txt.mod += 1;
 
@@ -412,8 +412,8 @@ sub mp_doc.join_line(doc)
             if (txt.x && txt.lines[txt.y][txt.x - 1] == "\x{ad}")
                 txt.x -= 1;
 
-            mp.vw_unwrap_y(txt.lines, txt.y);
-            mp.vw_unwrap_y(txt.lines, txt.y + 1);
+            mp.vw_unwrap(txt.lines, txt.y);
+            mp.vw_unwrap(txt.lines, txt.y + 1);
         }
 
         /* concats current line with the next one */
@@ -423,7 +423,7 @@ sub mp_doc.join_line(doc)
         del(txt.lines, txt.y + 1);
 
         if (mp.config.visual_wrap)
-            mp.vw_wrap_y(txt.lines, txt.y + 1, mp.vw_col());
+            mp.vw_wrap(txt.lines, mp.vw_col(), txt.y + 1);
 
         txt.mod += 1;
     }
@@ -457,7 +457,7 @@ sub mp_doc.delete_line(doc)
     txt.x = mp_c.vx2x(txt.lines[txt.y], vx);
 
     if (mp.config.visual_wrap)
-        mp.vw_wrap_y(txt.lines, txt.y, mp.vw_col());
+        mp.vw_wrap(txt.lines, mp.vw_col(), txt.y);
 
     txt.mod += 1;
 
@@ -481,7 +481,7 @@ sub mp_doc.delete_char(doc)
         if (txt.x && txt.lines[txt.y][txt.x - 1] == "\x{ad}")
             txt.x -= 1;
 
-        mp.vw_unwrap_y(txt.lines, txt.y);
+        mp.vw_unwrap(txt.lines, txt.y);
     }
 
     /* is it over the end of line? */
@@ -493,7 +493,7 @@ sub mp_doc.delete_char(doc)
     }
 
     if (mp.config.visual_wrap)
-        mp.vw_wrap_y(txt.lines, txt.y, mp.vw_col());
+        mp.vw_wrap(txt.lines, mp.vw_col(), txt.y);
 
     doc->set_offset(o);
 
@@ -606,7 +606,7 @@ sub mp_doc.insert_string(doc, str)
         if (txt.x && txt.lines[txt.y][txt.x - 1] == "\x{ad}")
             txt.x -= 1;
 
-        mp.vw_unwrap_y(txt.lines, txt.y);
+        mp.vw_unwrap(txt.lines, txt.y);
     }
 
     /* splice and change */
@@ -619,7 +619,7 @@ sub mp_doc.insert_string(doc, str)
     /* re-wrap line */
     if (mp.config.visual_wrap) {
         local o = doc->get_offset();
-        mp.vw_wrap_y(txt.lines, txt.y, mp.vw_col());
+        mp.vw_wrap(txt.lines, mp.vw_col(), txt.y);
         doc->set_offset(o);
     }
 
@@ -855,7 +855,7 @@ sub mp_doc.join_paragraph(doc)
     local l;
 
     if (mp.config.visual_wrap)
-        mp.vw_unwrap_y(txt.lines, txt.y);
+        mp.vw_unwrap(txt.lines, txt.y);
 
     while ((l = txt.lines[txt.y + 1]) && size(l)) {
         /* delete all leading blanks in the next line */
@@ -866,7 +866,7 @@ sub mp_doc.join_paragraph(doc)
     }
 
     if (mp.config.visual_wrap)
-        mp.vw_wrap_y(txt.lines, txt.y, mp.vw_col());
+        mp.vw_wrap(txt.lines, mp.vw_col(), txt.y);
 
     return doc;
 }
