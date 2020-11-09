@@ -1,6 +1,15 @@
 Minimum Profit Release Notes
 ============================
 
+5.44
+----
+
+ - Bug fixes:
+    - Fixed backwards search (hungups and skipped matches).
+    - Fixed ugly attributes at exit in the ANSI driver.
+    - Fixed compilation in GTK v.2.
+    - Fixed JSON syntax highlight.
+
 5.43
 ----
 

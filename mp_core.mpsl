@@ -396,8 +396,9 @@ global mp_doc = new(mp_base, {
 mp.unicode_tbl = [
     {
         "ellipsis":  "...",
-        "pilcrow":   "P",
+        "pilcrow":   "\x{00b6}",
         "middledot": ".",
+        "wordwrap":  "\x{00b8}",
         "horiz":     "-",
         "vert":      "|",
         "arrowup":   "^",
@@ -411,14 +412,15 @@ mp.unicode_tbl = [
         "wcorner":   "|",
         "ecorner":   "|",
         "ccorner":   "+",
-        "tab":       "\x{ac}",
-        "formfeed":  "\x{a4}",
+        "tab":       "\x{00ac}",
+        "formfeed":  "\x{00a4}",
         "unknown":   "?"
     },
     {
         "ellipsis":  "\x{2026}",
         "pilcrow":   "\x{00b6}",
         "middledot": "\x{00b7}",
+        "wordwrap":  "\x{00b8}",
         "horiz":     "\x{2500}",
         "vert":      "\x{2502}",
         "arrowup":   "\x{25b2}",

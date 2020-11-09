@@ -351,6 +351,24 @@ sub mp.prefix_regex(str)
 }
 
 
+sub regex_dir(rx, str, dir)
+/* returns a match with direction (-1, backwards; last match in string) */
+{
+    local r = NULL;
+
+    if (dir == -1) {
+        while (regex(rx, str, r[0] + r[1]))
+            r = regex();
+    }
+    else {
+        if (regex(rx, str))
+            r = regex();
+    }
+
+    return r;
+}
+
+
 sub mp_doc.search_dir(doc, str, dir)
 /* search str and put the current position there, with direction */
 {
@@ -418,10 +436,8 @@ sub mp_doc.search_dir(doc, str, dir)
 
     /* do the search */
     local n = (dir == -1) && (size(lines) - 1) || 0;
-    while ((l = lines[n]) != NULL && regex(l, str) == NULL)
+    while (n >= 0 && (l = lines[n]) != NULL && (r = regex_dir(l, str, dir)) == NULL)
         n += dir;
-
-    r = regex();
 
     if (r) {
         /* if it was found in the first line, add offset */
@@ -498,7 +514,7 @@ sub mp_doc.seek_prev_or_next_char(doc, func)
     local txt = doc.txt;
 
     /* get current char */
-    local w = slice(txt.lines[txt.y], txt.x, 1);
+    local w = txt.lines[txt.y][txt.x];
 
     /* move one char right */
     doc->move_right();

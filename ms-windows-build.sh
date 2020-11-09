@@ -21,3 +21,8 @@ mv .32 mp-5-portable-32.exe
 mv .32c mp-5c-portable-32.exe
 mv mp-5.exe mp-5-portable-64.exe
 mv mp-5c.exe mp-5c-portable-64.exe
+
+i686-w64-mingw32-strip mp-5-portable-32.exe
+i686-w64-mingw32-strip mp-5c-portable-32.exe
+x86_64-w64-mingw32-strip mp-5-portable-64.exe
+x86_64-w64-mingw32-strip mp-5c-portable-64.exe

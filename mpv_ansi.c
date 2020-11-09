@@ -476,6 +476,9 @@ static mpdm_t ansi_drv_shutdown(mpdm_t a, mpdm_t ctxt)
 
     ansi_raw_tty(0);
 
+    /* set default attribute */
+    printf("\033[0;39;49m\n");
+
     ansi_clrscr();
 
     if ((v = mpdm_get_wcs(MP, L"exit_message")) != NULL) {

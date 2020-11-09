@@ -53,6 +53,7 @@ struct drw_1_info {
     wchar_t wc_tab;             /* char for marking tabs */
     wchar_t wc_formfeed;        /* char for marking form feeds */
     wchar_t wc_unknown;         /* char for marking unknown characters */
+    wchar_t wc_wordwrap;       /* char for marking word wraps */
 };
 
 struct drw_1_info drw_1;
@@ -296,6 +297,8 @@ static int drw_prepare(mpdm_t doc)
         drw_1.wc_tab = *ptr;
     if ((ptr = mpdm_string(mpdm_get_wcs(v, L"formfeed"))) != NULL)
         drw_1.wc_formfeed = *ptr;
+    if ((ptr = mpdm_string(mpdm_get_wcs(v, L"wordwrap"))) != NULL)
+        drw_1.wc_wordwrap = *ptr;
     if ((ptr = mpdm_string(mpdm_get_wcs(v, L"unknown"))) != NULL)
         drw_1.wc_unknown = *ptr;
 
@@ -701,7 +704,7 @@ static mpdm_t drw_push_pair(mpdm_t l, int i, int a, wchar_t * tmp)
 }
 
 
-static wchar_t drw_char(wchar_t c, int n)
+static wchar_t drw_char(wchar_t c, wchar_t pc, int n)
 /* does possible conversions to the char about to be printed */
 {
     /* real tab */
@@ -710,14 +713,18 @@ static wchar_t drw_char(wchar_t c, int n)
 
     /* soft hyphen */
     if (c == L'\xad')
-        c = L'\xb8';        /* cedilla */
+        c = drw_1.wc_wordwrap;  /* cedilla */
 
     if (drw_1.mark_eol) {
         if (c == L'\t')
             c = L'\xb7';    /* middledot */
         else
-        if (c == L'\n' || c == L'\0')
-            c = L'\xb6';    /* pilcrow */
+        if (c == L'\n' || c == L'\0') {
+            if (pc != L'\xad')
+                c = L'\xb6';    /* pilcrow */
+            else
+                c = L' ';
+        }
     }
     else {
         if (c == L'\t' || c == L'\n' || c == L'\0')
@@ -785,7 +792,7 @@ static void drw_remap_truncate(void)
     y = drw_1.vy;
 
     for (my = 0; my < drw_1.ty; my++) {
-        wchar_t c;
+        wchar_t c, pc = 0;
         int ax = 0;
         mx = 0;
 
@@ -799,7 +806,7 @@ static void drw_remap_truncate(void)
 
             for (n = 0; n < t && mx < drw_1.tx; n++) {
                 if (ax >= drw_1.vx)
-                    drw_map_1(mx++, my, drw_char(c, n), drw_2.attrs[i], x, y);
+                    drw_map_1(mx++, my, drw_char(c, pc, n), drw_2.attrs[i], x, y);
                 ax++;
             }
 
@@ -809,6 +816,7 @@ static void drw_remap_truncate(void)
                 break;
 
             x++;
+            pc = c;
 
         } while (mx < drw_1.tx);
 

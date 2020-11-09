@@ -14,7 +14,7 @@ LIBS:
 
 PROJ=mp
 
-ADD_DOCS=AUTHORS README LICENSE RELEASE_NOTES mp_templates.sample
+ADD_DOCS=README LICENSE RELEASE_NOTES mp_templates.sample
 GRUTATXT_DOCS=doc/mp_index.html doc/mp_cookbook.html doc/mp_internals.html \
 	doc/mp_configuration.html doc/mp_data_model.html \
 	doc/mp_man.html doc/mp_interactive_dialog_boxes.html \

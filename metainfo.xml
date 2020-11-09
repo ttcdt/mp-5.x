@@ -32,6 +32,26 @@
 
   <releases>
 
+    <release version="5.44" type="stable" date="2020-10-12">
+      <description>
+      <p>Bug fixes:</p>
+      <ul>
+        <li>Fixed backwards search (hungups and skipped matches).</li>
+        <li>Fixed ugly attributes at exit in the ANSI driver.</li>
+        <li>Fixed compilation in GTK v.2.</li>
+        <li>Fixed JSON syntax highlight.</li>
+      </ul>
+      </description>
+      <artifacts>
+        <artifact type="source">
+          <location>https://triptico.com/download/mp-5.tar.gz</location>
+        </artifact>
+        <artifact type="binary" platform="win32">
+          <location>https://triptico.com/download/mp-5-portable-64.exe</location>
+        </artifact>
+      </artifacts>
+    </release>
+
     <release version="5.43" type="stable" date="2020-10-11">
       <description>
       <p>New features:</p>
@@ -49,124 +69,6 @@
       </artifacts>
     </release>
 
-    <release version="5.42" type="stable" date="2020-08-28">
-      <description>
-      <p>New features:</p>
-      <ul>
-        <li>Speed improvements in ANSI and ncurses drivers. This will be
-        specially noticed in slow systems like the oldest Raspberry Pies.</li>
-        <li>In build (makefile) and grep logs, the ENTER key activates
-        the <code>open_under_cursor</code> action.</li>
-      </ul>
-      <p>Bugfixes:</p>
-      <ul>
-        <li>Fixed a rounding error in emacs-style scrolling.</li>
-      </ul>
-      </description>
-      <artifacts>
-        <artifact type="source">
-          <location>https://triptico.com/download/mp-5.tar.gz</location>
-        </artifact>
-        <artifact type="binary" platform="win32">
-          <location>https://triptico.com/download/mp-5-portable-64.exe</location>
-        </artifact>
-      </artifacts>
-    </release>
-
-    <release version="5.41" type="stable" date="2020-06-23">
-      <description>
-      <p>Bug fixes:</p>
-      <ul>
-        <li>Fixed crash in Qt5 startup.</li>
-        <li>Fixed typo in Perl syntax highlight.</li>
-      </ul>
-      </description>
-      <artifacts>
-        <artifact type="source">
-          <location>https://triptico.com/download/mp-5.41.tar.gz</location>
-        </artifact>
-        <artifact type="binary" platform="win32">
-          <location>https://triptico.com/download/mp-5-portable-64.exe</location>
-        </artifact>
-      </artifacts>
-    </release>
-
-    <release version="5.40" type="stable" date="2020-06-13">
-      <description>
-      <p>Updated maintainers.</p>
-      </description>
-      <artifacts>
-        <artifact type="source">
-          <location>https://triptico.com/download/mp/mp-5.40.tar.gz</location>
-        </artifact>
-        <artifact type="binary" platform="win32">
-          <location>https://triptico.com/download/mp/mp-5.40.exe</location>
-        </artifact>
-      </artifacts>
-    </release>
-
-    <release version="5.39" type="stable" date="2020-06-01">
-      <description>
-      <p>New features:</p>
-      <ul>
-        <li>The usage of Unicode characters in text menus, games, etc. can be disabled by setting the configuration variable <code>mp.config.use_unicode</code> to 0.</li>
-      </ul>
-      <p>Other changes:</p>
-      <ul>
-        <li>Some internal optimizations to visual wrapping code.</li>
-      </ul>
-      </description>
-      <artifacts>
-        <artifact type="source">
-          <location>https://triptico.com/download/mp/mp-5.39.tar.gz</location>
-        </artifact>
-        <artifact type="binary" platform="win32">
-          <location>https://triptico.com/download/mp/mp-5.39.exe</location>
-        </artifact>
-      </artifacts>
-    </release>
-
-    <release version="5.38" type="stable" date="2020-05-17">
-      <description>
-      <p>New features:</p>
-      <ul>
-        <li>A new visual wrap mode, where lines longer than the application window wrap (with special marking) instead of disappearing to the right. It's implemented in the <code>toggle_visual_wrap</code> action (bound by default to <code>ctrl-k</code>) and can be activated from the configuration file by setting <code>mp.config.visual_wrap</code> to 1.</li>
-      </ul>
-      <p>Other changes:</p>
-      <ul>
-        <li>When hard word wrapping is not set, the <code>word_wrap_paragraph</code> action behaves like <code>join_paragraph</code> (i.e. word-wraps to an infinite column).</li>
-      </ul>
-      </description>
-      <artifacts>
-        <artifact type="source">
-          <location>https://triptico.com/download/mp/mp-5.38.tar.gz</location>
-        </artifact>
-        <artifact type="binary" platform="win32">
-          <location>https://triptico.com/download/mp/mp-5.38.exe</location>
-        </artifact>
-      </artifacts>
-    </release>
-
-    <release version="5.37" type="stable" date="2020-03-10">
-      <description>
-      <p>Bug fixes:</p>
-      <ul>
-        <li>Fixed compilation issues under FreeBSD and OpenBSD.</li>
-      </ul>
-      <p>New features:</p>
-      <ul>
-        <li>New game 'Puzzle'.</li>
-      </ul>
-      </description>
-      <artifacts>
-        <artifact type="source">
-          <location>https://triptico.com/download/mp/mp-5.37.tar.gz</location>
-        </artifact>
-        <artifact type="binary" platform="win32">
-          <location>https://triptico.com/download/mp/mp-5.37.exe</location>
-        </artifact>
-      </artifacts>
-    </release>
   </releases>
   
   <launchable type="desktop-id">minimum_profit.desktop​</launchable>
