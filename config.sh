@@ -15,6 +15,9 @@ VERSION=`cut -f2 -d\" VERSION`
 # default installation prefix
 PREFIX=/usr/local
 
+# set PKG_CONFIG if it isn't set already
+PKG_CONFIG=${PKG_CONFIG:-pkg-config}
+
 # store command line args for configuring the libraries
 CONF_ARGS="$*"
 
@@ -341,10 +344,10 @@ if [ "$WITHOUT_KDE4" = "1" ] ; then
 else
     if which kde4-config > /dev/null 2>&1
     then
-        TMP_CFLAGS=$(pkg-config --cflags QtGui)
+        TMP_CFLAGS="$(${PKG_CONFIG} --cflags QtGui)"
         TMP_CFLAGS="$TMP_CFLAGS -I`kde4-config --install include` -I`kde4-config --install include`KDE"
 
-        TMP_LDFLAGS="$(pkg-config --libs QtGui) -lX11"
+        TMP_LDFLAGS="$(${PKG_CONFIG} --libs QtGui) -lX11"
         TMP_LDFLAGS="$TMP_LDFLAGS -L`kde4-config --install lib` -L`kde4-config --install lib`/kde4/devel -lkio -lkfile -lkdeui -lkdecore"
 
         echo "#include <KApplication>" > .tmp.cpp
@@ -384,10 +387,10 @@ echo -n "Testing for Qt5... "
 if [ "$WITHOUT_QT5" = "1" ] ; then
     echo "Disabled"
 else
-    if which pkg-config > /dev/null 2>&1
+    if which ${PKG_CONFIG} > /dev/null 2>&1
     then
-        TMP_CFLAGS="`sh -c 'pkg-config --cflags Qt5Widgets' 2>/dev/null` -fPIC"
-        TMP_LDFLAGS="`sh -c 'pkg-config --libs Qt5Widgets' 2>/dev/null`"
+        TMP_CFLAGS="$(${PKG_CONFIG} --cflags Qt5Widgets 2>/dev/null) -fPIC"
+        TMP_LDFLAGS="$(${PKG_CONFIG} --libs Qt5Widgets 2>/dev/null)"
 
         echo "#include <QtWidgets>" > .tmp.cpp
         echo "int main(int argc, char *argv[]) { new QApplication(argc, argv) ; return 0; } " >> .tmp.cpp
@@ -430,10 +433,10 @@ echo -n "Testing for Qt4... "
 if [ "$WITHOUT_QT4" = "1" ] ; then
     echo "Disabled"
 else
-    if which pkg-config > /dev/null 2>&1
+    if which ${PKG_CONFIG} > /dev/null 2>&1
     then
-        TMP_CFLAGS=`sh -c 'pkg-config --cflags QtGui' 2>/dev/null`
-        TMP_LDFLAGS="`sh -c 'pkg-config --libs QtGui' 2>/dev/null` -lX11"
+        TMP_CFLAGS="$(${PKG_CONFIG} --cflags QtGui 2>/dev/null)"
+        TMP_LDFLAGS="$(${PKG_CONFIG} --libs QtGui 2>/dev/null) -lX11"
 
         echo "#include <QtGui>" > .tmp.cpp
         echo "int main(int argc, char *argv[]) { new QApplication(argc, argv) ; return 0; } " >> .tmp.cpp
@@ -479,8 +482,8 @@ else
     echo "int main(void) { gtk_main(); return 0; } " >> .tmp.c
 
     # Try first GTK 3.0
-    TMP_CFLAGS=`sh -c 'pkg-config --cflags gtk+-3.0' 2>/dev/null`
-    TMP_LDFLAGS=`sh -c 'pkg-config --libs gtk+-3.0' 2>/dev/null`
+    TMP_CFLAGS="$(${PKG_CONFIG} --cflags gtk+-3.0 2>/dev/null)"
+    TMP_LDFLAGS="$(${PKG_CONFIG} --libs gtk+-3.0 2>/dev/null)"
 
     $CC $CFLAGS $TMP_CFLAGS .tmp.c $TMP_LDFLAGS -o .tmp.o 2>> .config.log
     if [ $? = 0 ] ; then
@@ -495,8 +498,8 @@ else
         DRV_GTK=1
     else
         # Try now GTK 2.0
-        TMP_CFLAGS=`sh -c 'pkg-config --cflags gtk+-2.0' 2>/dev/null`
-        TMP_LDFLAGS=`sh -c 'pkg-config --libs gtk+-2.0' 2>/dev/null`
+        TMP_CFLAGS="$(${PKG_CONFIG} --cflags gtk+-2.0 2>/dev/null)"
+        TMP_LDFLAGS="$(${PKG_CONFIG} --libs gtk+-2.0 2>/dev/null)"
 
         $CC $CFLAGS $TMP_CFLAGS .tmp.c $TMP_LDFLAGS -o .tmp.o 2>> .config.log
         if [ $? = 0 ] ; then
