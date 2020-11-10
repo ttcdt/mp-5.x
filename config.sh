@@ -265,8 +265,26 @@ else
         WITHOUT_ANSI=1
         DRV_CURSES=1
     else
-        echo "No"
-        WITHOUT_CURSES=1
+        echo "#include <ncurses.h>" > .tmp.c
+        echo "int main(void) { initscr(); endwin(); return 0; }" >> .tmp.c
+
+        TMP_CFLAGS="-I/usr/local/include -I/usr/include/ncurses -I/usr/include/ncursesw"
+        TMP_LDFLAGS="-L/usr/local/lib -lncurses"
+
+        $CC $CFLAGS $TMP_CFLAGS .tmp.c $TMP_LDFLAGS -o .tmp.o 2>> .config.log
+        if [ $? = 0 ] ; then
+            echo "#define CONFOPT_CURSES 1" >> config.h
+            echo $TMP_CFLAGS >> config.cflags
+            echo $TMP_LDFLAGS >> config.ldflags
+            echo "OK (ncurses)"
+            DRIVERS="ncursesw $DRIVERS"
+            DRV_OBJS="mpv_curses.o $DRV_OBJS"
+            WITHOUT_ANSI=1
+            DRV_CURSES=1
+        else
+            echo "No"
+            WITHOUT_CURSES=1
+        fi
     fi
 fi
 
