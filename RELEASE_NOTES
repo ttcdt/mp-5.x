@@ -269,5 +269,3 @@ fellow developer X-Ryl669.
     mp.colors.spell.gui         = [ 0xff8888, 0xffffff ];
     mp.colors.search.gui        = [ 0x000000, 0x00cc77 ];
 
-If you are interested in older release notes, please see git history
-in https://triptico.com/software/mp.html.
