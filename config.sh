@@ -266,11 +266,31 @@ echo -n "Testing for ncursesw... "
 if [ "$WITHOUT_CURSES" = "1" ] ; then
     echo "Disabled"
 else
-    TMP_CFLAGS="-I/usr/local/include -I/usr/include/ncurses -I/usr/include/ncursesw"
-    TMP_LDFLAGS="-L/usr/local/lib -lncursesw"
+    if chk_pkgconfig ncursesw ; then
+        TMP_CFLAGS="$(${PKG_CONFIG} --cflags ncursesw)"
+        TMP_LDFLAGS="$(${PKG_CONFIG} --libs ncursesw)"
+    elif chk_pkgconfig ncurses ; then
+        TMP_CFLAGS="$(${PKG_CONFIG} --cflags ncurses)"
+        TMP_LDFLAGS="$(${PKG_CONFIG} --libs ncurses)"
+    elif type ncursesw6-config >/dev/null 2>&1 ; then
+        TMP_CFLAGS="$(ncursesw6-config --cflags)"
+        TMP_LDFLAGS="$(ncursesw6-config --libs)"
+    elif type ncursesw5-config >/dev/null 2>&1 ; then
+        TMP_CFLAGS="$(ncursesw5-config --cflags)"
+        TMP_LDFLAGS="$(ncursesw5-config --libs)"
+    elif type ncurses6-config >/dev/null 2>&1 ; then
+        TMP_CFLAGS="$(ncurses6-config --cflags)"
+        TMP_LDFLAGS="$(ncurses6-config --libs)"
+    elif type ncurses5-config >/dev/null 2>&1 ; then
+        TMP_CFLAGS="$(ncurses5-config --cflags)"
+        TMP_LDFLAGS="$(ncurses5-config --libs)"
+    else
+        TMP_CFLAGS=
+        TMP_LDFLAGS=-lncurses
+    fi
 
     if chk_compiles "$(cat <<EOF
-#include <ncursesw/ncurses.h>
+#include <ncurses.h>
 int main(void) { initscr(); endwin(); return 0; }
 EOF
 )" ; then
@@ -282,6 +302,8 @@ EOF
         DRV_OBJS="mpv_curses.o $DRV_OBJS"
         WITHOUT_ANSI=1
         DRV_CURSES=1
+        CURSES_CFLAGS="$TMP_CFLAGS"
+        CURSES_LDFLAGS="$TMP_LDFLAGS"
     else
         echo "#include <ncurses.h>" > .tmp.c
         echo "int main(void) { initscr(); endwin(); return 0; }" >> .tmp.c
@@ -311,7 +333,8 @@ fi
 if [ "$WITHOUT_CURSES" != "1" ] ; then
     # test for transparent colors in curses
     echo -n "Testing for transparency support in curses... "
-
+    TMP_CFLAGS="$CURSES_CFLAGS"
+    TMP_LDFLAGS="$CURSES_LDFLAGS"
     if chk_compiles "$(cat <<EOF
 #include <ncurses.h>
 int main(void) { initscr(); use_default_colors(); endwin(); return 0; }
@@ -338,6 +361,8 @@ EOF
     else
         echo "No"
     fi
+    TMP_CFLAGS=
+    TMP_LDFLAGS=
 fi
 
 # ANSI
