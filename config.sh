@@ -109,6 +109,10 @@ if [ "$CONFIG_HELP" = "1" ] ; then
     exit 1
 fi
 
+chk_pkgconfig() {
+    ${PKG_CONFIG} --cflags "$1" >/dev/null 2>&1
+}
+
 echo "Configuring..."
 
 echo "/* automatically created by config.sh - do not modify */" > config.h
@@ -387,7 +391,7 @@ echo -n "Testing for Qt5... "
 if [ "$WITHOUT_QT5" = "1" ] ; then
     echo "Disabled"
 else
-    if which ${PKG_CONFIG} > /dev/null 2>&1
+    if chk_pkgconfig Qt5Widgets
     then
         TMP_CFLAGS="$(${PKG_CONFIG} --cflags Qt5Widgets 2>/dev/null) -fPIC"
         TMP_LDFLAGS="$(${PKG_CONFIG} --libs Qt5Widgets 2>/dev/null)"
@@ -433,7 +437,7 @@ echo -n "Testing for Qt4... "
 if [ "$WITHOUT_QT4" = "1" ] ; then
     echo "Disabled"
 else
-    if which ${PKG_CONFIG} > /dev/null 2>&1
+    if chk_pkgconfig QtGui > /dev/null 2>&1
     then
         TMP_CFLAGS="$(${PKG_CONFIG} --cflags QtGui 2>/dev/null)"
         TMP_LDFLAGS="$(${PKG_CONFIG} --libs QtGui 2>/dev/null) -lX11"
@@ -482,21 +486,24 @@ else
     echo "int main(void) { gtk_main(); return 0; } " >> .tmp.c
 
     # Try first GTK 3.0
-    TMP_CFLAGS="$(${PKG_CONFIG} --cflags gtk+-3.0 2>/dev/null)"
-    TMP_LDFLAGS="$(${PKG_CONFIG} --libs gtk+-3.0 2>/dev/null)"
+    if chk_pkgconfig gtk+-3.0 ; then
+        TMP_CFLAGS="$(${PKG_CONFIG} --cflags gtk+-3.0 2>/dev/null)"
+        TMP_LDFLAGS="$(${PKG_CONFIG} --libs gtk+-3.0 2>/dev/null)"
 
-    $CC $CFLAGS $TMP_CFLAGS .tmp.c $TMP_LDFLAGS -o .tmp.o 2>> .config.log
-    if [ $? = 0 ] ; then
-        echo "#define CONFOPT_GTK 3" >> config.h
-        echo "$TMP_CFLAGS " >> config.cflags
-        echo "$TMP_LDFLAGS " >> config.ldflags
-        echo "OK (3.0)"
-        DRIVERS="gtk $DRIVERS"
-        DRV_OBJS="mpv_gtk.o $DRV_OBJS"
-        CFLAGS="$CFLAGS $TMP_CFLAGS"
-        LDFLAGS="$LDFLAGS $TMP_LDFLAGS"
-        DRV_GTK=1
-    else
+        $CC $CFLAGS $TMP_CFLAGS .tmp.c $TMP_LDFLAGS -o .tmp.o 2>> .config.log
+        if [ $? = 0 ] ; then
+            echo "#define CONFOPT_GTK 3" >> config.h
+            echo "$TMP_CFLAGS " >> config.cflags
+            echo "$TMP_LDFLAGS " >> config.ldflags
+            echo "OK (3.0)"
+            DRIVERS="gtk $DRIVERS"
+            DRV_OBJS="mpv_gtk.o $DRV_OBJS"
+            CFLAGS="$CFLAGS $TMP_CFLAGS"
+            LDFLAGS="$LDFLAGS $TMP_LDFLAGS"
+            DRV_GTK=1
+        fi
+    fi
+    if test "$DRV_GTK" != 1 && chk_pkgconfig gtk+-2.0 ; then
         # Try now GTK 2.0
         TMP_CFLAGS="$(${PKG_CONFIG} --cflags gtk+-2.0 2>/dev/null)"
         TMP_LDFLAGS="$(${PKG_CONFIG} --libs gtk+-2.0 2>/dev/null)"
@@ -512,9 +519,10 @@ else
             CFLAGS="$CFLAGS $TMP_CFLAGS"
             LDFLAGS="$LDFLAGS $TMP_LDFLAGS"
             DRV_GTK=1
-        else
-            echo "No"
         fi
+    fi
+    if test "$DRV_GTK" != 1 ; then
+        echo "No"
     fi
 fi
 
