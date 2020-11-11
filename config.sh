@@ -113,6 +113,21 @@ chk_pkgconfig() {
     ${PKG_CONFIG} --cflags "$1" >/dev/null 2>&1
 }
 
+chk_compiles() {
+    if $USE_CXX ; then
+        MY_CC="$CPP"
+        OUT=.tmp.cpp
+    else
+        MY_CC="$CC"
+        OUT=.tmp.c
+    fi
+    printf "%s\n" "$1" > $OUT
+    printf "# compiling testcase:\n%s\n" "$1" >> .config.log
+    printf "%s\n" "$MY_CC $CFLAGS $TMP_CFLAGS $OUT $TMP_LDFLAGS -o .tmp.o" >> .config.log
+    $MY_CC $CFLAGS $TMP_CFLAGS $OUT $TMP_LDFLAGS -o .tmp.o 2>> .config.log
+}
+USE_CXX=false
+
 echo "Configuring..."
 
 echo "/* automatically created by config.sh - do not modify */" > config.h
@@ -163,11 +178,7 @@ if [ -z "$CFLAGS" ] ; then
 fi
 
 echo -n "Testing if C compiler supports ${CFLAGS}... "
-echo "int main(int argc, char *argv[]) { return 0; }" > .tmp.c
-
-$CC $CFLAGS .tmp.c -o .tmp.o 2>> .config.log
-
-if [ $? = 0 ] ; then
+if chk_compiles "int main(int argc, char *argv[]) { return 0; }" ; then
     echo "OK"
 else
     echo "No; resetting to defaults"
@@ -255,14 +266,14 @@ echo -n "Testing for ncursesw... "
 if [ "$WITHOUT_CURSES" = "1" ] ; then
     echo "Disabled"
 else
-    echo "#include <ncursesw/ncurses.h>" > .tmp.c
-    echo "int main(void) { initscr(); endwin(); return 0; }" >> .tmp.c
-
     TMP_CFLAGS="-I/usr/local/include -I/usr/include/ncurses -I/usr/include/ncursesw"
     TMP_LDFLAGS="-L/usr/local/lib -lncursesw"
 
-    $CC $CFLAGS $TMP_CFLAGS .tmp.c $TMP_LDFLAGS -o .tmp.o 2>> .config.log
-    if [ $? = 0 ] ; then
+    if chk_compiles "$(cat <<EOF
+#include <ncursesw/ncurses.h>
+int main(void) { initscr(); endwin(); return 0; }
+EOF
+)" ; then
         echo "#define CONFOPT_CURSES 1" >> config.h
         echo $TMP_CFLAGS >> config.cflags
         echo $TMP_LDFLAGS >> config.ldflags
@@ -275,17 +286,19 @@ else
         echo "No"
         WITHOUT_CURSES=1
     fi
+    TMP_CFLAGS=
+    TMP_LDFLAGS=
 fi
 
 if [ "$WITHOUT_CURSES" != "1" ] ; then
     # test for transparent colors in curses
     echo -n "Testing for transparency support in curses... "
 
-    echo "#include <ncurses.h>" > .tmp.c
-    echo "int main(void) { initscr(); use_default_colors(); endwin(); return 0; }" >> .tmp.c
-
-    $CC $CFLAGS $TMP_CFLAGS .tmp.c $TMP_LDFLAGS -o .tmp.o 2>> .config.log
-    if [ $? = 0 ] ; then
+    if chk_compiles "$(cat <<EOF
+#include <ncurses.h>
+int main(void) { initscr(); use_default_colors(); endwin(); return 0; }
+EOF
+)" ; then
         echo "#define CONFOPT_TRANSPARENCY 1" >> config.h
         echo "OK"
     else
@@ -295,12 +308,13 @@ if [ "$WITHOUT_CURSES" != "1" ] ; then
     # test now for wget_wch() existence
     echo -n "Testing for wget_wch()... "
 
-    echo "#include <wchar.h>" > .tmp.c
-    echo "#include <ncurses.h>" >> .tmp.c
-    echo "int main(void) { wchar_t c[2]; initscr(); wget_wch(stdscr, c); endwin(); return 0; }" >> .tmp.c
-
-    $CC $CFLAGS $TMP_CFLAGS .tmp.c $TMP_LDFLAGS -o .tmp.o 2>> .config.log
-    if [ $? = 0 ] ; then
+    if chk_compiles "$(cat <<EOF
+#include <wchar.h>
+#include <ncurses.h>
+int main(void) { wchar_t c[2]; initscr(); wget_wch(stdscr, c);
+endwin(); return 0; }
+EOF
+)" ; then
         echo "#define CONFOPT_WGET_WCH 1" >> config.h
         echo "OK"
     else
@@ -314,19 +328,19 @@ echo -n "Testing for ANSI terminal support... "
 if [ "$WITHOUT_ANSI" = "1" ] ; then
     echo "Disabled"
 else
-    rm -f .tmp.c
-    echo "#include <stdio.h>" >> .tmp.c
-    echo "#include <termios.h>" >> .tmp.c
-    echo "#include <unistd.h>" >> .tmp.c
-    echo "#include <sys/select.h>" >> .tmp.c
-    echo "#include <signal.h>" >> .tmp.c
-    echo "int main(void) { struct termios o; tcgetattr(0, &o); return 0; }" >> .tmp.c
 
     TMP_CFLAGS=""
     TMP_LDFLAGS=""
 
-    $CC $CFLAGS $TMP_CFLAGS .tmp.c $TMP_LDFLAGS -o .tmp.o 2>> .config.log
-    if [ $? = 0 ] ; then
+    if chk_compiles "$(cat <<EOF
+#include <stdio.h>
+#include <termios.h>
+#include <unistd.h>
+#include <sys/select.h>
+#include <signal.h>
+int main(void) { struct termios o; tcgetattr(0, &o); return 0; }
+EOF
+)" ; then
         echo "#define CONFOPT_ANSI 1" >> config.h
         echo $TMP_CFLAGS >> config.cflags
         echo $TMP_LDFLAGS >> config.ldflags
@@ -354,13 +368,11 @@ else
         TMP_LDFLAGS="$(${PKG_CONFIG} --libs QtGui) -lX11"
         TMP_LDFLAGS="$TMP_LDFLAGS -L`kde4-config --install lib` -L`kde4-config --install lib`/kde4/devel -lkio -lkfile -lkdeui -lkdecore"
 
-        echo "#include <KApplication>" > .tmp.cpp
-        echo "int main(void) { new KApplication() ; return 0; } " >> .tmp.cpp
-
-        echo "$CPP $TMP_CFLAGS .tmp.cpp $TMP_LDFLAGS -o .tmp.o" >> .config.log
-        $CPP $TMP_CFLAGS .tmp.cpp $TMP_LDFLAGS -o .tmp.o 2>> .config.log
-
-        if [ $? = 0 ] ; then
+        if USE_CXX=true chk_compiles "$(cat <<EOF
+#include <KApplication>
+int main(void) { new KApplication() ; return 0; }
+EOF
+)" ; then
             echo $TMP_CFLAGS >> config.cflags
             echo $TMP_LDFLAGS >> config.ldflags
 
@@ -380,6 +392,8 @@ else
         else
             echo "No"
         fi
+        TMP_CFLAGS=
+        TMP_LDFLAGS=
     else
         echo "No"
     fi
@@ -396,13 +410,11 @@ else
         TMP_CFLAGS="$(${PKG_CONFIG} --cflags Qt5Widgets 2>/dev/null) -fPIC"
         TMP_LDFLAGS="$(${PKG_CONFIG} --libs Qt5Widgets 2>/dev/null)"
 
-        echo "#include <QtWidgets>" > .tmp.cpp
-        echo "int main(int argc, char *argv[]) { new QApplication(argc, argv) ; return 0; } " >> .tmp.cpp
- 
-        echo "$CPP $TMP_CFLAGS .tmp.cpp $TMP_LDFLAGS -o .tmp.o" >> .config.log
-        $CPP $TMP_CFLAGS .tmp.cpp $TMP_LDFLAGS -o .tmp.o 2>> .config.log
-
-        if [ $? = 0 ] ; then
+        if USE_CXX=true chk_compiles "$(cat <<EOF
+#include <QtWidgets>
+int main(int argc, char *argv[]) { new QApplication(argc, argv) ; return 0; }
+EOF
+)" ; then
             echo $TMP_CFLAGS >> config.cflags
             echo $TMP_LDFLAGS >> config.ldflags
 
@@ -425,6 +437,8 @@ else
         else
             echo "No"
         fi
+        TMP_CFLAGS=
+        TMP_LDFLAGS=
     else
         echo "No"
     fi
@@ -442,13 +456,11 @@ else
         TMP_CFLAGS="$(${PKG_CONFIG} --cflags QtGui 2>/dev/null)"
         TMP_LDFLAGS="$(${PKG_CONFIG} --libs QtGui 2>/dev/null) -lX11"
 
-        echo "#include <QtGui>" > .tmp.cpp
-        echo "int main(int argc, char *argv[]) { new QApplication(argc, argv) ; return 0; } " >> .tmp.cpp
-
-        echo "$CPP $TMP_CFLAGS .tmp.cpp $TMP_LDFLAGS -o .tmp.o" >> .config.log
-        $CPP $TMP_CFLAGS .tmp.cpp $TMP_LDFLAGS -o .tmp.o 2>> .config.log
-
-        if [ $? = 0 ] ; then
+        if USE_CXX=true chk_compiles "$(cat <<EOF
+#include <QtGui>
+int main(int argc, char *argv[]) { new QApplication(argc, argv) ; return 0; }
+EOF
+)" ; then
             echo $TMP_CFLAGS >> config.cflags
             echo $TMP_LDFLAGS >> config.ldflags
 
@@ -470,6 +482,8 @@ else
         else
             echo "No"
         fi
+        TMP_CFLAGS=
+        TMP_LDFLAGS=
     else
         echo "No"
     fi
@@ -481,17 +495,17 @@ echo -n "Testing for GTK... "
 if [ "$WITHOUT_GTK" = "1" ] ; then
     echo "Disabled"
 else
-    echo "#include <gtk/gtk.h>" > .tmp.c
-    echo "#include <gdk/gdkkeysyms.h>" >> .tmp.c
-    echo "int main(void) { gtk_main(); return 0; } " >> .tmp.c
-
     # Try first GTK 3.0
     if chk_pkgconfig gtk+-3.0 ; then
         TMP_CFLAGS="$(${PKG_CONFIG} --cflags gtk+-3.0 2>/dev/null)"
         TMP_LDFLAGS="$(${PKG_CONFIG} --libs gtk+-3.0 2>/dev/null)"
 
-        $CC $CFLAGS $TMP_CFLAGS .tmp.c $TMP_LDFLAGS -o .tmp.o 2>> .config.log
-        if [ $? = 0 ] ; then
+        if chk_compiles "$(cat <<EOF
+#include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
+int main(void) { gtk_main(); return 0; }
+EOF
+)" ; then
             echo "#define CONFOPT_GTK 3" >> config.h
             echo "$TMP_CFLAGS " >> config.cflags
             echo "$TMP_LDFLAGS " >> config.ldflags
@@ -502,14 +516,20 @@ else
             LDFLAGS="$LDFLAGS $TMP_LDFLAGS"
             DRV_GTK=1
         fi
+        TMP_CFLAGS=
+        TMP_LDFLAGS=
     fi
     if test "$DRV_GTK" != 1 && chk_pkgconfig gtk+-2.0 ; then
         # Try now GTK 2.0
         TMP_CFLAGS="$(${PKG_CONFIG} --cflags gtk+-2.0 2>/dev/null)"
         TMP_LDFLAGS="$(${PKG_CONFIG} --libs gtk+-2.0 2>/dev/null)"
 
-        $CC $CFLAGS $TMP_CFLAGS .tmp.c $TMP_LDFLAGS -o .tmp.o 2>> .config.log
-        if [ $? = 0 ] ; then
+        if chk_compiles "$(cat <<EOF
+#include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
+int main(void) { gtk_main(); return 0; }
+EOF
+)" ; then
             echo "#define CONFOPT_GTK 2" >> config.h
             echo "$TMP_CFLAGS " >> config.cflags
             echo "$TMP_LDFLAGS " >> config.ldflags
@@ -520,6 +540,8 @@ else
             LDFLAGS="$LDFLAGS $TMP_LDFLAGS"
             DRV_GTK=1
         fi
+        TMP_CFLAGS=
+        TMP_LDFLAGS=
     fi
     if test "$DRV_GTK" != 1 ; then
         echo "No"
@@ -590,21 +612,21 @@ else
     echo "test" > tmp.bin
     $LD -r -b binary tmp.bin -o tmp.bin.o
 
-    echo "extern const char _binary_tmp_bin_start;" > .tmp.c
-    echo "extern const char _binary_tmp_bin_end;" >> .tmp.c
-    echo "extern const char binary_tmp_bin_start;" >> .tmp.c
-    echo "extern const char binary_tmp_bin_end;" >> .tmp.c
-    echo "int main(void) { " >> .tmp.c
-    echo "#ifdef CONFOPT_EMBED_NOUNDER" >> .tmp.c
-    echo "  int c = &binary_tmp_bin_end - &binary_tmp_bin_start;" >> .tmp.c
-    echo "#else" >> .tmp.c
-    echo "  int c = &_binary_tmp_bin_end - &_binary_tmp_bin_start;" >> .tmp.c
-    echo "#endif" >> .tmp.c
-    echo "  return c; } " >> .tmp.c
-
-    $CC $CFLAGS .tmp.c tmp.bin.o -o .tmp.o 2>> .config.log
-
-    if [ $? = 0 ] ; then
+    if chk_compiles "$(cat <<EOF
+extern const char _binary_tmp_bin_start;
+extern const char _binary_tmp_bin_end;
+extern const char binary_tmp_bin_start;
+extern const char binary_tmp_bin_end;
+int main(void) {
+#ifdef CONFOPT_EMBED_NOUNDER
+  int c = &binary_tmp_bin_end - &binary_tmp_bin_start;
+#else
+  int c = &_binary_tmp_bin_end - &_binary_tmp_bin_start;
+#endif
+  return c;
+}
+EOF
+)" ; then
         echo "Yes (with underscores)"
         MORE_OBJS="${ARCH_OBJ} ${MORE_OBJS}"
         echo "extern const char _binary_${ARCH_SYM}_start;" >> config.h
