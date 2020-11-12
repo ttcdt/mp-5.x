@@ -655,21 +655,21 @@ else
     echo "test" > tmp.bin
     $LD -r -b binary tmp.bin -o tmp.bin.o
 
-    if chk_compiles "$(cat <<EOF
-extern const char _binary_tmp_bin_start;
-extern const char _binary_tmp_bin_end;
-extern const char binary_tmp_bin_start;
-extern const char binary_tmp_bin_end;
-int main(void) {
-#ifdef CONFOPT_EMBED_NOUNDER
-  int c = &binary_tmp_bin_end - &binary_tmp_bin_start;
-#else
-  int c = &_binary_tmp_bin_end - &_binary_tmp_bin_start;
-#endif
-  return c;
-}
-EOF
-)" ; then
+    echo "extern const char _binary_tmp_bin_start;" > .tmp.c
+    echo "extern const char _binary_tmp_bin_end;" >> .tmp.c
+    echo "extern const char binary_tmp_bin_start;" >> .tmp.c
+    echo "extern const char binary_tmp_bin_end;" >> .tmp.c
+    echo "int main(void) { " >> .tmp.c
+    echo "#ifdef CONFOPT_EMBED_NOUNDER" >> .tmp.c
+    echo "  int c = &binary_tmp_bin_end - &binary_tmp_bin_start;" >> .tmp.c
+    echo "#else" >> .tmp.c
+    echo "  int c = &_binary_tmp_bin_end - &_binary_tmp_bin_start;" >> .tmp.c
+    echo "#endif" >> .tmp.c
+    echo "  return c; } " >> .tmp.c
+
+    $CC $CFLAGS .tmp.c tmp.bin.o -o .tmp.o 2>> .config.log
+
+    if [ $? = 0 ] ; then
         echo "Yes (with underscores)"
         MORE_OBJS="${ARCH_OBJ} ${MORE_OBJS}"
         echo "extern const char _binary_${ARCH_SYM}_start;" >> config.h
