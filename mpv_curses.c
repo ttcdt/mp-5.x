@@ -650,6 +650,7 @@ static mpdm_t nc_tui_doc_draw(mpdm_t args, mpdm_t ctxt)
             s = mpdm_aget(l, m);
 
             wattrset(stdscr, nc_attrs[attr]);
+            wattron(stdscr, nc_attrs[attr]);
             nc_addwstr(s);
         }
     }
@@ -805,6 +806,7 @@ static mpdm_t nc_tui_attr(mpdm_t a, mpdm_t ctxt)
 static mpdm_t nc_tui_refresh(mpdm_t a, mpdm_t ctxt)
 /* TUI: refresh the screen */
 {
+
     wrefresh(stdscr);
     return NULL;
 }

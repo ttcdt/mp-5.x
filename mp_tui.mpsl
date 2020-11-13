@@ -817,11 +817,11 @@ sub mp_drv.menu()
             }
         }
 
-        mp.tui.attr(mp.color.normal.attr);
+        mp.tui.attr(mp.colors.normal.attr);
         mp.tui.draw(mp.active(), 0);
     }
 
-    mp.tui.attr(mp.color.normal.attr);
+    mp.tui.attr(mp.colors.normal.attr);
 
     if (action != NULL)
         mp.process_action(action);
