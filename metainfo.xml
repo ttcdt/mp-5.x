@@ -32,14 +32,18 @@
 
   <releases>
 
-    <release version="5.44" type="stable" date="2020-11-10">
+    <release version="5.45" type="stable" date="2021-01-14">
       <description>
       <p>Bug fixes:</p>
       <ul>
-        <li>Fixed backwards search (hungups and skipped matches).</li>
-        <li>Fixed ugly attributes at exit in the ANSI driver.</li>
-        <li>Fixed compilation in GTK v.2.</li>
-        <li>Fixed JSON syntax highlight.</li>
+        <li>Strange behaviour in `delete_left` action at the beginning of a document (Tiny).</li>
+        <li>Hangup in a corner case when mixing visual word wrapping and hard word wrapping (Theo).</li>
+        <li>Strange colors in newer ncurses (contributed by X-Ryl669).</li>
+        <li>In the ANSI driver, set the default attribute before deleting up to the end of line to avoid spurious inverse colors in not-very-smart terminal emulators like kitty (Tiny).</li>
+      </ul>
+      <p>Improvements:</p>
+      <ul>
+        <li>Better config.sh configurability and package detection (contributed by rofl0r).</li>
       </ul>
       </description>
       <artifacts>
@@ -52,11 +56,14 @@
       </artifacts>
     </release>
 
-    <release version="5.43" type="stable" date="2020-10-11">
+    <release version="5.44" type="stable" date="2020-11-10">
       <description>
-      <p>New features:</p>
+      <p>Bug fixes:</p>
       <ul>
-        <li>The MPSL source is deployed in .zip format, so the disk footprint is smaller.</li>
+        <li>Fixed backwards search (hungups and skipped matches).</li>
+        <li>Fixed ugly attributes at exit in the ANSI driver.</li>
+        <li>Fixed compilation in GTK v.2.</li>
+        <li>Fixed JSON syntax highlight.</li>
       </ul>
       </description>
       <artifacts>

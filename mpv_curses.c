@@ -806,7 +806,6 @@ static mpdm_t nc_tui_attr(mpdm_t a, mpdm_t ctxt)
 static mpdm_t nc_tui_refresh(mpdm_t a, mpdm_t ctxt)
 /* TUI: refresh the screen */
 {
-
     wrefresh(stdscr);
     return NULL;
 }

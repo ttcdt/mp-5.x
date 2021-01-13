@@ -30,7 +30,7 @@
 
 #define MAX_COLORS 100
 char ansi_attrs[MAX_COLORS][64];
-
+int normal_attr = 0;
 
 /** code **/
 
@@ -179,7 +179,7 @@ static void ansi_build_colors(void)
 {
     mpdm_t colors;
     mpdm_t color_names;
-    mpdm_t v;
+    mpdm_t v, i;
     int n, c;
     int rgbcolor = 0;
 
@@ -192,9 +192,13 @@ static void ansi_build_colors(void)
 
     /* loop the colors */
     n = c = 0;
-    while (mpdm_iterator(colors, &c, &v, NULL)) {
+    while (mpdm_iterator(colors, &c, &v, &i)) {
         mpdm_t w;
         int c0, c1, cf = 0;
+
+        /* store the 'normal' attribute */
+        if (wcscmp(mpdm_string(i), L"normal") == 0)
+            normal_attr = n;
 
         /* flags */
         w = mpdm_get_wcs(v, L"flags");
@@ -452,6 +456,8 @@ static mpdm_t ansi_doc_draw(mpdm_t args, mpdm_t ctxt)
                 ansi_set_attr(attr);
                 ansi_print_v(s);
             }
+
+            ansi_set_attr(normal_attr);
 
             /* delete to end of line */
             printf("\033[K");

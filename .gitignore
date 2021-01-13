@@ -12,6 +12,7 @@ po/minimum-profit.pot
 *.[oa]
 *.moc
 mp.tar
+mp.zip
 .build.sh
 mpdm-stress
 mpsl-stress

@@ -249,25 +249,38 @@ mp.actions.check_for_updates = sub {
     mp.busy(1);
 
     local c = [];
-    local f = connect("triptico.com", "www");
+    local f;
+
+    /* try first fingerd */
+//    f = connect("triptico.com", 7979);
 
     if (f != NULL) {
-        local l;
+        write(f, sprintf("mp_release_notes %s %s\r\n", mp.VERSION, mp_drv.id));
+    }
+    else {
+        /* then try http */
+        f = connect("triptico.com", "www");
 
-        write(f, "GET /download/mp_release_notes HTTP/1.1\r\n");
-        write(f, "Host: triptico.com\r\n");
-        write(f, "User-Agent: Minimum Profit ",
-            mp.VERSION, " (", mp_drv.id, ") Update Checker\r\n");
-        write(f, "Connection: close\r\n\r\n");
+        if (f != NULL) {
+            local l;
 
-        /* ignore HTTP response */
-        while ((l = read(f)) != NULL) {
-            l = mp.chomp(l);
+            write(f, "GET /download/mp_release_notes HTTP/1.1\r\n");
+            write(f, "Host: triptico.com\r\n");
+            write(f, "User-Agent: Minimum Profit ",
+                mp.VERSION, " (", mp_drv.id, ") Update Checker\r\n");
+            write(f, "Connection: close\r\n\r\n");
 
-            if (l == '')
-                break;
+            /* ignore HTTP response */
+            while ((l = read(f)) != NULL) {
+                l = mp.chomp(l);
+
+                if (l == '')
+                    break;
+            }
         }
+    }
 
+    if (f != NULL) {
         /* content */
         /* drop first 3 lines */
         read(f);

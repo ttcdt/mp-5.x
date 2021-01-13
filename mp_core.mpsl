@@ -822,8 +822,8 @@ sub mp.assert_version(found, minimal, package)
 sub mp.test_versions()
 /* tests component versions */
 {
-    mp.assert_version(MPDM.version, 2.69, 'MPDM');
-    mp.assert_version(MPSL.VERSION, 2.60, 'MPSL');
+    mp.assert_version(MPDM.version, 2.70, 'MPDM');
+    mp.assert_version(MPSL.VERSION, 2.61, 'MPSL');
 }
 
 

@@ -585,7 +585,7 @@ int win32_drv_detect(int *argc, char ***argv)
 
         mpdm_t drv = mpdm_set_wcs(mpdm_root(), MPDM_O(), L"mp_drv");
 
-        mpdm_set_wcs(drv, MPDM_S(L"win32c"), L"id");
+        mpdm_set_wcs(drv, MPDM_S(sizeof(char *) == 8 ? L"win64c" : L"win32c"), L"id");
         mpdm_set_wcs(drv, MPDM_X(win32c_drv_startup), L"startup");
 
         ret = 1;

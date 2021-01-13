@@ -1,6 +1,22 @@
 Minimum Profit Release Notes
 ============================
 
+5.45
+----
+
+ - Bug fixes:
+    - Strange behaviour in `delete_left` action at the beginning
+      of a document (Tiny).
+    - Hangup in a corner case when mixing visual word wrapping and
+      hard word wrapping (Theo).
+    - Strange colors in newer ncurses (contributed by X-Ryl669).
+    - In the ANSI driver, set the default attribute before deleting
+      up to the end of line to avoid spurious inverse colors in
+      not-very-smart terminal emulators like kitty (Tiny).
+ - Improvements:
+    - Better config.sh configurability and package detection
+      (contributed by rofl0r).
+
 5.44
 ----
 

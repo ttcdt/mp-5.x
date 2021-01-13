@@ -33,7 +33,7 @@ mp_doc.actions['insert_page_break'] = sub (d) { d->store_undo()->insert("\x{000c
 mp_doc.actions['insert_m_dash']     = sub (d) { d->store_undo()->insert("\x{2014}"); };
 
 mp_doc.actions['delete_left']   = sub (d) {
-    if (d.txt.x + d.txt.y)
+    if (d.txt.x + d.txt.y) {
         d->store_undo();
 
         d->move_left();
@@ -45,6 +45,7 @@ mp_doc.actions['delete_left']   = sub (d) {
         }
 
         d->delete_char();
+    }
 
     return d;
 };
@@ -878,11 +879,19 @@ sub mp_doc.word_wrap_paragraph(doc)
     local txt = doc.txt;
 
     if (mp.config.word_wrap) {
+        /* disable visual wrap temporarily */
+        local t = mp.config.visual_wrap;
+        mp.config.visual_wrap = 0;
+
+        mp.vw_unwrap(txt.lines, txt.y);
         doc->join_paragraph()->move_eol();
 
         while (size(txt.lines[txt.y]) > mp.config.word_wrap) {
             doc->insert_space()->move_left()->delete_char();
         }
+
+        /* restore visual wrap */
+        mp.config.visual_wrap = t;
     }
 
     return doc;
