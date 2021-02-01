@@ -231,7 +231,7 @@ mp_doc.actions['revert'] = sub (d) {
 };
 
 mp.actions['open_config_file']  = sub {
-    mp.open(HOMEDIR + ".mp.mpsl");
+    mp.open(mp.config_file);
 };
 
 mp.actions['sync'] = sub {
@@ -572,7 +572,7 @@ sub mp.save_th(f, doc)
     doc.disk_op = 1;
 
     if (mp.config.visual_wrap)
-        lines = clone(doc.txt.lines)->mp.vw_unwrap();
+        lines = clone(doc.txt.lines)->mp_c.vw_unwrap();
     else
         lines = doc.txt.lines;
 
@@ -883,94 +883,12 @@ sub mp.vw_col()
 }
 
 
-sub mp.vw_unwrap(lines, y)
-/* unwraps lines */
-{
-    local e;
-
-    /* y not set? wrap the full array */
-    if (y == NULL) {
-        y = 0;
-        e = count(lines);
-    }
-    else
-        e = y + 1;
-
-    while (y < e) {
-        /* while this line ends in a soft-hyphen... */
-        while (lines[y][-1] == "\x{ad}") {
-            /* strip the hyphen and join next line */
-            lines[y] = lines[y]->slice(0, -2) + lines[y + 1];
-
-            /* destroy next line */
-            lines->del(y + 1);
-        }
-
-        y += 1;
-    }
-
-    return lines;
-}
-
-
-sub mp.vw_wrap(lines, max, y)
-/* rewrap lines to max */
-{
-    local o1;
-
-    /* unwrap first */
-    mp.vw_unwrap(lines, y);
-
-    if (y == NULL) {
-        y = 0;
-        o1 = 0;
-    }
-    else
-        o1 = 1;
-
-    while (y < count(lines)) {
-        /* while this line is longer... */
-        while (count(lines[y]) > max) {
-            local l = lines[y];
-            local m = max;
-    
-            /* wrap by word */
-            while (m > 0 && l[m] == " ")
-                m -= 1;
-            while (m > 0 && l[m] != " ")
-                m -= 1;
-    
-            if (m == 0)
-                m = max;
-    
-            /* get rest of line */
-            local r = l->slice(m + 1, -1);
-    
-            /* replace current cropped line + soft-hyphen */
-            lines[y] = l->slice(0, m + 1) + "\x{ad}";
-    
-            /* and insert the rest of line below */
-            y += 1;
-            lines->ins(r, y);
-        }
-    
-        y += 1;
-
-        /* only one? stop here */
-        if (o1)
-            break;
-    }
-
-    return lines;
-}
-
-
 sub mp_doc.vw_unwrap(doc)
 /* unwraps a document, keeping the position */
 {
     doc->busy(1);
     local o = doc->get_offset();
-    mp.vw_unwrap(doc.txt.lines);
+    mp_c.vw_unwrap(doc.txt.lines);
     doc->set_offset(o);
     doc->busy(0);
 }
@@ -981,7 +899,7 @@ sub mp_doc.vw_wrap(doc)
 {
     doc->busy(1);
     local o = doc->get_offset();
-    mp.vw_wrap(doc.txt.lines, mp.vw_col());
+    mp_c.vw_wrap(doc.txt.lines, mp.vw_col());
     doc->set_offset(o);
     doc.txt.vx = 0;
     doc->busy(0);

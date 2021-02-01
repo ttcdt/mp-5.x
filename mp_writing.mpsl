@@ -15,8 +15,8 @@
 mp_doc.actions['word_count'] = sub (d) {
     local c = d->long_op(d.word_count);
 
-    mp.alert(sprintf(L("Lines: %d Words: %d"),
-        size(d->get_active_area()), c));
+    mp.alert(sprintf(L("Lines: %d\nWords: %d\nPages: %d"),
+        size(d->get_active_area()), c, c * 4 / 1000));
 };
 
 
@@ -75,7 +75,7 @@ sub mp_doc.word_count(doc)
     local w = 0;
 
     foreach (l, doc->get_active_area())
-        w += size(mp.split_by_words(l, "/[^ \t]+/"));
+        w += size(mp.split_by_words(l, "/[^ \t\x{ad}]+/"));
 
     return w;
 }

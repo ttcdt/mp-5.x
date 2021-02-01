@@ -687,6 +687,11 @@ _Redo_
 
 Redoes the previously undone operation, if any.
 
+release_notes
+-------------
+
+Shows the notes for this release.
+
 repeated_words_options
 ----------------------
 

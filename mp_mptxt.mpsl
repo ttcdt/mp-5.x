@@ -22,7 +22,7 @@ global mp_mptxt = {
         local lines;
 
         if (mp.config.visual_wrap)
-            lines = clone(doc.txt.lines)->mp.vw_unwrap();
+            lines = clone(doc.txt.lines)->mp_c.vw_unwrap();
         else
             lines = doc.txt.lines;
 

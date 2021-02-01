@@ -69,8 +69,9 @@ global mp = {
         eol:                    (mp_drv.id == 'win32' && "\r\n" || "\n"),
         status_format:          "%m%n %x,%y [%l] %R%O%W %s %e %t",
         time_stamp_format:      "%a, %d %b %Y %H:%M:%S %z",
-        visual_wrap:            0,
-        use_unicode:            1
+        visual_wrap:            1,
+        use_unicode:            1,
+        dark_mode:              1
     },
 
     /* regular expression matching a word (test fallback) */
@@ -90,67 +91,67 @@ global mp = {
     colors:         {
         normal: {
             text:   [ 'default', 'default' ],
-            gui:    [ 0x000000, 0xffffff ]
+            gui:    NULL
         },
         cursor: {
             text:   [ 'default', 'default' ],
-            gui:    [ 0x000000, 0xffffff ],
+            gui:    NULL,
             flags:  [ 'reverse' ]
         },
         selection: {
             text:   [ 'red', 'default' ],
-            gui:    [ 0xff0000, 0xffffff ],
-            flags:  [ 'reverse']
+            gui:    NULL,
+            flags:  [ 'reverse' ]
         },
         comments: {
             text:   [ 'green', 'default' ],
-            gui:    [ 0x00cc77, 0xffffff ]
+            gui:    NULL
         },
         documentation: {
             text:   [ 'cyan', 'default' ],
-            gui:    [ 0x8888ff, 0xffffff ]
+            gui:    NULL
         },
         quotes: {
             text:   [ 'blue', 'default' ],
-            gui:    [ 0x0000ff, 0xffffff ],
+            gui:    NULL,
             flags:  [ 'bright' ]
         },
         matching: {
             text:   [ 'black', 'cyan' ],
-            gui:    [ 0x000000, 0xffff00 ]
+            gui:    NULL
         },
         word1: {
             text:   [ 'green', 'default' ],
-            gui:    [ 0x00aa00, 0xffffff ],
+            gui:    NULL,
             flags:  [ 'bright' ]
         },
         word2: {
             text:   [ 'red', 'default' ],
-            gui:    [ 0xff6666, 0xffffff ],
+            gui:    NULL,
             flags:  [ 'bright' ]
         },
         word3: {
             text:   [ 'default', 'default' ],
-            gui:    [ 0x000088, 0xffffff ],
+            gui:    NULL,
             flags:  [ 'bright' ]
         },
         tag: {
             text:   [ 'cyan', 'default' ],
-            gui:    [ 0x8888ff, 0xffffff ],
+            gui:    NULL,
             flags:  [ 'underline' ]
         },
         spell: {
             text:   [ 'red', 'default' ],
-            gui:    [ 0xff8888, 0xffffff ],
+            gui:    NULL,
             flags:  [ 'bright', 'underline' ]
         },
         search: {
             text:   [ 'black', 'green' ],
-            gui:    [ 0x000000, 0x00cc77 ]
+            gui:    NULL
         },
         suggest: {
             text:   [ 'black', 'white' ],
-            gui:    [ 0x000000, 0x808080 ],
+            gui:    NULL,
             flags:  [ 'bright' ]
         }
     },
@@ -332,23 +333,6 @@ mp.colors.spell.gui         = [ 0xff8888, 0xffffff ];
 mp.colors.search.gui        = [ 0x000000, 0x00cc77 ];
 */
 
-/* Minimum Profit Dark */
-
-mp.colors.normal.gui        = [ 0xf0f0f0, 0x1b1b1b ];
-mp.colors.cursor.gui        = mp.colors.normal.gui;
-mp.colors.selection.gui     = [ 0xf2777a, 0x000000 ];
-mp.colors.comments.gui      = [ 0x00cc77, 0x1b1b1b ];
-mp.colors.documentation.gui = [ 0x8888ff, 0x1b1b1b ];
-mp.colors.quotes.gui        = [ 0x629FCF, 0x1b1b1b ];
-mp.colors.matching.gui      = [ 0x000000, 0x00aaaa ];
-mp.colors.word1.gui         = [ 0x00aa00, 0x1b1b1b ];
-mp.colors.word2.gui         = [ 0xff6666, 0x1b1b1b ];
-mp.colors.word3.gui         = [ 0xe0e0e0, 0x1b1b1b ];
-mp.colors.tag.gui           = [ 0x8888ff, 0x1b1b1b ];
-mp.colors.spell.gui         = [ 0xff8888, 0x1b1b1b ];
-mp.colors.search.gui        = [ 0x000000, 0x00cc77 ];
-mp.colors.search.gui        = [ 0x000000, 0x00cc77 ];
-mp.colors.suggest.gui       = [ 0x000000, 0x808080 ];
 
 /** MP base class **/
 
@@ -769,8 +753,10 @@ sub mp.process_cmdline()
 
 
 sub mp.load_profile()
-/* loads ~/.mp.mpsl */
+/* loads the configuration file(s) */
 {
+    local cfdir, cf;
+
     /* if /etc/mp.mpsl exists, execute it */
     if (stat('/etc/mp.mpsl') != NULL) {
         eval( sub {
@@ -779,11 +765,25 @@ sub mp.load_profile()
         });
     }
 
-    /* if ~/.mp.mpsl exists, execute it */
-    if (ERROR == NULL && stat(HOMEDIR + '.mp.mpsl') != NULL) {
+    /* find where the config file is */
+    cfdir = HOMEDIR;
+    cf    = ".mp.mpsl";
+
+    if (stat(cfdir + cf) == NULL) {
+        /* if ~/.config is a directory, use ~/.config/mp.mpsl */
+        if (stat(cfdir + ".config/")->get(2)->bitand(0x4000)) {
+            cfdir = HOMEDIR + ".config/";
+            cf    = "mp.mpsl";
+        }
+    }
+
+    mp.config_file = cfdir + cf;
+
+    /* if the config file exists, execute it */
+    if (ERROR == NULL && stat(mp.config_file) != NULL) {
         eval( sub {
-            local INC = [ HOMEDIR ];
-            load(".mp.mpsl");
+            local INC = [ cfdir ];
+            load(cf);
         });
     }
 
@@ -870,6 +870,47 @@ sub mp.exit()
 }
 
 
+sub mp.prepare()
+/* things to be done just before driver initializing */
+{
+    if (mp.config.dark_mode) {
+        /* Minimum Profit Dark */
+        mp.colors.normal.gui        |= [ 0xf0f0f0, 0x1b1b1b ];
+        mp.colors.cursor.gui        |= [ 0xf0f0f0, 0x1b1b1b ];
+        mp.colors.selection.gui     |= [ 0xf2777a, 0x000000 ];
+        mp.colors.comments.gui      |= [ 0x00cc77, 0x1b1b1b ];
+        mp.colors.documentation.gui |= [ 0x8888ff, 0x1b1b1b ];
+        mp.colors.quotes.gui        |= [ 0x629FCF, 0x1b1b1b ];
+        mp.colors.matching.gui      |= [ 0x000000, 0x00aaaa ];
+        mp.colors.word1.gui         |= [ 0x00aa00, 0x1b1b1b ];
+        mp.colors.word2.gui         |= [ 0xff6666, 0x1b1b1b ];
+        mp.colors.word3.gui         |= [ 0xe0e0e0, 0x1b1b1b ];
+        mp.colors.tag.gui           |= [ 0x8888ff, 0x1b1b1b ];
+        mp.colors.spell.gui         |= [ 0xff8888, 0x1b1b1b ];
+        mp.colors.search.gui        |= [ 0x000000, 0x00cc77 ];
+        mp.colors.search.gui        |= [ 0x000000, 0x00cc77 ];
+        mp.colors.suggest.gui       |= [ 0x000000, 0x808080 ];
+    }
+    else {
+        /* Minimum Profit Classic */
+        mp.colors.normal.gui        |= [ 0x000000, 0xffffff ];
+        mp.colors.cursor.gui        |= [ 0x000000, 0xffffff ];
+        mp.colors.selection.gui     |= [ 0xff0000, 0xffffff ];
+        mp.colors.comments.gui      |= [ 0x00cc77, 0xffffff ];
+        mp.colors.documentation.gui |= [ 0x8888ff, 0xffffff ];
+        mp.colors.quotes.gui        |= [ 0x0000ff, 0xffffff ];
+        mp.colors.matching.gui      |= [ 0x000000, 0xffff00 ];
+        mp.colors.word1.gui         |= [ 0x00aa00, 0xffffff ];
+        mp.colors.word2.gui         |= [ 0xff6666, 0xffffff ];
+        mp.colors.word3.gui         |= [ 0x000088, 0xffffff ];
+        mp.colors.tag.gui           |= [ 0x8888ff, 0xffffff ];
+        mp.colors.spell.gui         |= [ 0xff8888, 0xffffff ];
+        mp.colors.search.gui        |= [ 0x000000, 0x00cc77 ];
+        mp.colors.suggest.gui       |= [ 0x000000, 0x808080 ];
+    }
+}
+
+
 /** modules **/
 
 local mp_modules = [
@@ -911,8 +952,9 @@ foreach (m, mp_modules) {
 if (ERROR == NULL) {
     mp.load_profile();
     mp.load_state();
-    mp_drv.startup();
     mp.process_cmdline();
+    mp.prepare();
+    mp_drv.startup();
     mp.test_versions();
     mp_drv.main_loop();
     mp_drv.shutdown();

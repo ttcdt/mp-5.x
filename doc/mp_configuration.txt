@@ -44,6 +44,11 @@ The external command to be executed when a tag search is requested. By
 default is `ctags *'. Other useful value is `ctags -R', that search for
 tags recursively in subdirectories.
 
+mp.config.dark_mode
+-------------------
+
+Selects dark (1) or light (0) color modes (default: 1).
+
 mp.config.double_page
 ---------------------
 
@@ -99,6 +104,13 @@ mp.config.html_title
 
 The title to be used when exporting a mptxt file to HTML (default: the
 output file name).
+
+mp.config.hw_cursor
+-------------------
+
+In text modes, moves the hardware terminal cursor to the position of
+the file editing cursor. Some terminals interfere with the cursor color
+used internally (default: 0).
 
 mp.config.ispell_cmd
 --------------------

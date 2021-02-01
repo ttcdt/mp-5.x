@@ -111,7 +111,6 @@ __I18N__ = {
 	"Error reading from command '%s'" => "Error al leer desde el comando '%s'",
 	"Revert" => "Revertir",
 	"Invalid encoding " => "Codificaci\x{00f3}n no v\x{00e1}lida ",
-	"Lines: %d Words: %d" => "Lineas: %d Palabras: %d",
 	"Set charset encoding..." => "Codificaci\x{00f3}n...",
 	"Count words" => "Contar palabras",
 	"Toggle spellchecking" => "Conmutar ortograf\x{00ed}a",
@@ -255,5 +254,6 @@ __I18N__ = {
 	"Toggle visual wrap" => "Conmutar 'visual wrap'",
 	"Internal error" => "Error interno",
 	"Release notes" => "Notas sobre la versi\x{00f3}n",
+	"Lines: %d\nWords: %d\nPages: %d" => "L\x{00ed}neas: %d\nPalabras: %d\nP\x{00e1}ginas: %d",
 	"-" => "-"
 };

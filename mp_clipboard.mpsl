@@ -228,7 +228,7 @@ sub mp_doc.copy(doc)
         mp.clipboard = doc->get_active_area();
         mp.clipboard_vertical = doc.txt.mark.vertical;
 
-        mp.vw_unwrap(mp.clipboard);
+        mp_c.vw_unwrap(mp.clipboard);
 
         mp_drv.clip_to_sys();
     }

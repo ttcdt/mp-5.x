@@ -32,6 +32,37 @@
 
   <releases>
 
+    <release version="5.46" type="stable" date="2021-02-02">
+      <description>
+      <p>Improvements:</p>
+      <ul>
+      <li>In text interfaces, typing on a selection list filters by text the elements shown (contributed by FltkLover).</li>
+      <li>New configuration variable `mp.config.dark_mode', to switch between dark / light color modes (default: 1, dark) (Claire).</li>
+      </ul>
+      <p>Important changes:</p>
+      <ul>
+      <li>Visual wrapping is now on by default. If text disappearing beyond the right margin is preferred, you can set the configuration variable `mp.config.visual_wrap' to 0. Also, remember that visual wrapping can always be toggled using the `ctrl-k' keycode (Theo).</li>
+      <li>If the ~/.config directory exists, the user configuration file is assumed to be ~/.config/mp.mpsl (unless a traditional ~/.mp.mpsl file already exists) (Theo).</li>
+      </ul>
+      <p>Bug fixes:</p>
+      <ul>
+      <li>Fixed word count when visual wrapping is on (Claire).</li>
+      </ul>
+      <p>Other changes:</p>
+      <ul>
+      <li>The `word_count' action also shows an (approximate) number of pages.</li>
+      </ul>
+      </description>
+      <artifacts>
+        <artifact type="source">
+          <location>https://triptico.com/download/mp-5.tar.gz</location>
+        </artifact>
+        <artifact type="binary" platform="win32">
+          <location>https://triptico.com/download/mp-5-portable-64.exe</location>
+        </artifact>
+      </artifacts>
+    </release>
+
     <release version="5.45" type="stable" date="2021-01-14">
       <description>
       <p>Bug fixes:</p>

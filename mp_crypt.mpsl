@@ -155,8 +155,6 @@ sub mp.crypt_load(fd, password, ver)
 sub mp.crypt_save(fd, lines, password, ver)
 /* saves the lines as an encrypted file */
 {
-    local nl = 0;
-
     /* default version */
     if (ver != 1 && ver != 2)
         ver = 2;
@@ -173,9 +171,9 @@ sub mp.crypt_save(fd, lines, password, ver)
     crc = 0xffff;
 
     /* loop the lines */
-    foreach (l, lines) {
+    foreach (l, i, lines) {
         /* write a line separator if it's not the first line */
-        if (nl)
+        if (i)
             l = "\n" + l;
 
         /* write each char xoring with next crypto-byte */
@@ -183,8 +181,6 @@ sub mp.crypt_save(fd, lines, password, ver)
             crc = crc->mp.crc16(ord(c));
             putchar(fd, a4->char(c));
         }
-
-        nl += 1;
     }
 
     if (ver == 2) {

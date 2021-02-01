@@ -1337,6 +1337,124 @@ mpdm_t mp_c_set_offset(mpdm_t args, mpdm_t ctxt)
 }
 
 
+mpdm_t mp_c_vw_unwrap(mpdm_t args, mpdm_t ctxt)
+/* unwraps lines wrapped by soft-hyphens */
+{
+    mpdm_t lines = mpdm_get_i(args, 0);
+    mpdm_t v = mpdm_get_i(args, 1);
+    int y, o1;
+
+    /* y not set? wrap the full array */
+    if (v == NULL) {
+        y  = 0;
+        o1 = 0;
+    }
+    else {
+        y  = mpdm_ival(v);
+        o1 = 1;
+    }
+
+    while (y < mpdm_size(lines)) {
+        wchar_t *ptr;
+        int z;
+
+        v = mpdm_get_i(lines, y);
+
+        /* while this line ends in a soft-hyphen... */
+        while ((ptr = mpdm_string(v)) && (z = wcslen(ptr)) > 1 && ptr[z - 1] == L'\xad') {
+            /* join this line (without the soft-hyphen) with next line */
+            v = mpdm_strcat(MPDM_NS(ptr, z - 1), mpdm_get_i(lines, y + 1));
+
+            /* store in the array */
+            mpdm_set_i(lines, v, y);
+
+            /* delete next line */
+            mpdm_del_i(lines, y + 1);
+        }
+
+        /* only one? done */
+        if (o1)
+            break;
+
+        y++;
+    }
+
+    return lines;
+}
+
+
+mpdm_t mp_c_vw_wrap(mpdm_t args, mpdm_t ctxt)
+/* rewrap lines to max */
+{
+    mpdm_t lines = mpdm_get_i(args, 0);
+    int max = mpdm_ival(mpdm_get_i(args, 1));
+    mpdm_t v = mpdm_get_i(args, 2);
+    int y, o1;
+
+    /* convert args from lines, max, y to lines, y */
+    mpdm_del_i(args, 1);
+
+    /* unwrap first */
+    mp_c_vw_unwrap(args, ctxt);
+
+    /* y not set? wrap the full array */
+    if (v == NULL) {
+        y  = 0;
+        o1 = 0;
+    }
+    else {
+        y  = mpdm_ival(v);
+        o1 = 1;
+    }
+
+    while (y < mpdm_size(lines)) {
+        wchar_t *ptr;
+
+        v = mpdm_get_i(lines, y);
+
+        /* while this line is longer than max... */
+        while ((ptr = mpdm_string(v)) && wcslen(ptr) > max) {
+            mpdm_t w;
+            int m = max;
+            wchar_t *ptr2;
+
+            /* wrap by word */
+            while (m > 0 && ptr[m] == L' ')
+                m--;
+            while (m > 0 && ptr[m] != L' ')
+                m--;
+
+            if (m == 0)
+                m = max;
+
+            /* build the first part */
+            ptr2 = calloc((m + 3), sizeof(wchar_t));
+            wcsncpy(ptr2, ptr, m + 1);
+            ptr2[m + 1] = L'\xad';
+            w = MPDM_ENS(ptr2, m + 2);
+
+            /* build the second part */
+            v = MPDM_S(&ptr[m + 1]);
+
+            /* set the first part */
+            mpdm_set_i(lines, w, y);
+
+            /* insert the second part */
+            y++;
+            mpdm_ins(lines, v, y);
+        }
+
+        /* only one? done */
+        if (o1)
+            break;
+
+        y++;
+    }
+
+    return lines;
+}
+
+
 static mpdm_t find_in_embedded_arch(mpdm_t args, mpdm_t ctxt)
 /* searches for embedded MPSL code */
 {
@@ -1406,6 +1524,8 @@ void mp_startup(int argc, char *argv[])
     mpdm_set_wcs(mp_c, MPDM_X(mp_c_search_hex),     L"search_hex");
     mpdm_set_wcs(mp_c, MPDM_X(mp_c_get_offset),     L"get_offset");
     mpdm_set_wcs(mp_c, MPDM_X(mp_c_set_offset),     L"set_offset");
+    mpdm_set_wcs(mp_c, MPDM_X(mp_c_vw_unwrap),      L"vw_unwrap");
+    mpdm_set_wcs(mp_c, MPDM_X(mp_c_vw_wrap),        L"vw_wrap");
 
     /* creates the INC (executable path) array */
     INC = mpdm_set_wcs(mpdm_root(), MPDM_A(0), L"INC");

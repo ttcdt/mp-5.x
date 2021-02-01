@@ -163,40 +163,23 @@ sub mp.tui.readline(prompt, history, default, flags)
             local done = 0;
 
             while (!done) {
-                local l = glob(r + '*');
+                local l = glob(r + "*");
+                l->ins("../", 0);
 
                 if (size(l)) {
-                    ins(l, '../', 0);
-
-                    local p = mp.tui.list(prompt, l, 1, { 'split_entry' => 1 });
+                    local p = mp.tui.list(prompt, l, 1, {
+                        'split_entry': 1, 'filter': r, 'file': 1 });
 
                     if (p == NULL) {
                         r = NULL;
                         done = 1;
                     }
                     else {
-                        /* If in a subdirectory, we need to walk only one path up only and not to '../' */
-                        if (p == 0) {
-                            local segment = split(r, '/');
-                            /* Remove last slash's empty value */
-                            pop(segment);
-                            /* Walk up one item */
-                            if (size(segment) > 0) pop(segment);
-                            if (size(segment) == 0) {
-                                if (r[0] == '/') segment = ['/'];
-                                else {
-                                    segment = split(getenv('PWD'), '/');
-                                }
-                            }
-                            r = join(segment, '/') + '/';
-                        } 
-                        else {
-                            r = l[p];
+                        r = l[p];
 
-                            /* if it's not a directory, retry */
-                            if (regex(r, '@/$@') == NULL)
-                                done = 1;
-                        }
+                        /* if it's not a directory, retry in search on it */
+                        if (regex(r, '@/$@') == NULL)
+                            done = 1;
                     }
                 }
                 else
@@ -281,8 +264,31 @@ sub mp.tui.list(prompt, data, pos, flags)
     if (pos == NULL)
         pos = 0;
 
+    /* filtering data */
+    local filter = flags.filter || "";
+    local org_data = data;
+    local refilter = TRUE;
+
     for (;;) {
         local k, n, cp;
+
+        /* refiltering needed? */
+        if (refilter) {
+            if (filter != "")
+                data = org_data->grep(regcomp("/" + filter + "/"));
+            else
+                data = org_data;
+
+            pos = 0;
+
+            /* print the filter */
+            mp.tui.attr(mp.colors.menu.attr);
+            mp.tui.move(sx + count(prompt) + 1, sy - 1, 1);
+            mp.tui.addstr(filter);
+            mp.tui.attr(mp.colors.normal.attr);
+        }
+
+        refilter = FALSE;
 
         /* limits for pos (in data space) */
         if (pos < 0)
@@ -381,41 +387,21 @@ sub mp.tui.list(prompt, data, pos, flags)
             break;
         }
         else
-        if ((ord(k) >= ord('a') && ord(k) <= ord('z')) ||
-            (ord(k) >= ord('A') && ord(k) <= ord('Z')) ||
-            (ord(k) >= ord('0') && ord(k) <= ord('9')) ||
-            k == '.' || k == '_') {
-
-            /* hint ~= lc(k) is crashing mp-5 */
-            hint = join([hint, lc(k)]);
-            /* search the first item >= k */
-            pos = 0;
-
-            while (pos < size(data) - 1) {
-                local entry = data[pos];
-
-                if (flags != NULL && flags.split_entry) {
-                    /* trim any trailing slash */
-                    if (entry[size(entry) - 1] == '/')
-                        entry = splice(entry, NULL, size(entry) - 1, 1);
-
-                    local segment = split(entry, '/');
-                    if (size(segment) > 0)
-                        entry = segment[size(segment) - 1];
-                }
-
-                if (size(hint) <= size(entry)) {
-                    /* no need to compare the complete entry, only the user-hinted size */
-                    local c = splice(lc(entry), NULL, size(hint), size(entry) - size(hint));
-                    if (cmp(hint, c) <= 0)
-                        break;
-                }
-                pos += 1;
-            }
+        if (k == "backspace") {
+            filter   = filter->slice(0, -2);
+            refilter = TRUE;
+        }
+        else
+        if (count(k) == 1) {
+            filter += k;
+            refilter = TRUE;
         }
     }
 
     mp.tui.full_refresh = 1;
+
+    if (pos != NULL)
+        pos = org_data->seek(data[pos]);
 
     return pos;
 }
