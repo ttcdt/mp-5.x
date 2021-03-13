@@ -152,6 +152,26 @@ static void ansi_gotoxy(int x, int y)
 }
 
 
+static void ansi_getxy(int *x, int *y)
+/* gets the x and y cursor position */
+{
+    char *buffer;
+
+    printf("\033[6n");
+    fflush(stdout);
+
+    buffer = ansi_read_string(0);
+    sscanf(buffer, "\033[%d;%dR", y, x);
+}
+
+
+static void ansi_clreol(void)
+/* clear to end of line */
+{
+    printf("\033[K");
+}
+
+
 static void ansi_clrscr(void)
 /* clears the screen */
 {
@@ -172,6 +192,20 @@ static void ansi_print_v(mpdm_t v)
 static void ansi_set_attr(int a)
 {
     printf("%s", ansi_attrs[a]);
+}
+
+
+static void ansi_refresh(void)
+/* refresh the screen */
+{
+    fflush(stdout);
+}
+
+
+static wchar_t ansi_charat(int x, int y)
+/* returns the char at the x, y position */
+{
+    return L' ';
 }
 
 
@@ -335,6 +369,10 @@ struct _str_to_code {
     { "\033OB",             L"ctrl-cursor-down" },
     { "\033OD",             L"ctrl-cursor-left" },
     { "\033OC",             L"ctrl-cursor-right" },
+    { "\033[11~",           L"f1" },
+    { "\033[12~",           L"f2" },
+    { "\033[13~",           L"f3" },
+    { "\033[14~",           L"f4" },
     { NULL,                 NULL }
 };
 
@@ -378,7 +416,7 @@ static mpdm_t ansi_getkey(mpdm_t args, mpdm_t ctxt)
             else
                 k = MPDM_MBS(str);
         }
-    
+
         /* esc+letter? alt-letter */
         if (str[0] == '\033' && str[1] >= 'a' &&
             str[1] <= 'z' && str[2] == '\0') {
@@ -387,7 +425,12 @@ static mpdm_t ansi_getkey(mpdm_t args, mpdm_t ctxt)
             sprintf(tmp, "alt-%c", str[1]);
             k = MPDM_MBS(tmp);
         }
-    
+
+        /* if it's a string that starts with a backspace,
+           it's probably a sequence of them, so treat it as only one */
+        if (str[0] == '\b' || str[0] == '\177')
+            f = L"backspace";
+
         /* still nothing? search the table of keys */
         if (k == NULL && f == NULL) {
             int n;
@@ -408,65 +451,35 @@ static mpdm_t ansi_getkey(mpdm_t args, mpdm_t ctxt)
         }
     
         /* if there is still no recognized ANSI string, return string as is */
-        if (f == NULL) {
+        if (k == NULL && f == NULL) {
             int n;
-    
+            mpdm_t v;
+
             /* convert carriage returns to new lines */
             for (n = 0; str[n]; n++) {
                 if (str[n] == '\r')
                     str[n] = '\n';
             }
-    
-            mpdm_set_wcs(MP, MPDM_MBS(str), L"raw_string");
-            f = L"insert-raw-string";
+
+            v = MPDM_MBS(str);
+
+            if (mpdm_size(v) == 1) {
+                /* return as is */
+                k = v;
+            }
+            else {
+                /* more than one char */
+                mpdm_set_wcs(MP, v, L"raw_string");
+                f = L"insert-raw-string";
+            }
         }
-    
+
         /* if something, create a value */
         if (k == NULL && f != NULL)
             k = MPDM_S(f);
     }
 
     return k;
-}
-
-
-static mpdm_t ansi_doc_draw(mpdm_t args, mpdm_t ctxt)
-{
-    mpdm_t d;
-    int n, m, o;
-
-    d = mpdm_get_i(args, 0);
-    o = mpdm_ival(mpdm_get_i(args, 1));
-    d = mpdm_ref(mp_draw(d, o));
-
-    for (n = 0; n < mpdm_size(d); n++) {
-        mpdm_t l = mpdm_get_i(d, n);
-
-        if (l != NULL) {
-            ansi_gotoxy(0, n);
-
-            for (m = 0; m < mpdm_size(l); m++) {
-                int attr;
-                mpdm_t s;
-
-                /* get the attribute and the string */
-                attr = mpdm_ival(mpdm_get_i(l, m++));
-                s = mpdm_get_i(l, m);
-
-                ansi_set_attr(attr);
-                ansi_print_v(s);
-            }
-
-            ansi_set_attr(normal_attr);
-
-            /* delete to end of line */
-            printf("\033[K");
-        }
-    }
-
-    mpdm_unref(d);
-
-    return NULL;
 }
 
 
@@ -530,7 +543,7 @@ static mpdm_t ansi_tui_move(mpdm_t a, mpdm_t ctxt)
 
     /* if third argument is not NULL, clear line */
     if (mpdm_get_i(a, 2) != NULL)
-        printf("\033[K");
+        ansi_clreol();
 
     return NULL;
 }
@@ -548,7 +561,49 @@ static mpdm_t ansi_tui_attr(mpdm_t a, mpdm_t ctxt)
 static mpdm_t ansi_tui_refresh(mpdm_t a, mpdm_t ctxt)
 /* TUI: refresh the screen */
 {
-    fflush(stdout);
+    ansi_refresh();
+
+    return NULL;
+}
+
+
+static mpdm_t ansi_doc_draw(mpdm_t args, mpdm_t ctxt)
+/* draw the document */
+{
+    mpdm_t d;
+    int n, m, o;
+
+    d = mpdm_get_i(args, 0);
+    o = mpdm_ival(mpdm_get_i(args, 1));
+    d = mpdm_ref(mp_draw(d, o));
+
+    for (n = 0; n < mpdm_size(d); n++) {
+        mpdm_t l = mpdm_get_i(d, n);
+
+        if (l != NULL) {
+            ansi_gotoxy(0, n);
+
+            for (m = 0; m < mpdm_size(l); m++) {
+                int attr;
+                mpdm_t s;
+
+                /* get the attribute and the string */
+                attr = mpdm_ival(mpdm_get_i(l, m++));
+                s = mpdm_get_i(l, m);
+
+                ansi_set_attr(attr);
+                ansi_print_v(s);
+            }
+
+            ansi_set_attr(normal_attr);
+
+            /* delete to end of line */
+            ansi_clreol();
+        }
+    }
+
+    mpdm_unref(d);
+
     return NULL;
 }
 
@@ -558,13 +613,8 @@ static mpdm_t ansi_tui_getxy(mpdm_t a, mpdm_t ctxt)
 {
     mpdm_t v;
     int x, y;
-    char *buffer;
 
-    printf("\033[6n");
-    fflush(stdout);
-
-    buffer = ansi_read_string(0);
-    sscanf(buffer, "\033[%d;%dR", &y, &x);
+    ansi_getxy(&x, &y);
 
     v = MPDM_A(2);
     mpdm_ref(v);
@@ -579,14 +629,15 @@ static mpdm_t ansi_tui_getxy(mpdm_t a, mpdm_t ctxt)
 
 
 static mpdm_t ansi_tui_charat(mpdm_t a, mpdm_t ctxt)
+/* TUI: returns the character at x, y position */
 {
     wchar_t s[2];
-/*    int x, y;
+    int x, y;
 
     x = mpdm_ival(mpdm_get_i(a, 0));
     y = mpdm_ival(mpdm_get_i(a, 1));
-*/
-    s[0] = L' ';
+
+    s[0] = ansi_charat(x, y);
     s[1] = L'\0';
 
     return MPDM_S(s);

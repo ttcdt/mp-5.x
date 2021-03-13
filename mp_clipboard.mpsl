@@ -215,6 +215,24 @@ sub mp_doc.get_active_area(doc)
 }
 
 
+sub mp.copy(content)
+/* copies content to the clipboard */
+{
+    /* ensure content is an array */
+    if (type(content) == "string")
+        content = content->split("\n");
+
+    /* ensure it's unwrapped */
+    mp_c.vw_unwrap(content);
+
+    /* store */
+    mp.clipboard = content;
+
+    /* propagate */
+    mp_drv.clip_to_sys();
+}
+
+
 /**
  * mp_doc.copy - Copies the selected block to the clipboard
  * @doc: the document
@@ -225,12 +243,8 @@ sub mp_doc.get_active_area(doc)
 sub mp_doc.copy(doc)
 {
     if (doc.txt.mark) {
-        mp.clipboard = doc->get_active_area();
+        mp.copy(doc->get_active_area());
         mp.clipboard_vertical = doc.txt.mark.vertical;
-
-        mp_c.vw_unwrap(mp.clipboard);
-
-        mp_drv.clip_to_sys();
     }
 
     return doc;

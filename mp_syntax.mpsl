@@ -16,7 +16,7 @@ sub mp_doc.actions.help(d) {
     local w, h, r;
 
     /* get the special word regex separator for help (if any) */
-    r = d.syntax.help_word_regex;
+    r = regcomp(d.syntax.help_word_regex || mp.word_regex);
 
     /* if there is a word at the cursor position,
         try searching for help */

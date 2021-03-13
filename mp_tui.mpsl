@@ -267,7 +267,7 @@ sub mp.tui.list(prompt, data, pos, flags)
     /* filtering data */
     local filter = flags.filter || "";
     local org_data = data;
-    local refilter = TRUE;
+    local refilter = FALSE;
 
     for (;;) {
         local k, n, cp;

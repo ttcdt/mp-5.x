@@ -292,7 +292,6 @@ mp_doc.actions['exec_command'] = sub (d, cmd) {
                 local p_config = clone(mp.config);
 
                 mp.config.auto_indent = 0;
-                mp.config.visual_wrap = 0;
 
                 foreach (l, p)
                     d->insert(l);
@@ -399,7 +398,7 @@ mp_doc.actions['open_under_cursor'] = sub (d) {
             d = mp.open(f + ':' + l + ':');
     }
     else
-    if ((w = d->get_word("/[^ \t\"\'<>]+/")) != NULL)
+    if ((w = d->get_word(regcomp("/[^ \t\"\'<>]+/"))) != NULL)
         d = mp.open(w);
 
     return d;
@@ -571,7 +570,7 @@ sub mp.save_th(f, doc)
 
     doc.disk_op = 1;
 
-    if (mp.config.visual_wrap)
+    if (doc->visual_wrap())
         lines = clone(doc.txt.lines)->mp_c.vw_unwrap();
     else
         lines = doc.txt.lines;
@@ -863,6 +862,9 @@ sub mp.open(filename, password)
             d->search_set_y(y - 1);
         if (x)
             d->set_x(x - 1);
+
+        /* filter the document through the spellchecker (if it's active) */
+        mp.spell_document(d);
     }
 
     return d;
@@ -909,7 +911,7 @@ sub mp_doc.vw_wrap(doc)
 mp_doc.actions["toggle_visual_wrap"] = sub (d) {
     mp.config.visual_wrap = !mp.config.visual_wrap;
 
-    if (mp.config.visual_wrap)
+    if (d->visual_wrap())
         d->vw_wrap();
     else
         d->vw_unwrap();

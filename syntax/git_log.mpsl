@@ -1,0 +1,9 @@
+{
+    id:         'git_log',
+    name:       'git log',
+    defs: [
+        "word1",    [ "/^commit/m" ],
+        "word2",    [ "/^(Author|Date|Merge):/m" ]
+    ],
+    section: [ "^commit" ]
+};

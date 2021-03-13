@@ -75,7 +75,7 @@ sub mp_doc.word_count(doc)
     local w = 0;
 
     foreach (l, doc->get_active_area())
-        w += size(mp.split_by_words(l, "/[^ \t\x{ad}]+/"));
+        w += size(mp.split_by_words(l, regcomp("/[^ \t\x{ad}]+/")));
 
     return w;
 }

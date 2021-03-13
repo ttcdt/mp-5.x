@@ -66,7 +66,7 @@ global mp = {
         no_text_mouse:          0,
         show_line_numbers:      0,
         double_page:            120,
-        eol:                    (mp_drv.id == 'win32' && "\r\n" || "\n"),
+        eol:                    (mp_drv.id->regex("/^win(32|64)$/") && "\r\n" || "\n"),
         status_format:          "%m%n %x,%y [%l] %R%O%W %s %e %t",
         time_stamp_format:      "%a, %d %b %Y %H:%M:%S %z",
         visual_wrap:            1,
@@ -370,7 +370,11 @@ global mp_doc = new(mp_base, {
         syntax:     NULL,
 
         /* rendering function for MP docs in mp_core.c */
-        render:     mp_c.render
+        render:     mp_c.render,
+
+        visual_wrap: sub (d) {
+            return d.force_visual_wrap || mp.config.visual_wrap;
+        }
     }
 );
 
@@ -398,6 +402,7 @@ mp.unicode_tbl = [
         "ccorner":   "+",
         "tab":       "\x{00ac}",
         "formfeed":  "\x{00a4}",
+        "m_dash":    "-",
         "unknown":   "?"
     },
     {
@@ -420,6 +425,7 @@ mp.unicode_tbl = [
         "ccorner":   "\x{253c}",
         "tab":       "\x{2192}",
         "formfeed":  "\x{21a1}",
+        "m_dash":    "\x{2014}",
         "unknown":   "\x{fffd}"
     }
 ];
@@ -451,20 +457,18 @@ sub mp.active()
     if (size(mp.docs) == 0)
         mp.actions.new();
 
-    if (mp.config.visual_wrap) {
-        local d = mp.docs[mp.active_i];
+    local doc = mp.docs[mp.active_i];
 
-        if (d->exists("vw_wrap")) {
-            if (d.txt.last_tx != mp.window.tx || d.txt.last_ty != mp.window.ty) {
-                d->vw_wrap();
-                d.txt.last_tx = mp.window.tx;
-                d.txt.last_ty = mp.window.ty;
-            }
+    if (doc->exists("visual_wrap") && doc->visual_wrap()) {
+        if (doc.txt.last_tx != mp.window.tx || doc.txt.last_ty != mp.window.ty) {
+            doc->vw_wrap();
+            doc.txt.last_tx = mp.window.tx;
+            doc.txt.last_ty = mp.window.ty;
         }
     }
 
     /* get active document */
-    return mp.docs[mp.active_i];
+    return doc;
 }
 
 
@@ -770,12 +774,18 @@ sub mp.load_profile()
     cf    = ".mp.mpsl";
 
     if (stat(cfdir + cf) == NULL) {
+        local ncf = ENV["XDG_CONFIG_HOME"] || (HOMEDIR + ".config");
+
         /* if ~/.config is a directory, use ~/.config/mp.mpsl */
-        if (stat(cfdir + ".config/")->get(2)->bitand(0x4000)) {
-            cfdir = HOMEDIR + ".config/";
+        if (stat(ncf)->get(2)->bitand(0x4000)) {
+            cfdir = ncf;
             cf    = "mp.mpsl";
         }
     }
+
+    /* ensure the configuration directory ends with a / */
+    if (cfdir[-1] != "/")
+        cfdir += "/";
 
     mp.config_file = cfdir + cf;
 
@@ -802,9 +812,10 @@ sub mp.load_profile()
 sub mp.normalize_version(vs)
 /* converts a version string to something usable with cmp() */
 {
-    local l = vs->sregex('/-.+$/')->split('.');
+    /* strip possible string and split by dots */
+    local l = vs->sregex("/-.+$/")->split(".");
 
-    return l[0] + '.' +  l[1] + l[2];
+    return sprintf("%d.%04d", l->shift(), l->join());
 }
 
 
@@ -812,7 +823,7 @@ sub mp.assert_version(found, minimal, package)
 /* asserts that 'found' version of 'package' is at least 'minimal',
    or generate a warning otherwise */
 {
-    if (real(found) < real(minimal)) {
+    if (mp.normalize_version(found) < mp.normalize_version(minimal)) {
         mp.alert(sprintf(L("WARNING: %s version found is %s, but %s is needed"),
                 package, found, minimal));
     }
@@ -822,8 +833,8 @@ sub mp.assert_version(found, minimal, package)
 sub mp.test_versions()
 /* tests component versions */
 {
-    mp.assert_version(MPDM.version, 2.70, 'MPDM');
-    mp.assert_version(MPSL.VERSION, 2.61, 'MPSL');
+    mp.assert_version(MPDM.version, "2.72", "MPDM");
+    mp.assert_version(MPSL.VERSION, "2.62", "MPSL");
 }
 
 

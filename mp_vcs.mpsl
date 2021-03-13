@@ -25,12 +25,13 @@ mp.vcs = {
         check:  [ '.git', '../.git', '../../.git', '../../../.git' ],
         opts:   {
             "git add '%F'"      => NULL,
-            'git log'           => { unique_log: 1 },
-            "git log '%F'"      => { unique_log: 1 },
-            'git log -p'        => { unique_log: 1, diff: 1 },
-            "git log -p '%F'"   => { unique_log: 1, diff: 1 },
-            'git diff'          => { unique_log: 1, diff: 1 },
-            "git diff '%F'"     => { unique_log: 1, diff: 1 },
+            'git log'           => { unique_log: 1, syntax: "git_log" },
+            "git log '%F'"      => { unique_log: 1, syntax: "git_log" },
+            "git log `git describe --abbrev=0 --tags`..HEAD" => { unique_log: 1, syntax: "git_log" },
+            'git log -p'        => { unique_log: 1, syntax: "diff" },
+            "git log -p '%F'"   => { unique_log: 1, syntax: "diff" },
+            'git diff'          => { unique_log: 1, syntax: "diff" },
+            "git diff '%F'"     => { unique_log: 1, syntax: "diff" },
             'git status'        => NULL,
             "git blame '%F'"    => { unique_log: 1 },
             "git stash"         => NULL,
@@ -44,13 +45,13 @@ mp.vcs = {
         id:     'SVN',
         check:  [ '.svn', '../.svn', '../../.svn', '../../../.svn' ],
         opts:   {
-            'svn diff'            => { unique_log: 1, diff: 1 },
+            'svn diff'            => { unique_log: 1, syntax: "diff" },
             'svn status'          => NULL,
             'svn log'             => { unique_log: 1 },
-            'svn log --diff'      => { unique_log: 1, diff: 1 },
-            "svn diff '%f'"       => { unique_log: 1, diff: 1 },
+            'svn log --diff'      => { unique_log: 1, syntax: "diff" },
+            "svn diff '%f'"       => { unique_log: 1, syntax: "diff" },
             "svn log '%f'"        => { unique_log: 1 },
-            "svn log '%f' --diff" => { unique_log: 1, diff: 1 },
+            "svn log '%f' --diff" => { unique_log: 1, syntax: "diff" },
             "svn add '%f'"        => NULL,
             "svn annotate '%f'"   => { unique_log: 1 },
             "svn update"          => NULL,
@@ -62,10 +63,10 @@ mp.vcs = {
         id:     'Mercurial',
         check:  [ '.hg', '../.hg', '../../.hg' ],
         opts:   {
-            'hg diff'          => { unique_log: 1, diff: 1 },
+            'hg diff'          => { unique_log: 1, syntax: "diff" },
             'hg status'        => NULL,
             'hg log'           => { unique_log: 1 },
-            "hg diff '%f'"     => { unique_log: 1, diff: 1 },
+            "hg diff '%f'"     => { unique_log: 1, syntax: "diff" },
             "hg log '%f'"      => { unique_log: 1 },
             "hg add '%f'"      => NULL,
             "hg push"          => NULL,
@@ -148,11 +149,13 @@ sub mp.vcs_form()
                     log->insert(cmd + ":\n\n");
                 }
 
+                log.force_visual_wrap = 1;
+
                 log->actions.exec_command(cmd);
 
                 if (opt.unique_log) {
-                    if (opt.diff)
-                        log.syntax = mp.get_syntax("diff");
+                    if (opt.syntax)
+                        log.syntax = mp.get_syntax(opt.syntax);
 
                     log->move_bof();
                 }

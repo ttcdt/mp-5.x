@@ -169,31 +169,19 @@ mp.actions['about'] = sub {
     local msg =
         sprintf(L("Minimum Profit %s - Programmer Text Editor"), mp.VERSION) +
         "\nttcdt <dev@triptico.com> et al.\n\n" +
-        sprintf(L("Components: driver %s, MPDM %s, MPSL %s (%s)"),
-            (mp_drv.id || 'unknown'), MPDM.version, MPSL.VERSION, __VER__) + "\n" +
-        "\n"\
-        "This is free and unencumbered software released into the public domain.\n"\
-        "\n"\
-        "Anyone is free to copy, modify, publish, use, compile, sell, or\n"\
-        "distribute this software, either in source code form or as a compiled\n"\
-        "binary, for any purpose, commercial or non-commercial, and by any\n"\
-        "means.\n"\
-        "\n"\
-        "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\n"\
-        "EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF\n"\
-        "MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.\n"\
-        "IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR\n"\
-        "OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,\n"\
-        "ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR\n"\
-        "OTHER DEALINGS IN THE SOFTWARE.\n"\
-        "\n"\
-        "https://triptico.com/software/mp.html\n";
+        sprintf(L("Components: driver %s, MPDM %s, MPSL %s (%s)\n\n"),
+            (mp_drv.id || 'unknown'), MPDM.version, MPSL.VERSION, __VER__);
+
+    msg += resource("LICENSE") || "This software is released into the public domain.\n";
+
+    msg += "\nhttps://triptico.com/software/mp.html\n";
 
     local d = mp.open("<about>");
 
     if (size(d.txt.lines) == 1) {
         d->insert(msg)->move_bof();
         d->set_read_only();
+        d.force_visual_wrap = 1;
     }
 };
 
@@ -212,6 +200,8 @@ mp.actions['release_notes'] = sub {
 
         d.txt.lines = t->split("\n");
         d->move_bof()->set_read_only();
+        d.force_visual_wrap = 1;
+        d.syntax = mp.get_syntax("release_notes");
     }
 };
 
@@ -314,7 +304,7 @@ mp.actions.check_for_updates = sub {
         else {
             ins(c, "", 0);
             ins(c, L("There are new versions available:"), 0);
-            push(c, "", L("Update Minimum Profit from http://triptico.com/software/mp.html"), "");
+            push(c, "", L("Update Minimum Profit from https://triptico.com/software/mp.html"), "");
         }
     }
     else {
@@ -324,6 +314,8 @@ mp.actions.check_for_updates = sub {
     mp.busy(0);
 
     d.txt.lines = c;
+    d.force_visual_wrap = 1;
+    d.syntax = mp.get_syntax("release_notes");
 };
 
 
@@ -366,7 +358,7 @@ sub dump(v)
 
     d->move_eof()->insert(dumper(v));
     d->set_read_only();
-    d.syntax    = mp.get_syntax("mpsl");
+    d.syntax = mp.get_syntax("mpsl");
 
     return NULL;
 }

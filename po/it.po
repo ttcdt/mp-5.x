@@ -3,12 +3,14 @@ msgstr ""
 "Project-Id-Version: Minimum Profit\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2004-10-07 18:33+0200\n"
-"PO-Revision-Date: 2004-10-07 18:33+0200\n"
+"PO-Revision-Date: 2020-12-29 18:38+0100\n"
 "Last-Translator: Lesion <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: it\n"
+"X-Generator: Poedit 2.0.6\n"
 
 #: mp_crypt.mpsl:75 mp_file.mpsl:147
 msgid "Password"
@@ -28,41 +30,41 @@ msgid "<none>"
 msgstr "<nulla>"
 
 msgid "Unlinked functions"
-msgstr "Funzione morta"
+msgstr "Funzioni scollegate"
 
 #: mp_move.mpsl:37
 msgid "Line to go to"
-msgstr "Numero riga"
+msgstr "Linea a cui andare"
 
-#: mp_core.mpsl:359 mp_file.mpsl:31 mp_file.mpsl:610 mp_session.mpsl:49
+#: mp_core.mpsl:375 mp_file.mpsl:31 mp_file.mpsl:612 mp_session.mpsl:49
 #: mp_session.mpsl:57
 msgid "<unnamed>"
 msgstr "<Senza nome>"
 
 msgid "Enter file name:"
-msgstr "Nome del file:"
+msgstr "Inserire nome del file:"
 
 msgid "File '%s' not found."
 msgstr "File '%s' non trovato."
 
 msgid "Can't create file '%s'."
-msgstr "Impossibile scrivere '%s'."
+msgstr "Impossibile scrivere file '%s'."
 
 msgid "File has changed. Save changes?"
 msgstr "Il file e' cambiato. Salvare i cambiamenti?"
 
 #: mp_file.mpsl:250 mp_file.mpsl:321
 msgid "System command"
-msgstr "Esegui"
+msgstr "Comando di sistema"
 
 msgid "Error executing command."
 msgstr "Errore eseguendo il comando."
 
 msgid "Open documents"
-msgstr "Documenti aperti"
+msgstr "Apri documenti"
 
 msgid "Template file not found (%s)"
-msgstr "Impossibile aprire il file dei modelli (%s)"
+msgstr "File modello non trovato (%s)"
 
 msgid "Select template"
 msgstr "Seleziona modello"
@@ -78,29 +80,29 @@ msgstr "Testo non trovato."
 
 #: mp_search.mpsl:93
 msgid "Replace text"
-msgstr "Cambiare testo"
+msgstr "Sostituisci testo"
 
 #: mp_search.mpsl:98
 msgid "Replace with"
-msgstr "Con"
+msgstr "Sostituisci con"
 
 msgid "To end of file?"
-msgstr "Fine del file"
+msgstr "Fine del file?"
 
 #: mp_search.mpsl:139
 msgid "Files to grep (empty, all)"
-msgstr "File dove cercare"
+msgstr "File in grep (vuoto, tutto)"
 
 #: mp_tags.mpsl:25
 msgid "Tag to seek"
 msgstr "Tag da cercare"
 
-#: mp_edit.mpsl:116
+#: mp_edit.mpsl:115
 msgid "Word wrap on column (0, no word wrap)"
-msgstr "Word wrap alla colonna"
+msgstr "A capo automatico sulla colonna (0, nessun ritorno a capo automatico)"
 
 msgid "Tab size:"
-msgstr "Lunghezza del tab:"
+msgstr "Dimensioni della scheda:"
 
 msgid "Function to execute:"
 msgstr "Funzione da eseguire:"
@@ -109,13 +111,13 @@ msgid "Function not found (%s)"
 msgstr "Funzione non trovata (%s)"
 
 msgid "Tag list"
-msgstr "Lista dei tags"
+msgstr "Lista tag"
 
 msgid "Tag(s) not found."
 msgstr "Tag(s) non trovato(i)."
 
 msgid "ESC Cancel"
-msgstr "ESC Cancellare"
+msgstr "ESC Cancella"
 
 msgid "Y"
 msgstr "S"
@@ -126,18 +128,18 @@ msgstr "N"
 msgid " [Y/N]"
 msgstr " [S/N]"
 
-#: mp_tui.mpsl:526
+#: mp_tui.mpsl:540
 msgid " [ENTER]"
 msgstr " [INVIO]"
 
 msgid "<about Minimum Profit>"
-msgstr "<Circa Minimum Profit>"
+msgstr "<circa Minimo Profitto>"
 
-#: mpv_gtk.c:1891 mp_tui.mpsl:416
+#: mpv_gtk.c:1891 mp_tui.mpsl:430
 msgid "Yes"
 msgstr "Si"
 
-#: mpv_gtk.c:1892 mp_tui.mpsl:417
+#: mpv_gtk.c:1892 mp_tui.mpsl:431
 msgid "No"
 msgstr "No"
 
@@ -148,19 +150,19 @@ msgstr "OK"
 #: mpv_gtk.c:1893 mpv_gtk.c:1922 mpv_gtk.c:2188 mpv_gtk.c:2197 mpv_gtk.c:2198
 #: mpv_gtk.c:2207
 msgid "Cancel"
-msgstr "Cancellare"
+msgstr "Cancella"
 
 msgid "No usable video driver found."
-msgstr "Impossibile trovare un Driver Video utilizzabile"
+msgstr "Nessun driver video utilizzabile trovato."
 
 msgid "Bad mode."
 msgstr "Modo errato."
 
 msgid "<help about '%s'>"
-msgstr "<aiutami su '%s'>"
+msgstr "<aiuto su '%s'>"
 
 msgid "No help for '%s'"
-msgstr "Non posso aiutarti per '%s'"
+msgstr "Nessun aiuto per '%s'"
 
 msgid ""
 "%%Empty template file\n"
@@ -171,11 +173,13 @@ msgid ""
 "or the end of file. By selecting a template from the list (popped up\n"
 "by Ctrl-U), it will be inserted into the current text.\n"
 msgstr ""
-"%%File dei moduli vuoto\n"
+"%%File modello vuoto\n"
 "\n"
-"Questo file dei moduli e' vuoto. Per creare dei moduli scrivi un nome\n"
-"per ognuno (marcato con 2 caratteri % all'inizio della riga) e un blocco\n"
-"di testo. Per richiamare i moduli premi ctrl+U.\n"
+"Questo file modello è vuoto. Per creare modelli, scrivi un nome per\n"
+"ognuno (contrassegnato da due caratteri % insieme all'inizio di\n"
+"la riga) e un corpo di testo, delimitato dal nome del modello successivo\n"
+"o alla fine del file. Selezionando un modello dall'elenco (apparso\n"
+"di Ctrl-U), verrà inserito nel testo corrente.\n"
 
 msgid ""
 "#\n"
@@ -183,32 +187,36 @@ msgid ""
 "#\n"
 "\n"
 msgstr ""
+"#\n"
+"# File configurazione min. profitto\n"
+"#\n"
+"\n"
 
-#: mp_core.mpsl:182
+#: mp_core.mpsl:181
 msgid "&File"
-msgstr "&Archivio"
+msgstr "&File"
 
-#: mp_core.mpsl:193
+#: mp_core.mpsl:192
 msgid "&Edit"
-msgstr "&Edita"
+msgstr "&Modifica"
 
-#: mp_core.mpsl:204
+#: mp_core.mpsl:203
 msgid "&Search"
 msgstr "&Cerca"
 
-#: mp_core.mpsl:212
+#: mp_core.mpsl:211
 msgid "&Go to"
 msgstr "&Vai A"
 
-#: mp_core.mpsl:240
+#: mp_core.mpsl:239
 msgid "&Options"
 msgstr "&Opzioni"
 
 msgid "menu"
-msgstr "Menu"
+msgstr "menù"
 
 msgid "grep"
-msgstr ""
+msgstr "grep"
 
 #: mp_move.mpsl:139
 msgid "Line up"
@@ -220,11 +228,11 @@ msgstr "Freccia giu'"
 
 #: mp_move.mpsl:137
 msgid "Character left"
-msgstr "Freccia sinistra"
+msgstr "Carattere sinistra"
 
 #: mp_move.mpsl:138
 msgid "Character right"
-msgstr "Freccia destra"
+msgstr "Carattere destra"
 
 #: mp_move.mpsl:147
 msgid "Word left"
@@ -260,13 +268,13 @@ msgstr "Pagina giu'"
 
 #: mp_move.mpsl:149
 msgid "Go to line..."
-msgstr "Vai a riga..."
+msgstr "Vai alla riga..."
 
-#: mp_edit.mpsl:229
+#: mp_edit.mpsl:228
 msgid "Insert line"
 msgstr "Inserisci riga"
 
-#: mp_edit.mpsl:233
+#: mp_edit.mpsl:232
 msgid "Insert tab"
 msgstr "Inserisci tabulazione"
 
@@ -276,7 +284,7 @@ msgstr "Elimina il carattere sopra il cursore"
 msgid "Delete char to the left of cursor"
 msgstr "Elimina il carattere alla sinistra del cursore"
 
-#: mp_edit.mpsl:230
+#: mp_edit.mpsl:229
 msgid "Delete line"
 msgstr "Elimina la riga"
 
@@ -300,15 +308,15 @@ msgstr "Incolla il blocco"
 msgid "Cut block"
 msgstr "Taglia il blocco"
 
-#: mp_search.mpsl:241
+#: mp_search.mpsl:238
 msgid "Search text..."
 msgstr "Cerca testo..."
 
-#: mp_search.mpsl:242
+#: mp_search.mpsl:239
 msgid "Search next"
 msgstr "Cerca successivo"
 
-#: mp_search.mpsl:244
+#: mp_search.mpsl:241
 msgid "Replace..."
 msgstr "Sostituisci..."
 
@@ -347,17 +355,17 @@ msgid "Open file under cursor"
 msgstr "Apri il file sotto il cursore"
 
 msgid "Increment font size"
-msgstr "Aumenta la grandezza del font"
+msgstr "Aumenta la grandezza del carattere"
 
 msgid "Decrement font size"
-msgstr "Diminuisci la grandezza del font"
+msgstr "Diminuisci la grandezza del carattere"
 
 msgid "Insert/Overwrite"
-msgstr "Inserisci/sovrascrivi"
+msgstr "Inserisci/Sovrascrivi"
 
 #: mp_search.mpsl:30 mp_search.mpsl:103
 msgid "Case sensitive"
-msgstr ""
+msgstr "Tieni conto del maiuscolo o minuscolo"
 
 msgid "Save tabs"
 msgstr "Salva tabulazioni"
@@ -365,7 +373,7 @@ msgstr "Salva tabulazioni"
 msgid "Save LF as CR/LF"
 msgstr "Salva LF come CR/LF"
 
-#: mp_edit.mpsl:122
+#: mp_edit.mpsl:121
 msgid "Automatic indentation"
 msgstr "Indentazione automatica"
 
@@ -373,7 +381,7 @@ msgid "Mark column #80"
 msgstr "Segna colonna 80"
 
 msgid "Use regular expressions"
-msgstr ""
+msgstr "Usa espressioni regolari"
 
 msgid "Help for word under cursor"
 msgstr "Aiuto x la parola sotto il cursore"
@@ -406,14 +414,14 @@ msgid "Edit configuration file"
 msgstr "Modifica il file di configurazione"
 
 msgid "Word wrap..."
-msgstr "Word wrap..."
+msgstr "A capo automatico ..."
 
 msgid "Tab size..."
 msgstr "Lunghezza del tab..."
 
-#: mp_drv.mpsl:26 mp_tui.mpsl:494
+#: mp_drv.mpsl:26 mp_tui.mpsl:508
 msgid "Menu"
-msgstr "Menu"
+msgstr "Menù"
 
 msgid "About..."
 msgstr "Circa..."
@@ -431,7 +439,7 @@ msgid "Record macro"
 msgstr "Registra macro"
 
 msgid "Help on keys"
-msgstr "Aiuto per tasti"
+msgstr "Aiuto nei tasti"
 
 msgid "Position cursor with mouse"
 msgstr "Posiziona il cursore col mouse"
@@ -443,21 +451,21 @@ msgstr "Esegui funzione dell'editor..."
 msgid "Save modified texts"
 msgstr "Salva il testo modificato"
 
-#: mp_search.mpsl:248
+#: mp_search.mpsl:245
 msgid "Grep (find inside) files..."
-msgstr "Cerca dentro i file..."
+msgstr "File Grep (trova all'interno) ..."
 
 msgid "Select last successful search"
 msgstr "Seleziona l'ultima ricerca effettuata"
 
 msgid "Show clipboard"
-msgstr "mostra la clipboard"
+msgstr "Mostra gli appunti"
 
 msgid "Show log"
 msgstr "Mostra i log"
 
 msgid "Break hardlinks on write"
-msgstr "Link fisici corrotti in scrittura"
+msgstr "Rompere i collegamenti fisici in scrittura"
 
 #: mp_crypt.mpsl:97
 msgid "Password protect..."
@@ -470,25 +478,25 @@ msgid "Reformat paragraph using word-wrapping"
 msgstr "Riformatta paragrafo utilizzando lo word-wrapping"
 
 msgid "Insert new line above cursor"
-msgstr "Inserisci una nuova linea sopra al cursore"
+msgstr "Inserisce una nuova riga sopra il cursore"
 
 msgid "Insert new line below cursor"
-msgstr "Inserisci una nuova linea sotto al cursore"
+msgstr "Inserisci una nuova riga sotto al cursore"
 
 msgid "Join current line to one above"
-msgstr "Unisci la linea corrente con quella sopra"
+msgstr "Unisci la riga corrente con quella sopra"
 
 msgid "Join current line to one below"
-msgstr "Unisci la linea corrente con quella sotto"
+msgstr "Unisci la riga corrente con quella sotto"
 
 msgid "Flip letter case if A-Z or a-z"
-msgstr "Cambia Maiuscole-Minuscole"
+msgstr "Scambia le maiuscole se A-Z o a-z"
 
 msgid "Flip word case"
-msgstr "Cambia Maiuscole-Minuscole parole"
+msgstr "Cambia parole Maiuscole-Minuscole"
 
 msgid "Delete all whitespace after cursor"
-msgstr "Rimuovi tutti gli spazi prima del cursore"
+msgstr "Cancella tutti gli spazi vuoti dopo il cursore"
 
 msgid "Delete to the beginning of word"
 msgstr "Cancella fino all'inizio della parola"
@@ -506,7 +514,7 @@ msgid "Error executing user defined function"
 msgstr "Errore di esecuzione della funzione definita dall'utente"
 
 msgid "<Output of \"%s\">"
-msgstr "Output di \"%s\">"
+msgstr "Uscita di \"%s\">"
 
 msgid "Toggle insert/overwrite"
 msgstr "Alterna inserisci/sovrascrivi"
@@ -514,11 +522,11 @@ msgstr "Alterna inserisci/sovrascrivi"
 msgid "Reformat paragraph with word wrapping"
 msgstr "Riformatta paragrafo con word-wrapping"
 
-#: mp_search.mpsl:246
+#: mp_search.mpsl:243
 msgid "Move to previous instance of current char"
 msgstr "Sposta alla precedente istanza del carattere corrente"
 
-#: mp_search.mpsl:245
+#: mp_search.mpsl:242
 msgid "Move to next instance of current char"
 msgstr "Sposta alla prossima istanza del carattere corrente"
 
@@ -566,7 +574,7 @@ msgstr ""
 " -m|--mode [modo]\tModi del syntax-hilight\n"
 " --col80\t\tMarca la colonna 80\n"
 " -bw|--monochrome\tBianco e nero\n"
-" -tx|--text\t\tUse text mode (instead of GUI)\n"
+" -tx|--text\t\tUsa modo testo (anzichè  GUI)\n"
 " -h|--help\t\tQuesta piccola schermata\n"
 "\n"
 " -hw|--hardware-cursor\tAttiva l'uso del cursore hardware\n"
@@ -575,13 +583,13 @@ msgstr ""
 "\t\t\t"
 
 msgid "Can't execute '%s'"
-msgstr ""
+msgstr "Impossibile eseguire \"%s\""
 
 msgid "Spellchecking is only available under Unix systems."
-msgstr ""
+msgstr "Il controllo ortografico è disponibile solo nei sistemi Unix."
 
 msgid "Mark spelling errors"
-msgstr ""
+msgstr "Contrassegna gli errori di ortografia"
 
 msgid ""
 "Usage: mp [options] [file [file ...]]\n"
@@ -604,711 +612,735 @@ msgid ""
 " -nt|--no-transparent\tDisable transparent mode (eterm, aterm, etc.)\n"
 "\t\t\t"
 msgstr ""
+"Utilizzo: mp [opzioni] [file [file ...]]\n"
+"\n"
+"Opzioni:\n"
+"\n"
+" -t | --tag [tag] Modifica il file in cui è definito il tag\n"
+" -w | --word-wrap [col] Imposta il wordwrapping nella colonna col\n"
+" -ts | --tab-size [size] Imposta la dimensione della scheda\n"
+" -ai | --autoindent Imposta la modalità di rientro automatico\n"
+" -l | --lang [lang] Selezione della lingua\n"
+" -m | --mode [mode] Modalità sintassi-hilight\n"
+" --col80 Segna la colonna # 80\n"
+" - bw | --monochrome Monocromatico\n"
+" -tx | --text Usa la modalità testo (invece della GUI)\n"
+" -h | --help Questa schermata di aiuto\n"
+"\n"
+" -hw | --hardware-cursor Attiva l'uso del cursore hardware\n"
+" --mouse Attiva l'uso del mouse per il posizionamento del cursore\n"
+" -nt | --no-transparent Disabilita la modalità trasparente (eterm, aterm, ecc.)\n"
+"\t\t\t"
 
 #: mp_crypt.mpsl:86
 msgid "Passwords don't match."
-msgstr ""
+msgstr "Le password non corrispondono."
 
 msgid "Word wrapping must be set"
-msgstr ""
+msgstr "È necessario impostare il ritorno a capo automatico"
 
-#: mp_edit.mpsl:232
+#: mp_edit.mpsl:231
 msgid "Insert space"
-msgstr ""
+msgstr "Inserisci spazio"
+
+#: mp_edit.mpsl:234
+msgid "Delete character"
+msgstr "Cancella carattere"
 
 #: mp_edit.mpsl:235
-msgid "Delete character"
-msgstr ""
-
-#: mp_edit.mpsl:236
 msgid "Delete character to the left"
-msgstr ""
+msgstr "Cancella carattere a sinistra"
 
-#: mp_edit.mpsl:239
+#: mp_edit.mpsl:238
 msgid "Undo"
-msgstr ""
+msgstr "Scartare"
+
+#: mp_edit.mpsl:240
+msgid "Join a paragraph in one line"
+msgstr "Unisci un paragrafo in una riga"
 
 #: mp_edit.mpsl:241
-msgid "Join a paragraph in one line"
-msgstr ""
-
-#: mp_edit.mpsl:242
 msgid "Word-wrap a paragraph"
-msgstr ""
+msgstr "A capo automatico di un paragrafo"
 
 #: mp_file.mpsl:49
 msgid "Save file as"
-msgstr ""
+msgstr "Salva file come"
 
 msgid "Error saving file: %s"
-msgstr ""
+msgstr "Errore salvataggio file: %s"
 
 #: mp_file.mpsl:137 mp_file.mpsl:432
 msgid "File to open"
-msgstr ""
+msgstr "File da aprire"
 
 #: mp_misc.mpsl:19
 msgid "Code to execute"
-msgstr ""
+msgstr "Codice da eseguire"
 
 #: mp_misc.mpsl:40 mp_misc.mpsl:58
 msgid "Error: "
-msgstr ""
+msgstr "Errore: "
 
 msgid "Exit value:\n"
-msgstr ""
+msgstr "Valore di uscita:\n"
 
-#: mp_misc.mpsl:342
+#: mp_misc.mpsl:329
 msgid "Execute MPSL code..."
-msgstr ""
+msgstr "Esegui codice MPSL ..."
 
-#: mp_misc.mpsl:343
+#: mp_misc.mpsl:330
 msgid "Execute document as MPSL"
-msgstr ""
+msgstr "Esegui documento come MPSL"
 
-#: mp_misc.mpsl:348
+#: mp_misc.mpsl:335
 msgid "Bigger font"
-msgstr ""
+msgstr "Carattere più grande"
 
-#: mp_misc.mpsl:349
+#: mp_misc.mpsl:336
 msgid "Smaller font"
-msgstr ""
+msgstr "Carattere più piccolo"
 
 #: mp_move.mpsl:151
 msgid "Move cursor to mouse click"
-msgstr ""
+msgstr "Sposta il cursore sul clic del mouse"
 
 #: mp_move.mpsl:152
 msgid "Mouse wheel up"
-msgstr ""
+msgstr "Rotellina del mouse su"
 
 #: mp_move.mpsl:153
 msgid "Mouse wheel down"
-msgstr ""
+msgstr "Rotellina del mouse giù"
 
 #: mp_search.mpsl:108
 msgid "Global replace"
-msgstr ""
+msgstr "Sostituzione globale"
 
 #: mp_search.mpsl:162
 msgid "File(s) not found."
-msgstr ""
+msgstr "File non trovato."
 
 msgid "Grep"
-msgstr ""
+msgstr "Grep"
 
-#: mp_search.mpsl:243
+#: mp_search.mpsl:240
 msgid "Search previous"
-msgstr ""
+msgstr "Cerca precedente"
 
 #: mp_syntax.mpsl:30
 #, c-format
 msgid "No help for '%s'."
-msgstr ""
+msgstr "Nessun aiuto per '%s'."
 
 #: mp_syntax.mpsl:34
 #, c-format
 msgid "<help on '%s'>"
-msgstr ""
+msgstr "<aiuto nel '%s'>"
 
 #: mp_syntax.mpsl:129
 msgid "Help on word over cursor"
-msgstr ""
+msgstr "Aiuto sulla parola tramite cursore"
 
 #: mp_tags.mpsl:71
 msgid "No matching symbol found."
-msgstr ""
+msgstr "Nessun simbolo corrispondente trovato."
 
 #: mp_tags.mpsl:70
 msgid "Select symbol"
-msgstr ""
+msgstr "Seleziona il simbolo"
 
 #: mp_tags.mpsl:85
 msgid "Symbol completion..."
-msgstr ""
+msgstr "Completamento del simbolo ..."
 
 #: mp_tags.mpsl:164
 msgid "Tag not found."
-msgstr ""
+msgstr "Tag non trovato."
 
 #: mp_tags.mpsl:176
 msgid "Select tag"
-msgstr ""
+msgstr "Seleziona tag"
 
 #: mp_templates.mpsl:24
 msgid "Template to insert"
-msgstr ""
+msgstr "Modello da inserire"
 
-#: mp_edit.mpsl:127
+#: mp_edit.mpsl:126
 msgid "Line termination"
-msgstr ""
+msgstr "Terminazione di linea"
 
-#: mp_edit.mpsl:167
+#: mp_edit.mpsl:166
 msgid "Tab size"
-msgstr ""
+msgstr "Dimensioni tab"
 
-#: mp_edit.mpsl:171
+#: mp_edit.mpsl:170
 msgid "Convert tabs to spaces"
-msgstr ""
+msgstr "Converti tab in spazi"
+
+#: mp_edit.mpsl:242
+msgid "Line options..."
+msgstr "Opzioni di linea ..."
 
 #: mp_edit.mpsl:243
-msgid "Line options..."
-msgstr ""
-
-#: mp_edit.mpsl:244
 msgid "Tab options..."
-msgstr ""
+msgstr "Opzioni tab..."
 
 msgid "File has changed. Are you sure?"
-msgstr ""
+msgstr "Il file è cambiato. Sei sicuro?"
 
 msgid "Error writing command '%s'"
-msgstr ""
+msgstr "Errore durante la scrittura del comando '%s'"
 
 #: mp_file.mpsl:309
 #, c-format
 msgid "Error reading from command '%s'"
-msgstr ""
+msgstr "Errore durante la lettura dal comando '%s'"
 
 #: mp_file.mpsl:481
 msgid "Revert"
-msgstr ""
+msgstr "Ripristina"
 
 msgid "Encoding (utf-8, iso8859-1, etc.; empty, current locale)"
-msgstr ""
+msgstr "Encoding (utf-8, iso8859-1, ecc.; vuoto, valuta locale)"
 
 #: mp_misc.mpsl:152
 msgid "Invalid encoding "
-msgstr ""
+msgstr "Codifica non valida "
 
-#: mp_misc.mpsl:347
+#: mp_writing.mpsl:18
+#, c-format
+msgid "Lines: %d Words: %d"
+msgstr "Righe: %d Parole: %d"
+
+#: mp_misc.mpsl:334
 msgid "Set charset encoding..."
-msgstr ""
+msgstr "Imposta codifica set di caratteri ..."
 
 #: mp_writing.mpsl:61
 msgid "Count words"
-msgstr ""
+msgstr "Conta le parole"
 
 #: mp_spell.mpsl:29
 msgid "Toggle spellchecking"
-msgstr ""
+msgstr "Attiva il controllo ortografico"
 
-#: mp_tui.mpsl:821
+#: mp_tui.mpsl:835
 msgid "Please, wait..."
-msgstr ""
+msgstr "Attendi..."
 
 #: mp_file.mpsl:279
 #, c-format
 msgid "Error writing to command '%s'"
-msgstr ""
+msgstr "Errore durante la scrittura nel comando '%s'"
 
-#: mp_edit.mpsl:240
+#: mp_edit.mpsl:239
 msgid "Redo"
-msgstr ""
+msgstr "Rifare"
 
 #: mp_tags.mpsl:84
 msgid "Complete..."
-msgstr ""
+msgstr "Completare..."
 
 msgid "Select"
-msgstr ""
+msgstr "Selezionare"
 
 msgid "No session file was found to load"
-msgstr ""
+msgstr "Nessun file di sessione trovato da caricare"
 
 msgid "Could not be found and was not opened"
-msgstr ""
+msgstr "Impossibile trovare e non è stato aperto"
 
 #: mp_session.mpsl:28
 msgid "Load session"
-msgstr ""
+msgstr "Carica sessione"
 
 #: mp_session.mpsl:29
 msgid "Save session"
-msgstr ""
+msgstr "Salva sessione"
 
-#: mp_core.mpsl:485
+#: mp_core.mpsl:499
 #, c-format
 msgid "Unknown action '%s'"
-msgstr ""
+msgstr "Azione sconosciuta '%s'"
 
-#: mp_edit.mpsl:791
+#: mp_edit.mpsl:790
 #, c-format
 msgid "Unbound keystroke '%s'"
-msgstr ""
+msgstr "Sequenza di tasti non associata '%s'"
 
-#: mp_file.mpsl:751
+#: mp_file.mpsl:753
 #, c-format
 msgid "New file '%s'"
-msgstr ""
+msgstr "Nuovo file '%s'"
 
-#: mp_search.mpsl:504
+#: mp_search.mpsl:485
 #, c-format
 msgid "%d replaces"
-msgstr ""
+msgstr "%d sostituisce"
 
-#: mp_core.mpsl:700
+#: mp_core.mpsl:714
 #, c-format
 msgid "Cannot open '%s'"
-msgstr ""
+msgstr "Non può essere aperto '%s'"
 
-#: mp_core.mpsl:816
+#: mp_core.mpsl:814
 #, c-format
 msgid "WARNING: %s version found is %s, but %s is needed"
-msgstr ""
+msgstr "ATTENZIONE: la versione di %s trovata è %s, ma è necessario %s"
 
 #: mp_clipboard.mpsl:89
 msgid "Mark using mouse dragging"
-msgstr ""
+msgstr "Segna utilizzando il trascinamento del mouse"
 
-#: mp_edit.mpsl:137
+#: mp_edit.mpsl:136
 msgid "Mark end of lines"
-msgstr ""
+msgstr "Segna la fine delle righe"
 
 #: mp_file.mpsl:482
 msgid "Close all"
-msgstr ""
+msgstr "Chiudi tutto"
 
 msgid "No Makefile targets found."
-msgstr ""
+msgstr "Non creare file di destinazione trovati."
 
 msgid "Makefile target"
-msgstr ""
+msgstr "Crea file di destinazione"
 
 msgid "No errors nor warnings found."
-msgstr ""
+msgstr "Nessun errore né avviso trovato."
 
 msgid "Errors and Warnings"
-msgstr ""
+msgstr "Errori e avvisi"
 
 #: mp_build.mpsl:52
 msgid "Build project..."
-msgstr ""
+msgstr "Crea progetto ..."
 
 #: mp_file.mpsl:540
 msgid "Read-only document"
-msgstr ""
+msgstr "Documento solo lettura"
 
 #: mp_clipboard.mpsl:83
 msgid "Mark vertical block"
-msgstr ""
+msgstr "Segna blocco verticale"
 
 #: mp_syntax.mpsl:47
 msgid "No detection for sections for this mode."
-msgstr ""
+msgstr "Nessun rilevamento per le sezioni di questa modalità."
 
 #: mp_syntax.mpsl:50
 msgid "No sections were found in this document."
-msgstr ""
+msgstr "Nessuna sezione è stata trovata in questo documento."
 
 #: mp_syntax.mpsl:68
 msgid "Section list"
-msgstr ""
+msgstr "Elenco delle sezioni"
 
 #: mp_syntax.mpsl:130
 msgid "Section list..."
-msgstr ""
+msgstr "Elenco delle sezioni..."
 
 #: mp_spell.mpsl:30
 msgid "Search misspelled word"
-msgstr ""
+msgstr "Cerca parole con errori di ortografia"
 
 #: mp_spell.mpsl:31
 msgid "Ignore last misspelled word"
-msgstr ""
+msgstr "Ignora l'ultima parola con errori di ortografia"
 
 #: mp_writing.mpsl:27
 msgid "Number of letters at the start or end"
-msgstr ""
+msgstr "Numero di lettere all'inizio o alla fine"
 
 msgid "Maximum distance"
-msgstr ""
+msgstr "Massima distanza"
 
 msgid "Search repeated words..."
-msgstr ""
+msgstr "Cerca parole ripetute..."
 
 #: mp_writing.mpsl:63
 msgid "Search repeated word"
-msgstr ""
+msgstr "Cerca parola ripetuta"
 
 #: mp_search.mpsl:144
 msgid "Base directory (empty, current)"
-msgstr ""
+msgstr "Directory di base (vuota, attuale)"
 
 #: mp_search.mpsl:149
 msgid "Recursive?"
-msgstr ""
+msgstr "Ricorsivo?"
 
 #: mp_writing.mpsl:33
 msgid "Maximum distance between words"
-msgstr ""
+msgstr "Massima distanza tra le parole"
 
 #: mp_writing.mpsl:62
 msgid "Repeated words options..."
-msgstr ""
+msgstr "Opzioni parole ripetute..."
 
 #: mp_clipboard.mpsl:88
 msgid "Delete block"
-msgstr ""
+msgstr "Cancella blocco"
 
-#: mp_edit.mpsl:132
+#: mp_edit.mpsl:131
 msgid "Keep original end of lines"
-msgstr ""
+msgstr "Mantieni la fine delle righe originale"
 
 #: mp_file.mpsl:490
 msgid "Hexadecimal viewer..."
-msgstr ""
+msgstr "Visualizzatore esadecimale..."
 
 #: mp_file.mpsl:491
 msgid "Open dropped files"
-msgstr ""
+msgstr "Apri i file rilasciati"
 
-#: mp_edit.mpsl:174
+#: mp_edit.mpsl:173
 msgid "Use previous line for tab columns"
-msgstr ""
+msgstr "Usa la riga precedente per le colonne delle tabulazioni"
 
-#: mp_misc.mpsl:345
+#: mp_misc.mpsl:332
 msgid "Insert next item"
-msgstr ""
+msgstr "Inserisci l'elemento successivo"
 
-#: mp_edit.mpsl:246
+#: mp_edit.mpsl:245
 msgid "Toggle insert/overwrite mode"
-msgstr ""
+msgstr "Attiva / disattiva la modalità di inserimento/sovrascrittura"
 
 #: mp_file.mpsl:488
 msgid "Filter selection through system command..."
-msgstr ""
+msgstr "Filtra la selezione tramite il comando di sistema ..."
 
 #: mp_clipboard.mpsl:90
 msgid "Mark all"
-msgstr ""
+msgstr "Segna tutto"
 
 #: mp_misc.mpsl:120
 msgid "Select action to execute"
-msgstr ""
+msgstr "Seleziona l'azione da eseguire"
 
-#: mp_misc.mpsl:344
+#: mp_misc.mpsl:331
 msgid "Execute action on document..."
-msgstr ""
+msgstr "Esegui azione sul documento ..."
 
 #: mp_clipboard.mpsl:44
 msgid "Cut lines containing"
-msgstr ""
+msgstr "Linee di taglio contenenti"
 
 #: mp_clipboard.mpsl:91
 msgid "Cut lines containing a string..."
-msgstr ""
+msgstr "Linee di taglio contenenti una stringa ..."
 
-#: mp_edit.mpsl:234
+#: mp_edit.mpsl:233
 msgid "Insert real tab character"
-msgstr ""
+msgstr "Inserisci un carattere di tabulazione reale"
+
+#: mp_edit.mpsl:236
+msgid "Indent block"
+msgstr "Rientro blocco"
 
 #: mp_edit.mpsl:237
-msgid "Indent block"
-msgstr ""
-
-#: mp_edit.mpsl:238
 msgid "Unindent block"
-msgstr ""
+msgstr "Annulla rientro blocco"
 
 #: mp_templates.mpsl:65
 msgid "Template file to edit"
-msgstr ""
+msgstr "File modello da modificare"
 
-#: mp_edit.mpsl:142
+#: mp_edit.mpsl:141
 msgid "'Smart' move to beginning of line"
-msgstr ""
+msgstr "Spostamento 'intelligente' all'inizio della riga"
 
 #: mp_vcs.mpsl:98
 msgid "This directory is not under a supported version control system"
-msgstr ""
+msgstr "Questa directory non è in un sistema di controllo della versione supportato"
 
 #: mp_vcs.mpsl:109
 #, c-format
 msgid "Available %s commands"
-msgstr ""
+msgstr "Comandi %s disponibili"
 
 #: mp_vcs.mpsl:129 mp_vcs.mpsl:139 mp_vcs.mpsl:145
 #, c-format
 msgid "<%s output>"
-msgstr ""
+msgstr "<%s uscita>"
 
-#: mp_misc.mpsl:356
+#: mp_misc.mpsl:343
 msgid "Version Control..."
-msgstr ""
+msgstr "Controllo della versione ..."
 
-#: mp_misc.mpsl:353
+#: mp_misc.mpsl:340
 msgid "Play \"Pipes\""
-msgstr ""
+msgstr "Riproduci \"Pipes\""
 
 msgid "You won! Press any key."
-msgstr ""
+msgstr "Hai vinto! Premere un qualsiasi tasto."
 
-#: mp_misc.mpsl:312
+#: mp_misc.mpsl:299
 msgid "You already have the latest version."
-msgstr ""
+msgstr "Hai già l'ultima versione."
 
-#: mp_misc.mpsl:316
+#: mp_misc.mpsl:303
 msgid "There are new versions available:"
-msgstr ""
+msgstr "Sono disponibili nuove versioni:"
 
-#: mp_misc.mpsl:317
+#: mp_misc.mpsl:304
 msgid "Update Minimum Profit from http://triptico.com/software/mp.html"
-msgstr ""
+msgstr "Aggiorna il profitto minimo da http://triptico.com/software/mp.html"
 
-#: mp_misc.mpsl:321
+#: mp_misc.mpsl:308
 msgid "Cannot connect -- please try later."
-msgstr ""
+msgstr "Impossibile connettersi. Riprova più tardi."
 
 msgid "Check for updates..."
-msgstr ""
+msgstr "Controlla gli aggiornamenti..."
 
-#: mp_core.mpsl:221
+#: mp_core.mpsl:220
 msgid "&Project"
-msgstr ""
+msgstr "&Progetto"
 
-#: mp_core.mpsl:229
+#: mp_core.mpsl:228
 msgid "&Writing"
-msgstr ""
+msgstr "&Scrittura"
 
 #: mp_file.mpsl:154
 #, c-format
 msgid "Bad password for file '%s'"
-msgstr ""
+msgstr "Password errata per il file '%s'"
 
 msgid "Error opening file '%s': %s"
-msgstr ""
+msgstr "Errore apertura file '%s': %s"
 
 #: mp_syntax.mpsl:131
 msgid "Move one section up"
-msgstr ""
+msgstr "Sposta una sezione in alto"
 
 #: mp_syntax.mpsl:132
 msgid "Move one section down"
-msgstr ""
+msgstr "Sposta una sezione in basso"
 
 #: mp_toys.mpsl:247
 msgid "Pipes - carry water from top to bottom by turning the pipes"
-msgstr ""
+msgstr "Tubi: trasportare l'acqua dall'alto verso il basso ruotando i tubi"
 
 #: mp_file.mpsl:56 mp_file.mpsl:72
 #, c-format
 msgid "Error saving '%s': %s"
-msgstr ""
+msgstr "Errore salvataggio '%s': %s"
 
 #: mp_file.mpsl:209
 #, c-format
 msgid "'%s' has changed. Are you sure?"
-msgstr ""
+msgstr "'%s' è cambiato. Sei sicuro?"
 
 #: mp_file.mpsl:511
 #, c-format
 msgid "'%s' was changed externally. Reload?"
-msgstr ""
+msgstr "'%s' è stato modificato esternamente. Ricaricare?"
 
 #: mp_file.mpsl:554
 #, c-format
 msgid "'%s' has changed. Save changes?"
-msgstr ""
+msgstr "'%s' è cambiato. Salvare le modifiche?"
 
 #: mp_file.mpsl:159
 #, c-format
 msgid "Error opening '%s': %s"
-msgstr ""
+msgstr "Errore apertura '%s': %s"
 
 #: mp_misc.mpsl:136
 msgid "<current locale>"
-msgstr ""
+msgstr "<valuta locale>"
 
 #: mp_misc.mpsl:141
 msgid "Available encodings"
-msgstr ""
+msgstr "Codifiche disponibili"
 
-#: mp_misc.mpsl:310
+#: mp_misc.mpsl:297
 msgid "You have a development version newer than any stable release."
-msgstr ""
+msgstr "Hai una versione di sviluppo più recente di qualsiasi versione stabile."
 
 #: mp_file.mpsl:199
 msgid "Folder to open"
-msgstr ""
+msgstr "Cartella da aprire"
 
 #: mp_file.mpsl:483
 msgid "Open folder..."
-msgstr ""
+msgstr "Apri cartella..."
 
 #: mp_dir.mpsl:22
 #, c-format
 msgid "<listing of %s>"
-msgstr ""
+msgstr "<elenco di %s>"
 
 #: mp_dir.mpsl:29
 msgid "Directory editor"
-msgstr ""
+msgstr "Editor directory"
 
 #: mp_dir.mpsl:30
 msgid "Deleting a line deletes the file;"
-msgstr ""
+msgstr "L'eliminazione di una riga cancellata nel file;"
 
 #: mp_dir.mpsl:31
 msgid "Changing a line renames the file;"
-msgstr ""
+msgstr "La modifica di una riga rinominata nel file;"
 
 #: mp_dir.mpsl:32
 msgid "Saving commits the changes."
-msgstr ""
+msgstr "Il salvataggio impegna le modifiche."
 
 #: mp_dir.mpsl:33
 msgid "(Keep the 'number:' on each line untouched)"
-msgstr ""
+msgstr "(Mantieni intatto il \"numero:\" su ogni riga)"
 
 #: mp_dir.mpsl:52
 #, c-format
 msgid "<changes to directory '%s'>"
-msgstr ""
+msgstr "<cambia alla directory '%s'>"
 
 #: mp_dir.mpsl:71
 #, c-format
 msgid "# error renaming '%s' to '%s' (%s)"
-msgstr ""
+msgstr "# errore rinomina '%s' to '%s' (%s)"
 
 #: mp_dir.mpsl:74
 #, c-format
 msgid "# renamed '%s' to '%s'"
-msgstr ""
+msgstr "# rinominare '%s' nel '%s'"
 
 #: mp_dir.mpsl:91
 #, c-format
 msgid "# error deleting '%s' (%s)"
-msgstr ""
+msgstr "# errore cancellazione '%s' (%s)"
 
 #: mp_dir.mpsl:93
 #, c-format
 msgid "# deleted '%s'"
-msgstr ""
+msgstr "# cancellato '%s'"
 
-#: mp_misc.mpsl:346
+#: mp_misc.mpsl:333
 msgid "Insert time stamp"
-msgstr ""
+msgstr "Inserisci data e ora"
 
 #: mp_build.mpsl:21
 msgid "No build targets found."
-msgstr ""
+msgstr "Nessun obiettivo di creazione trovato."
 
 #: mp_build.mpsl:27
 msgid "Build target"
-msgstr ""
+msgstr "Crea obbiettivo"
 
 #: mp_build.mpsl:140
 #, c-format
 msgid "Error executing '%s'"
-msgstr ""
+msgstr "Errore esecuzione '%s'"
 
-#: mp_edit.mpsl:147
+#: mp_edit.mpsl:146
 msgid "Show line numbers"
-msgstr ""
+msgstr "Mostra i numeri di riga"
 
 #: mp_hex.mpsl:161
 msgid "Not found."
-msgstr ""
+msgstr "Non trovato."
 
 #: mp_hex.mpsl:168
 msgid "Hex string to seek"
-msgstr ""
+msgstr "Stringa esadecimale da cercare"
 
 #: mp_clipboard.mpsl:82
 msgid "Mark selection block"
-msgstr ""
+msgstr "Contrassegna il blocco di selezione"
 
 #: mp_clipboard.mpsl:84
 msgid "Mark vertical selection block"
-msgstr ""
+msgstr "Contrassegna il blocco di selezione verticale"
 
 #: mp_file.mpsl:479
 msgid "Suspend"
-msgstr ""
+msgstr "Sospendi"
 
 #: mp_move.mpsl:150
 msgid "Select word under cursor"
-msgstr ""
+msgstr "Seleziona la parola sotto il cursore"
 
 #: mp_search.mpsl:60 mp_search.mpsl:81
 msgid "Search wrapped"
-msgstr ""
+msgstr "Ricerca avvolta"
 
-#: mp_search.mpsl:247
+#: mp_search.mpsl:244
 msgid "Move to the matching bracket"
-msgstr ""
+msgstr "Passa alla parentesi corrispondente"
 
-#: mp_edit.mpsl:231
+#: mp_edit.mpsl:230
 msgid "Cut line"
-msgstr ""
+msgstr "Taglia linea"
 
 msgid "RTF file name"
-msgstr ""
+msgstr "RTF nome file"
 
 msgid "Export as RTF..."
-msgstr ""
+msgstr "Esporta come RTF..."
 
 #: mp_move.mpsl:155
 msgid "Scroll document down"
-msgstr ""
+msgstr "Scorri il documento verso il basso"
 
 #: mp_move.mpsl:156
 msgid "Scroll document up"
-msgstr ""
+msgstr "Scorri il documento verso l'alto"
+
+#: mp_edit.mpsl:246
+msgid "Insert page break character (FF)"
+msgstr "Inserisci carattere di interruzione di pagina (FF)"
 
 #: mp_edit.mpsl:247
-msgid "Insert page break character (FF)"
-msgstr ""
+msgid "Insert m-dash character"
+msgstr "Inserisci il carattere trattino m"
 
 #: mp_edit.mpsl:248
-msgid "Insert m-dash character"
-msgstr ""
-
-#: mp_edit.mpsl:249
 msgid "Insert raw string"
-msgstr ""
+msgstr "Inserisci una stringa raw"
 
-#: mp_search.mpsl:213
+#: mp_search.mpsl:210
 #, c-format
 msgid "%d lines replaced"
-msgstr ""
+msgstr "%d linee sostituite"
 
-#: mp_search.mpsl:249
+#: mp_search.mpsl:246
 msgid "Replace tabs with spaces"
-msgstr ""
+msgstr "Sostituisci le tabulazioni con spazi"
 
-#: mp_search.mpsl:250
+#: mp_search.mpsl:247
 msgid "Replace spaces with tabs"
-msgstr ""
+msgstr "Sostituisci gli spazi con le tabulazioni"
 
 msgid "Maze - help %s to find the treasure. As always, the X marks the spot."
-msgstr ""
+msgstr "Labirinto: aiuta %s a trovare il tesoro. Come sempre, la X segna il punto."
 
 msgid "..."
-msgstr ""
+msgstr "..."
 
 #: mp_file.mpsl:183
 msgid "Recent files"
-msgstr ""
+msgstr "File recenti"
 
 #: mp_file.mpsl:492
 msgid "Open recent files..."
-msgstr ""
+msgstr "Apri i file recenti..."
 
 #: mp_hex.mpsl:32
 #, c-format
 msgid "<hex view of %s>"
-msgstr ""
+msgstr "<visualizza esa nel %s>"
 
-#: mp_misc.mpsl:354
+#: mp_misc.mpsl:341
 msgid "Play \"Maze\""
-msgstr ""
+msgstr "Riproduci \"Labirinto\""
 
-#: mp_core.mpsl:648 mp_misc.mpsl:170
+#: mp_core.mpsl:662 mp_misc.mpsl:170
 #, c-format
 msgid "Minimum Profit %s - Programmer Text Editor"
-msgstr ""
+msgstr "Profitto minimo %s - Editor di testo del programmatore"
 
 msgid ""
 "Usage: mp-5 [options] [files...]\n"
@@ -1323,47 +1355,55 @@ msgid ""
 " -txt               Use text mode instead of GUI\n"
 " +NNN               Moves to line number NNN of last file\n"
 msgstr ""
+"Utilizzo: mp-5 [opzioni] [file ...]\n"
+"\n"
+"Opzioni:\n"
+"\n"
+"  -t {tag} Modifica il file in cui è definito il tag\n"
+"  -e {mpsl_code} Esegue il codice MPSL\n"
 
 msgid "Components: driver %s, MPDM %s, MPSL %s"
-msgstr ""
+msgstr "Componenti: driver %s, MPDM %s, MPSL %s"
 
 #: mp_dir.mpsl:100
 msgid "# nothing changed."
-msgstr ""
+msgstr "# niente è cambiato."
 
-#: mp_core.mpsl:939
+#: mp_core.mpsl:888
 msgid "<internal errors>"
-msgstr ""
+msgstr "<errore interno>"
 
 #: mp_toys.mpsl:82
 #, c-format
 msgid "Maze - help %s to find the treasure. As always, the %s marks the spot."
-msgstr ""
+msgstr "Labirinto: aiuta %s a trovare il tesoro. Come sempre, %s segna il punto."
 
 #: mp_toys.mpsl:216 mp_toys.mpsl:393 mp_toys.mpsl:602
 msgid "You won! Press ENTER."
-msgstr ""
+msgstr "Hai vinto! Premere INVIO."
 
 #: mp_file.mpsl:86
 msgid "Export to file (available formats: "
-msgstr ""
+msgstr "Esporta su file (formati disponibili: "
 
 #: mp_file.mpsl:109
 #, c-format
 msgid "Error exporting '%s': %s"
-msgstr ""
+msgstr "Errore esportazione '%s': %s"
 
 msgid "Unknown export format '%s'. Available: [%s]"
-msgstr ""
+msgstr "Formato esportazione sconosciuto '%s'. Disponibile: [%s]"
 
 #: mp_file.mpsl:474
 msgid "Export..."
-msgstr ""
+msgstr "Esporta..."
 
 msgid ""
 "Unknown export format '%s'.\n"
 "Available: [%s]"
 msgstr ""
+"Formato di esportazione sconosciuto \"%s\".\n"
+"Disponibile: [%s]"
 
 #: mp_file.mpsl:99
 #, c-format
@@ -1371,8 +1411,10 @@ msgid ""
 "Unsupported format '%s'.\n"
 "(Not one of: [%s])"
 msgstr ""
+"Formato \"%s\" non supportato.\n"
+"(Non uno di: [%s])"
 
-#: mp_core.mpsl:650
+#: mp_core.mpsl:664
 msgid ""
 "Usage: mp-5 [options] [files...]\n"
 "\n"
@@ -1388,64 +1430,69 @@ msgid ""
 " +NNN               Moves to line number NNN of last file\n"
 " -ni                Non-interactive (to be used with -e or -f)\n"
 msgstr ""
+"Utilizzo: mp-5 [opzioni] [file ...]\n"
+"\n"
+"Opzioni:\n"
+"\n"
+" -t {tag}           Modifica il file in cui è definito il tag\n"
+" -e {mpsl_code}     Esegue il codice MPSL\n"
+" -f {mpsl_script}   Esegue il file di script MPSL\n"
+" -F {mpsl_script}  Esegue il file di script MPSL ed esce\n"
+" -d {directory}     Imposta la directory corrente\n"
+" -x {file}           Apre il file nel visualizzatore esadecimale\n"
+" -txt                Usa la modalità testo invece della GUI\n"
+" + NNN P              assa al numero di riga NNN dell'ultimo file\n"
+" -ni                    Non interattivo (da utilizzare con -e o -f)\n"
 
-#: mp_edit.mpsl:191
+#: mp_edit.mpsl:190
 msgid "C/C++ clang options"
-msgstr ""
+msgstr "C/C++ clang opzioni"
 
-#: mp_edit.mpsl:245
+#: mp_edit.mpsl:244
 msgid "Code completion options..."
-msgstr ""
+msgstr "Opzioni di completamento del codice ..."
 
 #: mp_misc.mpsl:172
 #, c-format
 msgid "Components: driver %s, MPDM %s, MPSL %s (%s)"
-msgstr ""
+msgstr "Componenti: driver %s, MPDM %s, MPSL %s (%s)"
 
 #: mp_tags.mpsl:86
 msgid "Completion with clang..."
-msgstr ""
+msgstr "Completamento con clang ..."
 
 #: mp_tags.mpsl:221
 msgid "Completion"
-msgstr ""
+msgstr "Completamento"
 
-#: mp_misc.mpsl:355
+#: mp_misc.mpsl:342
 msgid "Play \"Puzzle\""
-msgstr ""
+msgstr "Riproduci \"Puzzle\""
 
 #: mp_tags.mpsl:258
 msgid "No completion found"
-msgstr ""
+msgstr "Nessun completamento trovato"
 
 #: mp_toys.mpsl:485
 msgid "Puzzle - order the list by moving the blank"
-msgstr ""
+msgstr "Puzzle: ordina l'elenco spostando lo spazio vuoto"
 
 #: mp_file.mpsl:493
 msgid "Toggle visual wrap"
-msgstr ""
+msgstr "Attiva/Disattiva l'involucro visivo"
 
 #: mp_misc.mpsl:207
 msgid "Internal error"
-msgstr ""
+msgstr "Errore interno"
 
-#: mp_misc.mpsl:350
+#: mp_misc.mpsl:337
 msgid "About"
-msgstr ""
+msgstr "Circa"
 
-#: mp_misc.mpsl:351
+#: mp_misc.mpsl:338
 msgid "Check for updates"
-msgstr ""
+msgstr "Controlla gli aggiornamenti"
 
-#: mp_misc.mpsl:352
+#: mp_misc.mpsl:339
 msgid "Release notes"
-msgstr ""
-
-#: mp_writing.mpsl:18
-#, c-format
-msgid ""
-"Lines: %d\n"
-"Words: %d\n"
-"Pages: %d"
-msgstr ""
+msgstr "Note di rilascio"

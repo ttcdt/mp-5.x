@@ -515,9 +515,9 @@ sub mp.split_by_words(s, r)
 {
     /* if no special-purpose regex set, take global one */
     if (r == NULL)
-        r = mp.word_regex;
+        r = regcomp(mp.word_regex);
 
-    return s->map(regcomp(r));
+    return s->map(r);
 }
 
 
@@ -535,7 +535,7 @@ sub mp_doc.split_line_by_words(doc, r)
 
     /* if no special-purpose regex set, take global one */
     if (r == NULL)
-        r = mp.word_regex;
+        r = regcomp(mp.word_regex);
 
     while ((w = regex(l, r, c[0] + c[1])) != NULL) {
         /* store the word */

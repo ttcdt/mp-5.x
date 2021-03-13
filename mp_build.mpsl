@@ -89,14 +89,16 @@ sub mp.build_execute(target)
     local syntax = mp.active.syntax.name;
     local log = mp.open('<build output>');
 
-    log.txt.lines = [];
+    log.txt.lines = [""];
     log.txt.y = 0;
+    log.force_visual_wrap = 1;
 
     /* special keycode */
     log.keycodes.enter = "open_under_cursor";
 
     /* very very special cases: MPSL */
-    if (syntax == "MPSL" && (regex(target, "/^check/") || regex(target, "/^execute/"))) {
+    if (syntax == "MPSL" &&
+        (regex(target, "/^check/") || regex(target, "/^execute/"))) {
         local op = target->split(" ");
 
         local f = open(op[1]);
@@ -121,18 +123,18 @@ sub mp.build_execute(target)
                     res = 'Syntax OK';
             }
 
-            log->append(res);
+            log->insert(res + "\n");
             ERROR = NULL;
         }
         else
-            log->append("Error opening " + op[1]);
+            log->insert("Error opening " + op[1] + "\n");
     }
     else {
         /* pipe through make */
         local p;
         if ((p = popen(target, 'r')) != NULL) {
             foreach (l, p)
-                log->append(mp.chomp(l));
+                log->insert(l);
 
             pclose(p);
         }
@@ -147,10 +149,6 @@ sub mp.build_execute(target)
     log.txt.vy = 0;
     log->move_eof();
     log->move_bol();
-
-    /* ensure the log document has something */
-    if (count(log.txt.lines) == 0)
-        log.txt.lines = [''];
 
     /* set the last search regex to match file:line strings,
         so that calling seek-next and seek-prev moves there */

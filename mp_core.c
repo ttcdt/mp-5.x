@@ -53,7 +53,8 @@ struct drw_1_info {
     wchar_t wc_tab;             /* char for marking tabs */
     wchar_t wc_formfeed;        /* char for marking form feeds */
     wchar_t wc_unknown;         /* char for marking unknown characters */
-    wchar_t wc_wordwrap;       /* char for marking word wraps */
+    wchar_t wc_wordwrap;        /* char for marking word wraps */
+    wchar_t wc_m_dash;          /* char for the m-dash */
 };
 
 struct drw_1_info drw_1;
@@ -299,6 +300,8 @@ static int drw_prepare(mpdm_t doc)
         drw_1.wc_formfeed = *ptr;
     if ((ptr = mpdm_string(mpdm_get_wcs(v, L"wordwrap"))) != NULL)
         drw_1.wc_wordwrap = *ptr;
+    if ((ptr = mpdm_string(mpdm_get_wcs(v, L"m_dash"))) != NULL)
+        drw_1.wc_m_dash = *ptr;
     if ((ptr = mpdm_string(mpdm_get_wcs(v, L"unknown"))) != NULL)
         drw_1.wc_unknown = *ptr;
 
@@ -372,7 +375,7 @@ static int drw_prepare(mpdm_t doc)
 static int drw_fill_attr(int attr, int offset, int size)
 /* fill an attribute */
 {
-    if (attr != -1)
+    if (attr != -1 && offset + size < drw_2.size + 1)
         memset(drw_2.attrs + offset, attr, size);
 
     return offset + size;
@@ -714,6 +717,10 @@ static wchar_t drw_char(wchar_t c, wchar_t pc, int n)
     /* soft hyphen */
     if (c == L'\xad')
         c = drw_1.wc_wordwrap;  /* cedilla */
+
+    /* m-dash */
+    if (c == L'\x2014')
+        c = drw_1.wc_m_dash;
 
     if (drw_1.mark_eol) {
         if (c == L'\t')

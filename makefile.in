@@ -38,15 +38,15 @@ dep:
 		sed -e 's;$(MPDM)/;$$(MPDM)/;g' \
 			-e 's;$(MPSL)/;$$(MPSL)/;g' > makefile.depend
 
-mp.tar: *.mpsl lang/*.mpsl syntax/*.mpsl RELEASE_NOTES
-	$(TAR) cvf $@ *.mpsl lang/*.mpsl syntax/*.mpsl RELEASE_NOTES
+mp.tar: *.mpsl lang/*.mpsl syntax/*.mpsl RELEASE_NOTES LICENSE
+	$(TAR) cvf $@ *.mpsl lang/*.mpsl syntax/*.mpsl RELEASE_NOTES LICENSE
 
 mp.tar.o: mp.tar
 	$(LD) -r -b binary mp.tar -o $@
 
-mp.zip: *.mpsl lang/*.mpsl syntax/*.mpsl RELEASE_NOTES
+mp.zip: *.mpsl lang/*.mpsl syntax/*.mpsl RELEASE_NOTES LICENSE
 	rm -f $@
-	zip -r $@ *.mpsl lang/*.mpsl syntax/*.mpsl RELEASE_NOTES
+	zip -r $@ *.mpsl lang/*.mpsl syntax/*.mpsl RELEASE_NOTES LICENSE
 
 mp.zip.o: mp.zip
 	$(LD) -r -b binary mp.zip -o $@

@@ -32,70 +32,28 @@
 
   <releases>
 
-    <release version="5.46" type="stable" date="2021-02-02">
+    <release version="5.47" type="stable" date="2021-03-03">
       <description>
-      <p>Improvements:</p>
-      <ul>
-      <li>In text interfaces, typing on a selection list filters by text the elements shown (contributed by FltkLover).</li>
-      <li>New configuration variable `mp.config.dark_mode', to switch between dark / light color modes (default: 1, dark) (Claire).</li>
-      </ul>
-      <p>Important changes:</p>
-      <ul>
-      <li>Visual wrapping is now on by default. If text disappearing beyond the right margin is preferred, you can set the configuration variable `mp.config.visual_wrap' to 0. Also, remember that visual wrapping can always be toggled using the `ctrl-k' keycode (Theo).</li>
-      <li>If the ~/.config directory exists, the user configuration file is assumed to be ~/.config/mp.mpsl (unless a traditional ~/.mp.mpsl file already exists) (Theo).</li>
-      </ul>
-      <p>Bug fixes:</p>
-      <ul>
-      <li>Fixed word count when visual wrapping is on (Claire).</li>
-      </ul>
-      <p>Other changes:</p>
-      <ul>
-      <li>The `word_count' action also shows an (approximate) number of pages.</li>
-      </ul>
-      </description>
-      <artifacts>
-        <artifact type="source">
-          <location>https://triptico.com/download/mp-5.tar.gz</location>
-        </artifact>
-        <artifact type="binary" platform="win32">
-          <location>https://triptico.com/download/mp-5-portable-64.exe</location>
-        </artifact>
-      </artifacts>
-    </release>
-
-    <release version="5.45" type="stable" date="2021-01-14">
-      <description>
-      <p>Bug fixes:</p>
-      <ul>
-        <li>Strange behaviour in `delete_left` action at the beginning of a document (Tiny).</li>
-        <li>Hangup in a corner case when mixing visual word wrapping and hard word wrapping (Theo).</li>
-        <li>Strange colors in newer ncurses (contributed by X-Ryl669).</li>
-        <li>In the ANSI driver, set the default attribute before deleting up to the end of line to avoid spurious inverse colors in not-very-smart terminal emulators like kitty (Tiny).</li>
-      </ul>
-      <p>Improvements:</p>
-      <ul>
-        <li>Better config.sh configurability and package detection (contributed by rofl0r).</li>
-      </ul>
-      </description>
-      <artifacts>
-        <artifact type="source">
-          <location>https://triptico.com/download/mp-5.tar.gz</location>
-        </artifact>
-        <artifact type="binary" platform="win32">
-          <location>https://triptico.com/download/mp-5-portable-64.exe</location>
-        </artifact>
-      </artifacts>
-    </release>
-
-    <release version="5.44" type="stable" date="2020-11-10">
-      <description>
-      <p>Bug fixes:</p>
-      <ul>
-        <li>Fixed backwards search (hungups and skipped matches).</li>
-        <li>Fixed ugly attributes at exit in the ANSI driver.</li>
-        <li>Fixed compilation in GTK v.2.</li>
-        <li>Fixed JSON syntax highlight.</li>
-      </ul>
+        <p>Improvements:</p>
+        <ul>
+        <li>The spellchecking code has been optimized for speed (Tiny).</li>
+        <li>Updated italian translation (contributed by Sergio).</li>
+        <li>New syntax highlight definition for git logs and release notes (Tiny).</li>
+        <li>New git operation to show a log from the latest tag (Tiny).</li>
+        </ul>
+        <p>Bug fixes:</p>
+        <ul>
+        <li>[ANSI] Allow remapping single character keycodes like the rest of the drivers (Theo).</li>
+        <li>Fixed rare crash in attribute filling under OpenBSD (Claire).</li>
+        <li>[Win32] Set mp.config.eol to \r\n also under 64bit Windows (Tiny).</li>
+        <li>[ANSI] Fixed bad processing of a repetitive string of backspace characters (Theo).</li>
+        <li>[TUI] Fixed initial position in lists (contributed by FltkLover).</li>
+        </ul>
+        <p>Other changes:</p>
+        <ul>
+        <li>If defined, the XDG_CONFIG_HOME environment variable is used instead of a hardcoded `$HOME/.config' (contributed by aov).</li>
+        <li>New function mp.copy(), to copy a string or array into the clipboard (Tiny).</li>
+        </ul>
       </description>
       <artifacts>
         <artifact type="source">

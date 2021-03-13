@@ -38,7 +38,7 @@ mp_doc.actions['delete_left']   = sub (d) {
 
         d->move_left();
 
-        if (mp.config.visual_wrap) {
+        if (d->visual_wrap()) {
             if (d.txt.x && d.txt.lines[d.txt.y][d.txt.x] == "\x{ad}") {
                 d.txt.x -= 1;
             }
@@ -394,7 +394,7 @@ sub mp_doc.break_line(doc, col)
     /* put second part there (or an empty string if NULL) */
     txt.lines[txt.y] = l2 || '';
 
-    if (mp.config.visual_wrap)
+    if (doc->visual_wrap())
         mp_c.vw_wrap(txt.lines, mp.vw_col(), txt.y);
 
     txt.mod += 1;
@@ -409,7 +409,7 @@ sub mp_doc.join_line(doc)
     local txt = doc.txt;
 
     if (txt.y < size(txt.lines)) {
-        if (mp.config.visual_wrap) {
+        if (doc->visual_wrap()) {
             if (txt.x && txt.lines[txt.y][txt.x - 1] == "\x{ad}")
                 txt.x -= 1;
 
@@ -423,7 +423,7 @@ sub mp_doc.join_line(doc)
         /* delete it */
         del(txt.lines, txt.y + 1);
 
-        if (mp.config.visual_wrap)
+        if (doc->visual_wrap())
             mp_c.vw_wrap(txt.lines, mp.vw_col(), txt.y + 1);
 
         txt.mod += 1;
@@ -457,7 +457,7 @@ sub mp_doc.delete_line(doc)
     /* move to previous x position */
     txt.x = mp_c.vx2x(txt.lines[txt.y], vx);
 
-    if (mp.config.visual_wrap)
+    if (doc->visual_wrap())
         mp_c.vw_wrap(txt.lines, mp.vw_col(), txt.y);
 
     txt.mod += 1;
@@ -478,7 +478,7 @@ sub mp_doc.delete_char(doc)
         return;
     }
 
-    if (mp.config.visual_wrap) {
+    if (doc->visual_wrap()) {
         if (txt.x && txt.lines[txt.y][txt.x - 1] == "\x{ad}")
             txt.x -= 1;
 
@@ -493,7 +493,7 @@ sub mp_doc.delete_char(doc)
         txt.lines[txt.y] = w;
     }
 
-    if (mp.config.visual_wrap)
+    if (doc->visual_wrap())
         mp_c.vw_wrap(txt.lines, mp.vw_col(), txt.y);
 
     doc->set_offset(o);
@@ -603,7 +603,7 @@ sub mp_doc.insert_string(doc, str)
     doc->delete_mark();
 
     /* unwrap line */
-    if (mp.config.visual_wrap) {
+    if (doc->visual_wrap()) {
         if (txt.x && txt.lines[txt.y][txt.x - 1] == "\x{ad}")
             txt.x -= 1;
 
@@ -618,7 +618,7 @@ sub mp_doc.insert_string(doc, str)
     txt.x += size(str);
 
     /* re-wrap line */
-    if (mp.config.visual_wrap) {
+    if (doc->visual_wrap()) {
         local o = doc->get_offset();
         mp_c.vw_wrap(txt.lines, mp.vw_col(), txt.y);
         doc->set_offset(o);
@@ -855,7 +855,7 @@ sub mp_doc.join_paragraph(doc)
     local txt = doc.txt;
     local l;
 
-    if (mp.config.visual_wrap)
+    if (doc->visual_wrap())
         mp_c.vw_unwrap(txt.lines, txt.y);
 
     while ((l = txt.lines[txt.y + 1]) && size(l)) {
@@ -866,7 +866,7 @@ sub mp_doc.join_paragraph(doc)
         doc->move_eol()->insert(' ')->join_line();
     }
 
-    if (mp.config.visual_wrap)
+    if (doc->visual_wrap())
         mp_c.vw_wrap(txt.lines, mp.vw_col(), txt.y);
 
     return doc;

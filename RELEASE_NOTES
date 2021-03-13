@@ -1,310 +1,323 @@
 Minimum Profit Release Notes
 ============================
 
+5.47
+----
+
+* Improvements:
+
+The spellchecking code has been optimized for speed (Tiny).
+
+Updated italian translation (contributed by Sergio).
+
+New syntax highlight definition for git logs and release notes (Tiny).
+
+New git operation to show a log from the latest tag (Tiny).
+
+* Bug fixes:
+
+[ANSI] Allow remapping single character keycodes like the rest of the drivers (Theo).
+
+Fixed rare crash in attribute filling under OpenBSD (Claire).
+
+[Win32] Set `mp.config.eol' to `\r\n' also under 64bit Windows (Tiny).
+
+[ANSI] Fixed bad processing of a repetitive string of backspace characters (Theo).
+
+[TUI] Fixed initial position in lists (contributed by FltkLover).
+
+* Other changes:
+
+If defined, the XDG_CONFIG_HOME environment variable is used instead of a hardcoded `$HOME/.config' (contributed by aov).
+
+New function `mp.copy()', to copy a string or array into the clipboard (Tiny).
+
 5.46
 ----
 
- - Improvements:
-    - In text interfaces, typing on a selection list filters by
-      text the elements shown (contributed by FltkLover).
-    - New configuration variable `mp.config.dark_mode', to switch
-      between dark / light color modes (default: 1, dark) (Claire).
- - Important changes:
-    - Visual wrapping is now on by default. If text disappearing
-      beyond the right margin is preferred, you can set the
-      configuration variable `mp.config.visual_wrap' to 0. Also,
-      remember that visual wrapping can always be toggled using
-      the `ctrl-k' keycode (Theo).
-    - If the ~/.config directory exists, the user configuration
-      file is assumed to be ~/.config/mp.mpsl (unless a traditional
-      ~/.mp.mpsl file already exists) (Theo).
- - Bug fixes:
-    - Fixed word count when visual wrapping is on (Claire).
- - Other changes:
-    - The `word_count' action also shows an (approximate) number
-      of pages.
+* Improvements:
+
+In text interfaces, typing on a selection list filters by text the elements shown (contributed by FltkLover).
+
+New configuration variable `mp.config.dark_mode', to switch between dark / light color modes (default: 1, dark) (Claire).
+
+* Important changes:
+
+Visual wrapping is now on by default. If text disappearing beyond the right margin is preferred, you can set the configuration variable `mp.config.visual_wrap' to 0. Also, remember that visual wrapping can always be toggled using the `ctrl-k' keycode (Theo).
+
+If the `~/.config' directory exists, the user configuration file is assumed to be `~/.config/mp.mpsl' (unless a traditional `~/.mp.mpsl' file already exists) (Theo).
+
+* Bug fixes:
+
+Fixed word count when visual wrapping is on (Claire).
+
+* Other changes:
+
+The `word_count' action also shows an (approximate) number of pages.
 
 5.45
 ----
 
- - Bug fixes:
-    - Strange behaviour in `delete_left` action at the beginning
-      of a document (Tiny).
-    - Hangup in a corner case when mixing visual word wrapping and
-      hard word wrapping (Theo).
-    - Strange colors in newer ncurses (contributed by X-Ryl669).
-    - In the ANSI driver, set the default attribute before deleting
-      up to the end of line to avoid spurious inverse colors in
-      not-very-smart terminal emulators like kitty (Tiny).
- - Improvements:
-    - Better config.sh configurability and package detection
-      (contributed by rofl0r).
+* Bug fixes:
+
+Strange behaviour in `delete_left' action at the beginning of a document (Tiny).
+
+Hangup in a corner case when mixing visual word wrapping and hard word wrapping (Theo).
+
+Strange colors in newer ncurses (contributed by X-Ryl669).
+
+In the ANSI driver, set the default attribute before deleting up to the end of line to avoid spurious inverse colors in not-very-smart terminal emulators like kitty (Tiny).
+
+* Improvements:
+
+Better config.sh configurability and package detection (contributed by rofl0r).
 
 5.44
 ----
 
- - Bug fixes:
-    - Fixed backwards search (hungups and skipped matches).
-    - Fixed ugly attributes at exit in the ANSI driver.
-    - Fixed compilation in GTK v.2.
-    - Fixed JSON syntax highlight.
+* Bug fixes:
+
+Fixed backwards search (hungups and skipped matches).
+
+Fixed ugly attributes at exit in the ANSI driver.
+
+Fixed compilation in GTK v.2.
+
+Fixed JSON syntax highlight.
 
 5.43
 ----
 
- - New features:
-    - The MPSL source is deployed in .zip format, so the disk
-      footprint is smaller.
+* New features:
+
+The MPSL source is deployed in .zip format, so the disk footprint is smaller.
 
 5.42
 ----
 
- - New features:
-    - Speed improvements in ANSI and ncurses drivers. This will be
-      specially noticed in slow systems like the oldest Raspberry Pies.
-    - In build (makefile) and grep logs, the ENTER key activates
-      the 'open_under_cursor' action.
- - Bugfixes:
-    - Fixed a rounding error in emacs-style scrolling.
+* New features:
+
+Speed improvements in ANSI and ncurses drivers. This will be specially noticed in slow systems like the oldest Raspberry Pies.
+
+In build (makefile) and grep logs, the ENTER key activates the `open_under_cursor' action.
+
+* Bugfixes:
+
+Fixed a rounding error in emacs-style scrolling.
 
 5.41
 ----
 
- - Bug fixes:
-    - Fixed crash in Qt5 startup.
-    - Fixed typo in Perl syntax highlight.
+* Bug fixes:
+
+Fixed crash in Qt5 startup.
+
+Fixed typo in Perl syntax highlight.
 
 5.40
 ----
 
- - Updated maintainers.
+* Important changes:
+
+New software maintainers.
 
 5.39
 ----
 
- - New features:
-    - The usage of Unicode characters in text menus, games, etc.
-      can be disabled by setting the configuration variable
-      `mp.config.use_unicode' to 0.
- - Other changes:
-    - Some internal optimizations to visual wrapping code.
+* New features:
+
+The usage of Unicode characters in text menus, games, etc. can be disabled by setting the configuration variable `mp.config.use_unicode' to 0.
+
+* Other changes:
+
+Some internal optimizations to visual wrapping code.
 
 5.38
 ----
 
- - New features:
-    - A new visual wrap mode, where lines longer than the
-      application window wrap (with special marking) instead
-      of disappearing to the right. It's implemented in the
-      `toggle_visual_wrap' action (bound by default to
-      `ctrl-k') and can be activated from the configuration
-      file by setting `mp.config.visual_wrap' to 1.
- - Other changes:
-    - When hard word wrapping is not set, the `word_wrap_paragraph' 
-      action behaves like `join_paragraph' (i.e. word-wraps to
-      an infinite column).
+* New features:
+
+A new visual wrap mode, where lines longer than the application window wrap (with special marking) instead of disappearing to the right. It's implemented in the `toggle_visual_wrap' action (bound by default to `ctrl-k') and can be activated from the configuration file by setting `mp.config.visual_wrap' to 1.
+
+* Other changes:
+
+When hard word wrapping is not set, the `word_wrap_paragraph' action behaves like `join_paragraph' (i.e. word-wraps to an infinite column).
 
 5.37
 ----
 
- - Bug fixes:
-    - Fixed compilation issues under FreeBSD and OpenBSD.
- - New features:
-    - New game 'Puzzle'.
+* Bug fixes:
+
+Fixed compilation issues under FreeBSD and OpenBSD.
+
+* New features:
+
+New game 'Puzzle'.
 
 5.36
 ----
 
- - Bug fixes:
-    - When using -f or -F, compiler errors are returned.
-    - Fixed not-that-read-only read-only documents.
-    - Fixed crash in GTK clipboard.
-    - The Qt driver now shows less 'shaky' text.
- - Other changes:
-    - The Unicode character to show tabs is now U+2192.
-    - The mptxt export functions now manage 'strong' and 'em'
-      spreading multiple lines.
+* Bug fixes:
+
+When using -f or -F, compiler errors are returned.
+
+Fixed not-that-read-only read-only documents.
+
+Fixed crash in GTK clipboard.
+
+The Qt driver now shows less 'shaky' text.
+
+* Other changes:
+
+The Unicode character to show tabs is now U+2192.
+
+The mptxt export functions now manage 'strong' and 'em' spreading multiple lines.
 
 5.35
 ----
 
-This release includes a big set of new features and bugfixes by
-fellow developer X-Ryl669.
+This release includes a big set of new features and bugfixes by fellow developer X-Ryl669.
 
- - Important changes:
-    - Some default keycodes have been changed:
-      - `ctrl-space' now triggers `complete' instead of the menu.
-      - `shift-f10' now opens the menu in text interfaces.
-      - `ctrl-u' now calls `complete_with_clang' instead of
-        previous `complete'.
- - New features:
-    - History (search, replace, etc.) is saved.
-    - Interactive search when entering filenames in text
-      interfaces (work by X-Ryl669).
-    - Reduce the number of undo while typing (once every second
-      at maximum) (work by X-Ryl669).
-    - Allow hint to also select directories in file selector
-      (work by X-Ryl669).
-    - Add support for mouse wheel scroll down event on ncurses
-      (work by X-Ryl669).
-    - Add support for showing list wherever we want in text
-      interfaces (work by X-Ryl669).
-    - Make tag completion inline with context instead of on a
-      new window in text interfaces (work by X-Ryl669).
-    - Add support for multiline editing: When you have selected
-      multiple lines in a rectangular block, and started inserting
-      text, it'll be reproduced on all lines (work by X-Ryl669).
-    - Added clang completion for C/C++ languages (work by X-Ryl669).
-    - HTML export now includes a page break in CSS.
-    - Added footer page number in troff exporting.
-    - Added footer page number in RTF exporting.
-    - New command line argument -F, to execute an MPSL script
-      and exit immediately after.
-    - Tabs are always shown differently from spaces.
- - Bug fixes:
-    - Fixed a serious bug in GTK redraws.
-    - Fixed crashes in Qt5.
-    - Fixed directory walk up in text interfaces file browser
-      (work by X-Ryl669).
-    - Fixed block marking options from the main menu.
-    - Fixed insert_time_stamp action.
-    - Fixed some bugs in completion.
-    - Fixed a bug when drawing double-width characters (they
-      were sometimes printed twice).
-    - Fix a of-by-one error in the vertical selection code
-      while deleting (work by X-Ryl669).
-    - Fix a of-by-one error in indenting a block of many
-      selected lines where the last line was never indented
-      (work by X-Ryl669).
-    - Fix a bug that's crashing mp when loading a session
-      (work by X-Ryl669).
-    - Fixed Qt building.
+* Important changes:
+
+Some default keycodes have been changed:
+
+`ctrl-space' now triggers `complete' instead of the menu.
+`shift-f10' now opens the menu in text interfaces.
+`ctrl-u' now calls `complete_with_clang' instead of previous `complete'.
+
+* New features:
+
+History (search, replace, etc.) is saved.
+
+Interactive search when entering filenames in text interfaces (work by X-Ryl669).
+
+Reduce the number of undo while typing (once every second at maximum) (work by X-Ryl669).
+
+Allow hint to also select directories in file selector (work by X-Ryl669).
+
+Add support for mouse wheel scroll down event on ncurses (work by X-Ryl669).
+
+Add support for showing list wherever we want in text interfaces (work by X-Ryl669).
+
+Make tag completion inline with context instead of on a new window in text interfaces (work by X-Ryl669).
+
+Add support for multiline editing: When you have selected multiple lines in a rectangular block, and started inserting text, it'll be reproduced on all lines (work by X-Ryl669).
+
+Added clang completion for C/C++ languages (work by X-Ryl669).
+
+HTML export now includes a page break in CSS.
+
+Added footer page number in troff exporting.
+
+Added footer page number in RTF exporting.
+
+New command line argument -F, to execute an MPSL script and exit immediately after.
+
+Tabs are always shown differently from spaces.
+
+* Bug fixes:
+
+Fixed a serious bug in GTK redraws.
+
+Fixed crashes in Qt5.
+
+Fixed directory walk up in text interfaces file browser (work by X-Ryl669).
+
+Fixed block marking options from the main menu.
+
+Fixed insert_time_stamp action.
+
+Fixed some bugs in completion.
+
+Fixed a bug when drawing double-width characters (they were sometimes printed twice).
+
+Fix a of-by-one error in the vertical selection code while deleting (work by X-Ryl669).
+
+Fix a of-by-one error in indenting a block of many selected lines where the last line was never indented (work by X-Ryl669).
+
+Fix a bug that's crashing mp when loading a session (work by X-Ryl669).
+
+Fixed Qt building.
 
 5.34
 ----
 
- - New features:
-    - New syntax highlight definitions for RTF files.
- - Bug fixes:
-    - The GTK clipboard code has been rewritten to support
-      copy / paste of characters with high Unicode points.
-    - Fixed some memory leaks in underlying libraries.
+* New features:
+
+New syntax highlight definitions for RTF files.
+
+* Bug fixes:
+
+The GTK clipboard code has been rewritten to support copy / paste of characters with high Unicode points.
+
+Fixed some memory leaks in underlying libraries.
 
 5.33
 ----
 
- - New features:
-    - Double page mode: if the viewport screen is wider than
-      the value in mp.config.double_page (default: 120), two
-      pages are shown simultaneously. If you don't like this
-      mode, set mp.config.double_page to 0 in the configuration
-      file.
-    - New command line option -ni for "non-interactive" mode.
-      Expected to be used with -e or -f. No video driver is
-      tried and it exists immediately after executing the
-      code or script.
-    - Native encoding support for Windows-1252 code page.
- - Other stuff:
-    - A new script ms-windows-build.sh, to build 32 and 64
-      bit MS Windows binaries using mingw32.
+* New features:
+
+Double page mode: if the viewport screen is wider than the value in mp.config.double_page (default: 120), two pages are shown simultaneously. If you don't like this mode, set mp.config.double_page to 0 in the configuration file.
+
+New command line option -ni for "non-interactive" mode. Expected to be used with -e or -f. No video driver is tried and it exists immediately after executing the code or script.
+
+Native encoding support for Windows-1252 code page.
+
+* Other stuff:
+
+A new script `ms-windows-build.sh', to build 32 and 64 bit MS Windows binaries using mingw32.
 
 5.32
 ----
 
- - New features:
-    - There is a new version format (2) for encrypted files.
-      The cypher algorithm is the same, but includes a CRC, so
-      that it's possible to know if the content has been
-      correctly decrypted (i.e. the decryption password is
-      valid). New encrypted documents use version 2, but
-      version 1 documents are not automatically upgraded.
-      If you want to do it, open a version 1 document, hit ESC,
-      type `mp.active.crypt_ver = 2' and save it back.
-      *NOTE*: This encryption format, though it uses a known
-      algorithm, has not been audited by anyone remotely
-      versed in cryptography, so you are at your own risk.
-    - The ANSI driver now support 256 color; if the config
-      variable mp.config.ansi_color256 is set to non-zero,
-      the 'gui' color definitions shall be used instead of
-      the usual 'text' definitions.
-    - In Linux and similar systems, both a .desktop and icon
-      files are installed.
-    - In the 'build target' list, also add the generic syntax-
-      dependent build targets at the end (i.e. when editing a
-      Python file in a Makefile-controlled folder, the execute
-      and syntax check options are shown at the end).
-    - New mptxt exporting to .troff format.
-    - New mptxt exporting to .html format.
-  - Other changes:
-    - The `export_as_rtf' action no longer exists; it has been
-      replaced by 'export'.
-    - There has been many internal changes due to both MPDM
-      and MPSL being moving targets, now that they are heavily
-      refactored. None of these changes add anything new nor
-      fix previous bugs.
-    - Fixed some whining about deprecated usage in GTK driver.
-    - In the easter egg / hidden game 'maze', pressing f1
-      shows a compass hint instead of the hero.
+* New features:
+
+There is a new version format (2) for encrypted files. The cypher algorithm is the same, but includes a CRC, so that it's possible to know if the content has been correctly decrypted (i.e. the decryption password is valid). New encrypted documents use version 2, but version 1 documents are not automatically upgraded. If you want to do it, open a version 1 document, hit ESC, type `mp.active.crypt_ver = 2' and save it back. *NOTE*: This encryption format, though it uses a known algorithm, has not been audited by anyone remotely versed in cryptography, so you are at your own risk.
+
+The ANSI driver now support 256 color; if the config variable `mp.config.ansi_color256' is set to non-zero, the 'gui' color definitions shall be used instead of the usual 'text' definitions.
+
+In Linux and similar systems, both a .desktop and icon files are installed.
+
+In the 'build target' list, also add the generic syntax-dependent build targets at the end (i.e. when editing a Python file in a Makefile-controlled folder, the execute and syntax check options are shown at the end).
+
+New mptxt exporting to .troff format.
+
+New mptxt exporting to .html format.
+
+* Other changes:
+
+The `export_as_rtf' action no longer exists; it has been replaced by `export'.
+
+There has been many internal changes due to both MPDM and MPSL being moving targets, now that they are heavily refactored. None of these changes add anything new nor fix previous bugs.
+
+Fixed some whining about deprecated usage in GTK driver.
+
+In the easter egg / hidden game 'Maze', pressing f1 shows a compass hint instead of the hero.
 
 5.31
 ----
 
- - License change: released into the public domain.
- - Improvements:
-    - The RTF export function has been rewritten. The generated
-      markup is much better and shows OK in most of the
-      inconsistent, crappy world of the RTF reader
-      implementations.  Also, there are several configurable
-      options (see the `doc/mp_configuration.txt' document).
- - Bug fixes:
-    - Many that I don't remember. Mostly they were new
-      bugs introduced by changes in MPDM and MPSL.
-    - Fixed Curses driver, broken some versions ago.
- - New features:
-    - There is native encoding support for MSDOS 437 and 850
-      page codes.
-    - New Pascal syntax highlight (yes, Pascal, no kidding).
-      I've been digging in very old shit.
-    - The ANSI driver now accepts alt-letter keycodes.
-    - The execute MPSL code function always dumps its output
-      to the dump window.
+* Important changes:
 
-5.3.0
------
+License change: released into the public domain.
 
- - Architectural changes:
-   - Major refactoring; old code pruned and cleaned, memory
-     management improved.
-   - MPSL code is no longer deployed as separate files, but
-     embedded in a tar file or inside the program binary itself.
-   - Some MPSL code is loaded on demand.
-   - New "portable" (i.e. no installation needed) versions for
-     MS Windows.
- - New features:
-   - New action `insert_m_dash', bound by default to `alt-minus'.
-   - New action `replace_tabs_with_spaces'.
-   - New action `replace_spaces_with_tabs'.
-   - New action `open_recent', to pick the file to open from
-     the previosly opened ones.
- - Other changes:
-   - Versioning have changed from x.x.x to x.yyy.
-   - The coloring theme for GUI drivers has changed to something
-     with dark background and softer colors. If you want to revert
-     the classic, bright colors on white background theme, copy
-     and paste the following into the configuration file:
+* Improvements:
 
-    /* Minimum Profit Classic */
-    mp.colors.normal.gui        = [ 0x000000, 0xffffff ];
-    mp.colors.cursor.gui        = mp.colors.normal.gui;
-    mp.colors.selection.gui     = [ 0xff0000, 0xffffff ];
-    mp.colors.comments.gui      = [ 0x00cc77, 0xffffff ];
-    mp.colors.documentation.gui = [ 0x8888ff, 0xffffff ];
-    mp.colors.quotes.gui        = [ 0x0000ff, 0xffffff ];
-    mp.colors.matching.gui      = [ 0x000000, 0xffff00 ];
-    mp.colors.word1.gui         = [ 0x00aa00, 0xffffff ];
-    mp.colors.word2.gui         = [ 0xff6666, 0xffffff ];
-    mp.colors.word3.gui         = [ 0x000088, 0xffffff ];
-    mp.colors.tag.gui           = [ 0x8888ff, 0xffffff ];
-    mp.colors.spell.gui         = [ 0xff8888, 0xffffff ];
-    mp.colors.search.gui        = [ 0x000000, 0x00cc77 ];
+The RTF export function has been rewritten. The generated markup is much better and shows OK in most of the inconsistent, crappy world of the RTF reader implementations.  Also, there are several configurable options (see the `doc/mp_configuration.txt' document).
 
+* Bug fixes:
+
+Many that I don't remember. Mostly they were new bugs introduced by changes in MPDM and MPSL.
+
+Fixed Curses driver, broken some versions ago.
+
+* New features:
+
+There is native encoding support for MSDOS 437 and 850 page codes.
+
+New Pascal syntax highlight (yes, Pascal, no kidding). I've been digging in very old shit.
+
+The ANSI driver now accepts alt-letter keycodes.
+
+The execute MPSL code function always dumps its output to the dump window.

@@ -151,6 +151,21 @@ sub mp.ispell_word_color_func(w)
 }
 
 
+sub mp.spell_document(doc)
+/* feeds a document through the spellchecker */
+{
+    if (mp.ispell_pipe != NULL) {
+        mp.busy(1);
+
+        foreach (l, doc.txt.lines)
+            foreach (w, mp.split_by_words(l))
+                mp.is_word_misspelled(w);
+
+        mp.busy(0);
+    }
+}
+
+
 /**
  * mp.ispell - Changes spelling highlight.
  * @b: boolean value
@@ -165,8 +180,10 @@ sub mp.ispell(b)
     if (b == -1)
         b = mp.word_color_func == NULL && 1 || 0;
 
-    if (b && mp.is_word_misspelled() != -1)
+    if (b && mp.is_word_misspelled() != -1) {
+        mp.spell_document(mp.active());
         mp.word_color_func = mp.ispell_word_color_func;
+    }
     else
         mp.word_color_func = NULL;
 }
