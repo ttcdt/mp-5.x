@@ -1159,14 +1159,8 @@ long CALLBACK WndProc(HWND hwnd, UINT msg, UINT wparam, LONG lparam)
         return 0;
 
     case WM_TIMER:
-        {
-            mpdm_t v;
-
-            if ((v = mpdm_get_wcs(MP, L"timer_func"))) {
-                mpdm_void(mpdm_exec(v, NULL, NULL));
-                redraw();
-            }
-        }
+        mp_process_event(MPDM_S(L"idle"));
+        redraw();
 
         return 0;
     }
@@ -1787,20 +1781,14 @@ static mpdm_t win32_drv_update_ui(mpdm_t a, mpdm_t ctxt)
 }
 
 
-static mpdm_t win32_drv_timer(mpdm_t a, mpdm_t ctxt)
+static mpdm_t win32_drv_idle(mpdm_t a, mpdm_t ctxt)
 {
-    int msecs = mpdm_ival(mpdm_get_i(a, 0));
-    mpdm_t func = mpdm_get_i(a, 1);
+    int idle_msecs = (int) (mpdm_rval(mpdm_get_i(a, 0)) * 1000);
 
     KillTimer(hwnd, 1);
 
-    mpdm_set_wcs(MP, func, L"timer_func");
-
-    /* if msecs and func are set, program timer */
-    if (msecs > 0 && func != NULL)
-        SetTimer(hwnd, 1, msecs, NULL);
-
-    return NULL;
+    if (idle_msecs > 0)
+        SetTimer(hwnd, 1, idle_msecs, NULL);
 }
 
 
@@ -1824,7 +1812,7 @@ static void register_functions(void)
     mpdm_set_wcs(drv, MPDM_X(win32_drv_clip_to_sys), L"clip_to_sys");
     mpdm_set_wcs(drv, MPDM_X(win32_drv_sys_to_clip), L"sys_to_clip");
     mpdm_set_wcs(drv, MPDM_X(win32_drv_update_ui),   L"update_ui");
-    mpdm_set_wcs(drv, MPDM_X(win32_drv_timer),       L"timer");
+    mpdm_set_wcs(drv, MPDM_X(win32_drv_idle),        L"idle");
     mpdm_set_wcs(drv, MPDM_X(win32_drv_busy),        L"busy");
     mpdm_set_wcs(drv, MPDM_X(win32_drv_alert),       L"alert");
     mpdm_set_wcs(drv, MPDM_X(win32_drv_confirm),     L"confirm");

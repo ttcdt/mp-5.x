@@ -104,7 +104,7 @@ sub mp.load_session()
     }
 
     if (active != -1)
-        mp.active_i = active;
+        mp.set_active(active);
 
     close(fh);
 

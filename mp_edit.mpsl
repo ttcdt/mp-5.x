@@ -269,7 +269,8 @@ sub mp_doc.indent_block(doc, insert_tab)
         local currentY = doc.txt.y;
         local currentX = doc.txt.x;
         local startY   = doc.txt.mark.by;
-        /* If the selection ends on a first column, don't indent the last line, it's not the user's intend */ 
+        /* If the selection ends on a first column,
+           don't indent the last line, it's not the user's intend */ 
         local endY     = doc.txt.mark.ey - (doc.txt.mark.ex == 0);
         local times    = endY - startY + 1;
         
@@ -311,7 +312,8 @@ sub mp_doc.unindent_block(doc, insert_real_tab)
         local currentY = doc.txt.y;
         local currentX = doc.txt.x;
         local startY   = doc.txt.mark.by;
-        /* If the selection ends on a first column, don't indent the last line, it's not the user's intend */ 
+        /* If the selection ends on a first column,
+           don't indent the last line, it's not the user's intend */ 
         local endY     = doc.txt.mark.ey - (doc.txt.mark.ex == 0);
         local times    = endY - startY + 1;
 
@@ -567,8 +569,10 @@ sub mp_doc.insert_string(doc, str)
 
     if (txt.mark.vertical == 1) {
         /* Need to perform vertical editing */
-        /* This insert the given string at all lines concerned by the mark itself (multiple time) */
-        /* Please notice that it does not remove the mark here, but modify it so it's only a single char wide */
+        /* This insert the given string at all lines
+           concerned by the mark itself (multiple time) */
+        /* Please notice that it does not remove the mark here,
+           but modify it so it's only a single char wide */
 
         if (txt.mark.bx != txt.mark.ex) {
             /* Need to delete all previous text in the mark first */
@@ -634,37 +638,44 @@ sub mp_doc.insert(doc, a)
 /* inserts an array of text into a document */
 {
     local txt = doc.txt;
-    local s;
 
     /* if a is not an array, split it */
     if (type(a) != "array")
         a = split(a, "\n");
+    else
+        a = clone(a);
 
-    if ((s = size(a))) {
+    if (size(a)) {
         /* paste first line into current position */
         doc->insert_string(a[0]);
+        a->del(0);
 
         /* more than just one line? */
-        if (s > 1) {
+        if (size(a)) {
             /* break current line in two */
             doc->break_line();
 
             /* insert last line */
-            doc->insert_string(a[s - 1]);
+            doc->insert_string(pop(a));
         }
 
         /* more than two lines? */
-        if (s > 2) {
-            local n = 1;
+        if (size(a)) {
+            if (doc->visual_wrap()) {
+                /* insert all lines one by one, possibly wrapping */
+                foreach (l, a)
+                    doc->insert_string(l)->break_line();
+            }
+            else {
+                /* raw insertion */
 
-            /* open room */
-            expand(txt.lines, txt.y, s - 2);
+                /* open room */
+                expand(txt.lines, txt.y, size(a));
 
-            /* transfer middle lines */
-            while (n < s - 1) {
-                txt.lines[txt.y] = a[n];
-                txt.y += 1;
-                n += 1;
+                foreach (l, a) {
+                    txt.lines[txt.y] = l;
+                    txt.y += 1;
+                }
             }
         }
     }
@@ -673,7 +684,8 @@ sub mp_doc.insert(doc, a)
 }
 
 sub mp_doc.append(doc, a)
-/* appends an array of lines to the document, bypassing indentation rules and current cursor position */
+/* appends an array of lines to the document,
+   bypassing indentation rules and current cursor position */
 {
     local txt = doc.txt;
 

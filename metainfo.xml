@@ -32,27 +32,14 @@
 
   <releases>
 
-    <release version="5.47" type="stable" date="2021-03-03">
+    <release version="5.48" type="stable" date="2021-03-21">
       <description>
         <p>Improvements:</p>
         <ul>
-        <li>The spellchecking code has been optimized for speed (Tiny).</li>
-        <li>Updated italian translation (contributed by Sergio).</li>
-        <li>New syntax highlight definition for git logs and release notes (Tiny).</li>
-        <li>New git operation to show a log from the latest tag (Tiny).</li>
-        </ul>
-        <p>Bug fixes:</p>
-        <ul>
-        <li>[ANSI] Allow remapping single character keycodes like the rest of the drivers (Theo).</li>
-        <li>Fixed rare crash in attribute filling under OpenBSD (Claire).</li>
-        <li>[Win32] Set mp.config.eol to \r\n also under 64bit Windows (Tiny).</li>
-        <li>[ANSI] Fixed bad processing of a repetitive string of backspace characters (Theo).</li>
-        <li>[TUI] Fixed initial position in lists (contributed by FltkLover).</li>
-        </ul>
-        <p>Other changes:</p>
-        <ul>
-        <li>If defined, the XDG_CONFIG_HOME environment variable is used instead of a hardcoded `$HOME/.config' (contributed by aov).</li>
-        <li>New function mp.copy(), to copy a string or array into the clipboard (Tiny).</li>
+        <li>[ANSI] Added double buffering, improving general speed and response (Theo).</li>
+        <li>Words explicitly ignored from the spellchecker (detected by calling the `seek_misspelled' action and disabled by calling `ignore_last_misspell') are now stored in the state so that they are not forgotten in next sessions (Tiny).</li>
+        <li>Also, these user-included words are also taken into account for completion if spellchecking is active (Tiny).</li>
+        <li>New syntax highlight definitions for Gemini / Gemtext files (contributed by cox778).</li>
         </ul>
       </description>
       <artifacts>

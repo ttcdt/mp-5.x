@@ -42,9 +42,7 @@ int nc_attrs[MAX_COLORS];
 /* code for the 'normal' attribute */
 static int normal_attr = 0;
 
-/* timer function */
-static int timer_msecs = 0;
-static mpdm_t timer_func = NULL;
+static int idle_msecs = 0;
 
 /** code **/
 
@@ -76,7 +74,6 @@ static void nc_sigwinch(int s)
 
 #endif
 
-
 #ifdef CONFOPT_WGET_WCH
 int wget_wch(WINDOW * w, wint_t * ch);
 #endif
@@ -88,12 +85,11 @@ static wchar_t *nc_getwch(void)
 
 #ifdef CONFOPT_WGET_WCH
 
-    /* set timer period */
-    if (timer_msecs > 0)
-        timeout(timer_msecs);
+    if (idle_msecs > 0)
+        timeout(idle_msecs);
 
-    if (wget_wch(stdscr, (wint_t *) c) == -1)
-        c[0] = (wchar_t) - 1;
+    if (wget_wch(stdscr, (wint_t *)c) == -1)
+        c[0] = L'\0';
 
 #else
     char tmp[MB_CUR_MAX + 1];
@@ -137,10 +133,8 @@ static mpdm_t nc_tui_getkey(mpdm_t args, mpdm_t ctxt)
 
     f = nc_getwch();
 
-    if (f[0] == -1) {
-        mpdm_void(mpdm_exec(timer_func, NULL, NULL));
-        return NULL;
-    }
+    if (f[0] == L'\0')
+        return MPDM_S(L"idle");
 
     /* detect shift+left, shift+right, shift+up, shift+down, shift+pageup, shift+pagedown, shift+home, shift+end */
     switch(f[0]) {
@@ -726,13 +720,9 @@ static void nc_build_colors(void)
 
 /** driver functions **/
 
-static mpdm_t ncursesw_drv_timer(mpdm_t a, mpdm_t ctxt)
+static mpdm_t ncursesw_drv_idle(mpdm_t a, mpdm_t ctxt)
 {
-    mpdm_t func = mpdm_aget(a, 1);
-
-    timer_msecs = mpdm_ival(mpdm_aget(a, 0));
-
-    mpdm_store(&timer_func, func);
+    idle_msecs = (int) (mpdm_rval(mpdm_get_i(a, 0)) * 1000);
 
     return NULL;
 }
@@ -853,7 +843,7 @@ static void nc_register_functions(void)
 
     drv = mpdm_hget_s(mpdm_root(), L"mp_drv");
 
-    mpdm_hset_s(drv, L"timer",      MPDM_X(ncursesw_drv_timer));
+    mpdm_hset_s(drv, L"idle",       MPDM_X(ncursesw_drv_idle));
     mpdm_hset_s(drv, L"shutdown",   MPDM_X(ncursesw_drv_shutdown));
     mpdm_hset_s(drv, L"suspend",    MPDM_X(ncursesw_drv_suspend));
 

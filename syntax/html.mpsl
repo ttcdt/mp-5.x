@@ -22,11 +22,12 @@
                     "tbody", "td", "textarea", "tfoot", "th",
                     "thead", "title", "tr", "tt", "ul",
                     "var" ], "|") +
-            ")[^<>]*>/i"
+            ")[^<>]*>/i",
+            "/<!doctype html>/i"
         ],
         'word2',    [
             mp.syn_token_list( [
-                 "!DOCTYPE", "class", "type",
+                "class", "type",
                 "cellspacing", "cellpadding",
                 "href", "align", "valign", "name", "lang",
                 "value", "action", "width", "height",

@@ -472,6 +472,22 @@ sub mp.active()
 }
 
 
+sub mp.set_active(i)
+/* sets the active document */
+{
+    local doc;
+
+    mp.active_i = i;
+
+    doc = mp.docs[mp.active_i];
+
+    /* set the idle time */
+    mp_drv.idle(doc.idle_seconds);
+
+    return doc;
+}
+
+
 sub mp.process_action(action)
 /* processes an action */
 {
@@ -497,7 +513,15 @@ sub mp.process_action(action)
 sub mp.process_event(k)
 /* processes a key event */
 {
+    local t = time();
     local doc = mp.active();
+
+    /* special process for the 'idle' pseudo-keycode */
+    if (k == "idle") {
+        /* if no idle_seconds are set or not enough time elapsed, ignore it */
+        if (doc.idle_seconds == 0 || t - doc.event_time < doc.idle_seconds)
+            k = NULL;
+    }
 
     /* notify the document that an event is to be processed */
     k = doc->pre_event(k);
@@ -532,6 +556,9 @@ sub mp.process_event(k)
         mp.shift_pressed = NULL;
 
         doc->post_event(k);
+
+        /* store the time this event was processed */
+        doc.event_time = t;
     }
 
     return NULL;

@@ -479,7 +479,7 @@ sub mp.tui.draw_scrollbar(doc)
 }
 
 
-sub mp.tui.draw(doc, opt)
+sub mp.tui.draw(doc, opt, nr)
 {
     /* full refresh needed? disable line optimization */
     if (mp.tui.full_refresh)
@@ -511,7 +511,8 @@ sub mp.tui.draw(doc, opt)
         );
     }
 
-    mp.tui.refresh();
+    if (!nr)
+        mp.tui.refresh();
 
     mp.tui.full_refresh = 0;
 }
@@ -804,7 +805,7 @@ sub mp_drv.menu()
         }
 
         mp.tui.attr(mp.colors.normal.attr);
-        mp.tui.draw(mp.active(), 0);
+        mp.tui.draw(mp.active(), 0, 1);
     }
 
     mp.tui.attr(mp.colors.normal.attr);

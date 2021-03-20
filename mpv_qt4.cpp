@@ -512,17 +512,14 @@ static mpdm_t qt4_drv_main_loop(mpdm_t a, mpdm_t ctxt)
 }
 
 
-static mpdm_t qt4_drv_timer(mpdm_t a, mpdm_t ctxt)
+static mpdm_t qt4_drv_idle(mpdm_t a, mpdm_t ctxt)
 {
-    int msecs = mpdm_ival(mpdm_get_i(a, 0));
-    mpdm_t func = mpdm_get_i(a, 1);
+    int idle_msecs = (int) (mpdm_rval(mpdm_get_i(a, 0)) * 1000);
 
     window->area->timer->stop();
 
-    mpdm_set_wcs(MP, func, L"timer_func");
-
     if (msecs)
-        window->area->timer->start(msecs);
+        window->area->timer->start(idle_msecs);
 
     return NULL;
 }
@@ -538,7 +535,7 @@ static void qt4_register_functions(void)
     mpdm_set_wcs(drv, MPDM_X(qt4_drv_clip_to_sys), L"clip_to_sys");
     mpdm_set_wcs(drv, MPDM_X(qt4_drv_sys_to_clip), L"sys_to_clip");
     mpdm_set_wcs(drv, MPDM_X(qt4_drv_update_ui),   L"update_ui");
-    mpdm_set_wcs(drv, MPDM_X(qt4_drv_timer),       L"timer");
+    mpdm_set_wcs(drv, MPDM_X(qt4_drv_idle),        L"idle");
     mpdm_set_wcs(drv, MPDM_X(qt4_drv_busy),        L"busy");
     mpdm_set_wcs(drv, MPDM_X(qt4_drv_alert),       L"alert");
     mpdm_set_wcs(drv, MPDM_X(qt4_drv_confirm),     L"confirm");

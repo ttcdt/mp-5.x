@@ -1836,14 +1836,9 @@ static mpdm_t retrieve_form_data(mpdm_t form_args, GtkWidget **form_widgets)
 }
 
 
-static gint timer_callback(gpointer data)
+static gint idle_callback(gpointer data)
 {
-    mpdm_t v;
-
-    if ((v = mpdm_get_wcs(MP, L"timer_func"))) {
-        mpdm_void(mpdm_exec(v, NULL, NULL));
-        gtk_widget_queue_draw(GTK_WIDGET(area));
-    }
+    mp_process_event(MPDM_S(L"idle"));
 
     return TRUE;
 }
@@ -2271,20 +2266,18 @@ static mpdm_t gtk_drv_update_ui(mpdm_t a, mpdm_t ctxt)
 }
 
 
-static mpdm_t gtk_drv_timer(mpdm_t a, mpdm_t ctxt)
+static mpdm_t gtk_drv_idle(mpdm_t a, mpdm_t ctxt)
 {
-    static guint prev = 0;
-    int msecs = mpdm_ival(mpdm_get_i(a, 0));
-    mpdm_t func = mpdm_get_i(a, 1);
+    static guint timer_id = 0;
+    int idle_msecs = (int) (mpdm_rval(mpdm_get_i(a, 0)) * 1000);
 
-    if (prev)
-        g_source_remove(prev);
+    if (timer_id)
+        g_source_remove(timer_id);
 
-    mpdm_set_wcs(MP, func, L"timer_func");
-
-    /* if msecs and func are set, program timer */
-    if (msecs > 0 && func != NULL)
-        prev = g_timeout_add(msecs, timer_callback, NULL);
+    if (idle_msecs > 0)
+        timer_id = g_timeout_add(idle_msecs, idle_callback, NULL);
+    else
+        timer_id = 0;
 
     return NULL;
 }
@@ -2362,7 +2355,7 @@ static void gtk_register_functions(void)
     mpdm_set_wcs(drv, MPDM_X(gtk_drv_clip_to_sys),  L"clip_to_sys");
     mpdm_set_wcs(drv, MPDM_X(gtk_drv_sys_to_clip),  L"sys_to_clip");
     mpdm_set_wcs(drv, MPDM_X(gtk_drv_update_ui),    L"update_ui");
-    mpdm_set_wcs(drv, MPDM_X(gtk_drv_timer),        L"timer");
+    mpdm_set_wcs(drv, MPDM_X(gtk_drv_idle),         L"idle");
     mpdm_set_wcs(drv, MPDM_X(gtk_drv_busy),         L"busy");
     mpdm_set_wcs(drv, MPDM_X(gtk_drv_alert),        L"alert");
     mpdm_set_wcs(drv, MPDM_X(gtk_drv_confirm),      L"confirm");

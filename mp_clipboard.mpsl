@@ -343,6 +343,9 @@ sub mp_doc.paste(doc)
 
     mp.config.auto_indent = t;
 
+    if (doc->visual_wrap())
+        doc->vw_wrap();
+
     return doc;
 }
 

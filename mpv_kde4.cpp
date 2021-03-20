@@ -382,9 +382,9 @@ static mpdm_t kde4_drv_sys_to_clip(mpdm_t a, mpdm_t ctxt)
 }
 
 
-static mpdm_t kde4_drv_timer(mpdm_t a, mpdm_t ctxt)
+static mpdm_t kde4_drv_idle(mpdm_t a, mpdm_t ctxt)
 {
-    return qt4_drv_timer(a, ctxt);
+    return qt4_drv_idle(a, ctxt);
 }
 
 static void kde4_register_functions(void)
@@ -397,7 +397,7 @@ static void kde4_register_functions(void)
     mpdm_hset_s(drv, L"clip_to_sys", MPDM_X(kde4_drv_clip_to_sys));
     mpdm_hset_s(drv, L"sys_to_clip", MPDM_X(kde4_drv_sys_to_clip));
     mpdm_hset_s(drv, L"update_ui",   MPDM_X(kde4_drv_update_ui));
-    mpdm_hset_s(drv, L"timer",       MPDM_X(kde4_drv_timer));
+    mpdm_hset_s(drv, L"idle",        MPDM_X(kde4_drv_idle));
     mpdm_hset_s(drv, L"busy",        MPDM_X(kde4_drv_busy));
     mpdm_hset_s(drv, L"alert",       MPDM_X(kde4_drv_alert));
     mpdm_hset_s(drv, L"confirm",     MPDM_X(kde4_drv_confirm));

@@ -36,7 +36,8 @@ mp_doc.actions['find_tag'] = sub(d) {
 
 
 mp_doc.actions['complete'] = sub(d) {
-    /* check if we have a more specific completion system for this syntax and call it if it's the case */
+    /* check if we have a more specific completion system
+       for this syntax and call it if it's the case */
     if (d.syntax.complete_func != NULL) {
         if (d.syntax->complete_func(d) == 1)
             return NULL;
@@ -48,6 +49,12 @@ mp_doc.actions['complete'] = sub(d) {
         local words = {};
 
         d->busy(1);
+
+        /* spellchecking active? */
+        if (mp.ispell_pipe != NULL && mp.state.spelling_cache != NULL) {
+            /* add all included words that starts with w */
+            words += mp.state.spelling_cache->grep(sub (v, i) { i->regex(w $ "/^%s/i"); });
+        }
 
         /* create a unique list of words */
         foreach (l, d.txt.lines)

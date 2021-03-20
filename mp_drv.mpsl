@@ -39,11 +39,20 @@ sub mp_drv.openfolder(prompt)   { return NULL; }
 sub mp_drv.savefile(prompt)     { return NULL; }
 sub mp_drv.suspend()            { return NULL; }
 sub mp_drv.sys_to_clip()        { return NULL; }
-sub mp_drv.timer(msecs,func)    { return NULL; }
+sub mp_drv.idle(seconds)        { return NULL; }
 sub mp_drv.update_ui()          { return NULL; }
 sub mp_drv.shutdown()           {
     if (mp.exit_message)
         print(mp.exit_message);
+
+    return NULL;
+}
+
+sub mp_drv.timer(msecs,func) {
+    mp.message = {
+        timeout:    time() + 10,
+        string:     L("This interface is deprecated. Use 'idle' instead.")
+    };
 
     return NULL;
 }

@@ -36,7 +36,7 @@ mp.actdesc['ignore_last_misspell']  = LL("Ignore last misspelled word");
 mp.config.ispell_cmd = "ispell -a";
 
 /* the spelling cache */
-mp.spelling_cache = {};
+mp.spelling_cache = NULL;
 
 /** code **/
 
@@ -86,6 +86,13 @@ sub mp.is_word_misspelled(w)
 {
     local l;
     local ret = 0;
+
+    if (mp.spelling_cache == NULL) {
+        if (mp.state.spelling_cache)
+            mp.spelling_cache = clone(mp.state.spelling_cache);
+        else
+            mp.spelling_cache = {};
+    }
 
     if (exists(mp.spelling_cache, w))
         return mp.spelling_cache[w];
@@ -244,6 +251,13 @@ sub mp_doc.search_misspelled(doc)
  */
 sub mp.ignore_last_misspell()
 {
-    if (mp.last_misspelled_word)
+    if (mp.last_misspelled_word) {
         mp.spelling_cache[mp.last_misspelled_word] = 0;
+
+        /* also store it in the state */
+        if (mp.state.spelling_cache == NULL)
+            mp.state.spelling_cache = {};
+
+        mp.state.spelling_cache[mp.last_misspelled_word] = 0;
+    }
 }

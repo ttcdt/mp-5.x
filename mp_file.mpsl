@@ -30,10 +30,8 @@ mp.config.html_title         = '';
 mp.actions['new']   = sub {
     local d = mp.find_file_by_name(L("<unnamed>"));
 
-    if (d != -1) {
-        mp.active_i = d;
-        d = mp.active();
-    }
+    if (d != -1)
+        d = mp.set_active(d);
     else
         d = mp.add(new(mp_doc, { is_new: 1 }));
 
@@ -451,6 +449,11 @@ mp.actions['open_dropped_files'] = sub {
 };
 
 
+mp_doc.actions["idle"] = sub (d) {
+    STDERR("idle\n");
+};
+
+
 /** default key bindings **/
 
 mp.keycodes['ctrl-n']           = 'next';
@@ -464,6 +467,7 @@ mp_doc.keycodes['ctrl-s']       = 'save';
 mp_doc.keycodes['ctrl-enter']   = 'open_under_cursor';
 mp_doc.keycodes['alt-enter']    = 'ctrl-enter';
 mp_doc.keycodes['ctrl-k']       = "toggle_visual_wrap";
+mp_doc.keycodes["idle"]         = "idle";
 
 /** action descriptions **/
 
@@ -490,6 +494,7 @@ mp.actdesc['hex_view']           = LL("Hexadecimal viewer...");
 mp.actdesc['open_dropped_files'] = LL("Open dropped files");
 mp.actdesc['open_recent']        = LL("Open recent files...");
 mp.actdesc['toggle_visual_wrap'] = LL("Toggle visual wrap");
+mp.actdesc['idle']               = LL("Called when idle");
 
 /** code **/
 
@@ -654,25 +659,21 @@ sub mp.add(doc)
     /* store in the list and set as active */
     ins(mp.docs, doc, mp.active_i);
 
-    return doc;
+    return mp.set_active(mp.active_i);
 }
 
 
 sub mp.next()
 /* rotates through the document list */
 {
-    mp.active_i = (mp.active_i + 1) % count(mp.docs);
-
-    return mp.active();
+    return mp.set_active((mp.active_i + 1) % count(mp.docs));
 }
 
 
 sub mp.prev()
 /* rotates through the document list, backwards */
 {
-    mp.active_i = (mp.active_i - 1 + count(mp.docs)) % count(mp.docs);
-
-    return mp.active();
+    return mp.set_active((mp.active_i - 1 + count(mp.docs)) % count(mp.docs));
 }
 
 
@@ -711,6 +712,8 @@ sub mp.close()
     if (mp.active_i == size(mp.docs))
         mp.active_i = 0;
 
+    mp.set_active(mp.active_i);
+
     /* cannot call mp.active() */
 }
 
@@ -739,8 +742,7 @@ sub mp.open(filename, password)
 
     if ((s = mp.find_file_by_name(filename)) != -1) {
         /* already open */
-        mp.active_i = s;
-        d = mp.active();
+        d = mp.set_active(s);
     }
     else
     if ((s = stat(filename)) == NULL) {
@@ -762,10 +764,8 @@ sub mp.open(filename, password)
         filename = s[13];
 
         /* look again for this filename in the open files */
-        if ((r = mp.find_file_by_name(filename)) != -1) {
-            mp.active_i = r;
-            d = mp.active();
-        }
+        if ((r = mp.find_file_by_name(filename)) != -1)
+            d = mp.set_active(r);
     }
 
     if (d == NULL) {

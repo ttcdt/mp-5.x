@@ -1102,12 +1102,8 @@ void MPArea::from_menu(QAction * action)
 
 void MPArea::from_timer(void)
 {
-    mpdm_t v;
-
-    if ((v = mpdm_get_wcs(MP, L"timer_func"))) {
-        mpdm_void(mpdm_exec(v, NULL, NULL));
-        update();
-    }
+    mp_process_event(MPDM_S(L"idle"));
+    update();
 }
 
 

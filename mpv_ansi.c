@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <wchar.h>
+#include <sys/time.h>
 
 #include "mpdm.h"
 #include "mpsl.h"
@@ -30,7 +31,11 @@
 
 #define MAX_COLORS 100
 char ansi_attrs[MAX_COLORS][64];
+int ansi_attrs_i = 0;
 int normal_attr = 0;
+
+static int idle_msecs = 0;
+
 
 /** code **/
 
@@ -56,7 +61,7 @@ static void ansi_raw_tty(int start)
 }
 
 
-static int ansi_something_waiting(int fd)
+static int ansi_something_waiting(int fd, int msecs)
 /* returns yes if there is something waiting on fd */
 {
     fd_set ids;
@@ -69,7 +74,7 @@ static int ansi_something_waiting(int fd)
     FD_SET(fd, &ids);
 
     tv.tv_sec  = 0;
-    tv.tv_usec = 10000;
+    tv.tv_usec = msecs * 1000;
 
     return select(1, &ids, NULL, NULL, &tv) > 0;
 }
@@ -79,11 +84,12 @@ char *ansi_read_string(int fd)
 /* reads an ansi string, waiting in the first char */
 {
     static char *buf = NULL;
-    static int z = 32;
+    static int z = 0;
     int n = 0;
 
-    if (buf == NULL)
-        buf = malloc(z);
+    /* if there is an idle time and nothing is here, exit */
+    if (idle_msecs > 0 && !ansi_something_waiting(fd, idle_msecs))
+        return NULL;
 
     /* first char blocks, rest of possible chars not */
     do {
@@ -100,13 +106,15 @@ char *ansi_read_string(int fd)
             buf[n++] = c;
         }
 
-    } while (ansi_something_waiting(fd));
+    } while (ansi_something_waiting(fd, 10));
 
     buf[n] = '\0';
 
     return n ? buf : NULL;
 }
 
+
+static void ansi_db_resize(int w, int h);
 
 static void ansi_get_tty_size(void)
 /* asks the tty for its size */
@@ -127,6 +135,8 @@ static void ansi_get_tty_size(void)
     v = mpdm_get_wcs(MP, L"window");
     mpdm_set_wcs(v, MPDM_I(w),     L"tx");
     mpdm_set_wcs(v, MPDM_I(h - 1), L"ty");
+
+    ansi_db_resize(w, h + 1);
 }
 
 
@@ -152,6 +162,7 @@ static void ansi_gotoxy(int x, int y)
 }
 
 
+#if 0
 static void ansi_getxy(int *x, int *y)
 /* gets the x and y cursor position */
 {
@@ -162,6 +173,9 @@ static void ansi_getxy(int *x, int *y)
 
     buffer = ansi_read_string(0);
     sscanf(buffer, "\033[%d;%dR", y, x);
+
+    (*x)--;
+    (*y)--;
 }
 
 
@@ -189,9 +203,18 @@ static void ansi_print_v(mpdm_t v)
 }
 
 
-static void ansi_set_attr(int a)
+static wchar_t ansi_charat(int x, int y)
+/* returns the char at the x, y position */
+{
+    return L' ';
+}
+#endif
+
+static int ansi_set_attr(int a)
 {
     printf("%s", ansi_attrs[a]);
+
+    return a;
 }
 
 
@@ -199,13 +222,6 @@ static void ansi_refresh(void)
 /* refresh the screen */
 {
     fflush(stdout);
-}
-
-
-static wchar_t ansi_charat(int x, int y)
-/* returns the char at the x, y position */
-{
-    return L' ';
 }
 
 
@@ -280,6 +296,8 @@ static void ansi_build_colors(void)
 
         n++;
     }
+
+    ansi_attrs_i = n;
 }
 
 
@@ -317,7 +335,6 @@ struct _str_to_code {
     { "\033[19;2~",         L"shift-f8" },
     { "\033[20;2~",         L"shift-f9" },
     { "\033[21;2~",         L"shift-f10" },
-
     { "\033[1;5P",          L"ctrl-f1" },
     { "\033[1;5Q",          L"ctrl-f2" },
     { "\033[1;5R",          L"ctrl-f3" },
@@ -478,13 +495,17 @@ static mpdm_t ansi_getkey(mpdm_t args, mpdm_t ctxt)
         if (k == NULL && f != NULL)
             k = MPDM_S(f);
     }
+    else
+        k = MPDM_S(L"idle");
 
     return k;
 }
 
 
-static mpdm_t ansi_drv_timer(mpdm_t a, mpdm_t ctxt)
+static mpdm_t ansi_drv_idle(mpdm_t a, mpdm_t ctxt)
 {
+    idle_msecs = (int) (mpdm_rval(mpdm_get_i(a, 0)) * 1000);
+
     return NULL;
 }
 
@@ -498,7 +519,8 @@ static mpdm_t ansi_drv_shutdown(mpdm_t a, mpdm_t ctxt)
     /* set default attribute */
     printf("\033[0;39;49m\n");
 
-    ansi_clrscr();
+    /* leave alternate screen */
+    printf("\033[?1049l\n");
 
     if ((v = mpdm_get_wcs(MP, L"exit_message")) != NULL) {
         mpdm_write_wcs(stdout, mpdm_string(v));
@@ -525,12 +547,150 @@ static mpdm_t ansi_drv_suspend(mpdm_t a, mpdm_t ctxt)
 }
 
 
+/** double buffer **/
+
+/* cursor position */
+static int db_x      = 0;
+static int db_y      = 0;
+
+/* buffer size */
+static int db_width  = 0;
+static int db_height = 0;
+
+/* buffers */
+static unsigned int *db_scr = NULL;
+static unsigned int *db_scr_o = NULL;
+
+/* last attr set */
+static unsigned int db_attr = 0;
+
+
+static void ansi_db_resize(int w, int h)
+/* initialize a new double buffer with a new size */
+{
+    /* alloc new space */
+    free(db_scr);
+    db_scr = (unsigned int *)calloc(w * h, sizeof(unsigned int));
+    free(db_scr_o);
+    db_scr_o = (unsigned int *)calloc(w * h, sizeof(unsigned int));
+
+    db_x      = 0;
+    db_y      = 0;
+    db_width  = w;
+    db_height = h;
+}
+
+
+static void ansi_db_print_v(mpdm_t v)
+/* print a value */
+{
+    int i = db_y * db_width;
+    wchar_t *p = mpdm_string(v);
+
+    if (db_y < db_height - 1) {
+        /* copy the string to current position */
+        while (db_x < db_width && *p) {
+            db_scr[i + db_x++] = ((unsigned int)*p * ansi_attrs_i) + db_attr;
+            p++;
+        }
+    }
+}
+
+
+static void ansi_db_gotoxy(int x, int y)
+/* set cursor position */
+{
+    db_x = x;
+    db_y = y;
+}
+
+
+static void ansi_db_clreol(void)
+/* clear to end of line */
+{
+    int i = db_y * db_width;
+    unsigned int c = ' ' * ansi_attrs_i + db_attr;
+    int n = db_x;
+
+    /* fill the rest of the line with blanks */
+    while (n < db_width)
+        db_scr[i + n++] = c;
+}
+
+
+static void ansi_db_set_attr(int a)
+/* set attribute for next characters */
+{
+    db_attr = a;
+}
+
+
+static void ansi_db_refresh(void)
+/* dump the buffer to the screen */
+{
+    int n, m;
+    int p_attr = -1;
+
+    p_attr = ansi_set_attr(normal_attr);
+
+    for (n = 0; n < db_height; n++) {
+        int i = n * db_width;
+
+        for (m = 0; m < db_width; m++) {
+            /* different content? */
+            if (db_scr[i + m] != db_scr_o[i + m]) {
+                wchar_t w;
+                int a;
+                char tmp[64];
+
+                ansi_gotoxy(m, n);
+
+                /* unpack character and attr */
+                w = db_scr[i + m] / ansi_attrs_i;
+                a = db_scr[i + m] % ansi_attrs_i;
+
+                /* write attr if different from the already set */
+                if (a != p_attr)
+                    p_attr = ansi_set_attr(a);
+
+                tmp[wctomb(tmp, w)] = '\0';
+                printf("%s", tmp);
+            }
+        }
+    }
+
+    ansi_gotoxy(db_x, db_y);
+
+    ansi_refresh();
+
+    /* save buffer */
+    memcpy(db_scr_o, db_scr, db_width * db_height * sizeof(wchar_t));
+}
+
+
+static void ansi_db_getxy(int *x, int *y)
+/* get cursor position */
+{
+    *x = db_x;
+    *y = db_y;
+}
+
+
+static wchar_t ansi_db_charat(int x, int y)
+/* get character at position */
+{
+    int i = y * db_width + x;
+
+    return db_scr[i] / ansi_attrs_i;
+}
+
+
 /** TUI **/
 
 static mpdm_t ansi_tui_addstr(mpdm_t a, mpdm_t ctxt)
 /* TUI: add a string */
 {
-    ansi_print_v(mpdm_get_i(a, 0));
+    ansi_db_print_v(mpdm_get_i(a, 0));
 
     return NULL;
 }
@@ -539,11 +699,11 @@ static mpdm_t ansi_tui_addstr(mpdm_t a, mpdm_t ctxt)
 static mpdm_t ansi_tui_move(mpdm_t a, mpdm_t ctxt)
 /* TUI: move to a screen position */
 {
-    ansi_gotoxy(mpdm_ival(mpdm_get_i(a, 0)), mpdm_ival(mpdm_get_i(a, 1)));
+    ansi_db_gotoxy(mpdm_ival(mpdm_get_i(a, 0)), mpdm_ival(mpdm_get_i(a, 1)));
 
     /* if third argument is not NULL, clear line */
     if (mpdm_get_i(a, 2) != NULL)
-        ansi_clreol();
+        ansi_db_clreol();
 
     return NULL;
 }
@@ -552,7 +712,7 @@ static mpdm_t ansi_tui_move(mpdm_t a, mpdm_t ctxt)
 static mpdm_t ansi_tui_attr(mpdm_t a, mpdm_t ctxt)
 /* TUI: set attribute for next string */
 {
-    ansi_set_attr(mpdm_ival(mpdm_get_i(a, 0)));
+    ansi_db_set_attr(mpdm_ival(mpdm_get_i(a, 0)));
 
     return NULL;
 }
@@ -561,7 +721,7 @@ static mpdm_t ansi_tui_attr(mpdm_t a, mpdm_t ctxt)
 static mpdm_t ansi_tui_refresh(mpdm_t a, mpdm_t ctxt)
 /* TUI: refresh the screen */
 {
-    ansi_refresh();
+    ansi_db_refresh();
 
     return NULL;
 }
@@ -571,17 +731,16 @@ static mpdm_t ansi_doc_draw(mpdm_t args, mpdm_t ctxt)
 /* draw the document */
 {
     mpdm_t d;
-    int n, m, o;
+    int n, m;
 
     d = mpdm_get_i(args, 0);
-    o = mpdm_ival(mpdm_get_i(args, 1));
-    d = mpdm_ref(mp_draw(d, o));
+    d = mpdm_ref(mp_draw(d, 0));
 
-    for (n = 0; n < mpdm_size(d); n++) {
+    for (n = 0; n < mpdm_size(d) && n < db_height - 1; n++) {
         mpdm_t l = mpdm_get_i(d, n);
 
         if (l != NULL) {
-            ansi_gotoxy(0, n);
+            ansi_db_gotoxy(0, n);
 
             for (m = 0; m < mpdm_size(l); m++) {
                 int attr;
@@ -591,14 +750,14 @@ static mpdm_t ansi_doc_draw(mpdm_t args, mpdm_t ctxt)
                 attr = mpdm_ival(mpdm_get_i(l, m++));
                 s = mpdm_get_i(l, m);
 
-                ansi_set_attr(attr);
-                ansi_print_v(s);
+                ansi_db_set_attr(attr);
+                ansi_db_print_v(s);
             }
 
-            ansi_set_attr(normal_attr);
+            ansi_db_set_attr(normal_attr);
 
             /* delete to end of line */
-            ansi_clreol();
+            ansi_db_clreol();
         }
     }
 
@@ -614,13 +773,13 @@ static mpdm_t ansi_tui_getxy(mpdm_t a, mpdm_t ctxt)
     mpdm_t v;
     int x, y;
 
-    ansi_getxy(&x, &y);
+    ansi_db_getxy(&x, &y);
 
     v = MPDM_A(2);
     mpdm_ref(v);
 
-    mpdm_set_i(v, MPDM_I(x - 1), 0);
-    mpdm_set_i(v, MPDM_I(y - 1), 1);
+    mpdm_set_i(v, MPDM_I(x), 0);
+    mpdm_set_i(v, MPDM_I(y), 1);
 
     mpdm_unrefnd(v);
 
@@ -637,7 +796,7 @@ static mpdm_t ansi_tui_charat(mpdm_t a, mpdm_t ctxt)
     x = mpdm_ival(mpdm_get_i(a, 0));
     y = mpdm_ival(mpdm_get_i(a, 1));
 
-    s[0] = ansi_charat(x, y);
+    s[0] = ansi_db_charat(x, y);
     s[1] = L'\0';
 
     return MPDM_S(s);
@@ -651,7 +810,7 @@ static void ansi_register_functions(void)
 
     drv = mpdm_get_wcs(mpdm_root(), L"mp_drv");
 
-    mpdm_set_wcs(drv, MPDM_X(ansi_drv_timer),       L"timer");
+    mpdm_set_wcs(drv, MPDM_X(ansi_drv_idle),        L"idle");
     mpdm_set_wcs(drv, MPDM_X(ansi_drv_shutdown),    L"shutdown");
     mpdm_set_wcs(drv, MPDM_X(ansi_drv_suspend),     L"suspend");
 
@@ -680,6 +839,9 @@ static mpdm_t ansi_drv_startup(mpdm_t a)
     ansi_sigwinch(0);
 
     ansi_build_colors();
+
+    /* enter alternate screen */
+    printf("\033[?1049h");
 
     return NULL;
 }
