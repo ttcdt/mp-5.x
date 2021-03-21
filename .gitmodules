@@ -1,6 +1,0 @@
-[submodule "mpsl"]
-	path = mpsl
-	url = https://github.com/ttcdt/mpsl.git
-[submodule "mpdm"]
-	path = mpdm
-	url = https://github.com/ttcdt/mpdm.git
