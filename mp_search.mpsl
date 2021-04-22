@@ -115,13 +115,22 @@ mp_doc.actions['replace'] = sub (d) {
     if (r != NULL) {
         mp.config.case_sensitive_search = r[2];
         mp.config.global_replace = r[3];
+        mp.last_replace_with = mp.backslash_codes(r[1]);
 
         d->store_undo();
-        d->long_op(mp_doc.replace, mp.backslash_codes(r[0]), mp.backslash_codes(r[1]));
+        d->long_op(mp_doc.replace, mp.backslash_codes(r[0]), mp.last_replace_with);
     }
 
     return d;
 };
+
+mp_doc.actions['replace_next'] = sub (d) {
+    d->store_undo();
+    d->long_op(mp_doc.replace, NULL, mp.last_replace_with);
+
+    return d;
+};
+
 
 mp_doc.actions['seek_next_char'] = sub (d) { d->seek_prev_or_next_char(mp_doc.search); };
 mp_doc.actions['seek_prev_char'] = sub (d) { d->seek_prev_or_next_char(mp_doc.search_back); };
@@ -242,6 +251,7 @@ mp.actdesc['seek']                     = LL("Search text...");
 mp.actdesc['seek_next']                = LL("Search next");
 mp.actdesc['seek_prev']                = LL("Search previous");
 mp.actdesc['replace']                  = LL("Replace...");
+mp.actdesc['replace_next']             = LL("Replace next");
 mp.actdesc['seek_next_char']           = LL("Move to next instance of current char");
 mp.actdesc['seek_prev_char']           = LL("Move to previous instance of current char");
 mp.actdesc['seek_matching']            = LL("Move to the matching bracket");
@@ -470,9 +480,12 @@ sub mp_doc.replace_1(doc, org, dst)
     local c;
 
     if ((c = doc->search(org)) != NULL) {
-        local txt, l;
+        local txt = doc.txt;
 
-        txt = doc.txt;
+        /* get the matched text and filter through sregex
+           to expand ampersands */
+        local m = txt.lines[txt.y]->slice(c[0], c[1]);
+        dst = m->sregex(mp.last_search, dst);
 
         /* substitute */
         txt.lines[txt.y] = splice(txt.lines[txt.y], dst, c[0], c[1]);

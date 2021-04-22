@@ -267,7 +267,7 @@ mp_doc.actions['exec_command'] = sub (d, cmd) {
             if ((p = popen(cmd, "w")) != NULL) {
                 mp.busy(1);
 
-                foreach (l, d->get_active_area())
+                foreach (l, d->get_active_area()->clone()->mp_c.vw_unwrap())
                     write(p, l + mp.config.eol);
 
                 pclose(p);
@@ -450,7 +450,8 @@ mp.actions['open_dropped_files'] = sub {
 
 
 mp_doc.actions["idle"] = sub (d) {
-    STDERR("idle\n");
+    /* do nothing */
+    return d;
 };
 
 
@@ -466,6 +467,7 @@ mp.keycodes['close-window']     = 'exit';
 mp_doc.keycodes['ctrl-s']       = 'save';
 mp_doc.keycodes['ctrl-enter']   = 'open_under_cursor';
 mp_doc.keycodes['alt-enter']    = 'ctrl-enter';
+mp_doc.keycodes['alt-o']        = 'ctrl-enter';
 mp_doc.keycodes['ctrl-k']       = "toggle_visual_wrap";
 mp_doc.keycodes["idle"]         = "idle";
 
@@ -502,6 +504,19 @@ sub mp.chomp(str)
 /* chomps the end of file chars from a string */
 {
     sregex(str, "/\r*\n*$/");
+}
+
+
+sub mp_doc.recov_file_name(doc)
+/* returns the recovery file name for this document */
+{
+    local fn = doc.name;
+
+    /* if it's not a recovery file itself, calculate it */
+    if (!regex(fn, "/\.recov$"))
+        fn = HOMEDIR + ".mp-" + md5(fn) + ".recov";
+
+    return fn;
 }
 
 
@@ -545,7 +560,49 @@ sub mp_doc.post_event(doc, k)
         };
     }
 
+    /* only try auto save if it's not disabled */
+    if (mp.config.auto_save_period)
+        mp.auto_save();
+
     return doc;
+}
+
+
+sub mp.auto_save()
+/* auto save recovery files */
+{
+    local t = time();
+
+    foreach (doc, mp.docs) {
+        if (doc.txt.mod) {
+            /* first time? just store current time */
+            if (doc.auto_save_time == NULL)
+                doc.auto_save_time = t;
+            else
+            /* time to check again? */
+            if (t > doc.auto_save_time + mp.config.auto_save_period) {
+                local f;
+
+                if ((f = open(doc->recov_file_name(), "w")) != NULL) {
+                    f->write(
+                        sprintf(L("RECOVERED DATA for %s at %t{%Y-%m-%d %H:%M:%S}"),
+                            doc.name, t));
+
+                    foreach (l, doc.txt.lines)
+                        f->write("\n")->write(l);
+
+                    f->close();
+                }
+
+                /* store checked time */
+                doc.auto_save_time = t;
+            }
+        }
+        else {
+            /* reset timer */
+            doc.auto_save_time = NULL;
+        }
+    }
 }
 
 
@@ -635,6 +692,9 @@ sub mp_doc.save(doc)
         s = stat(doc.name);
         doc.mtime  = s[9];
         doc.is_new = 0;
+
+        /* delete the recovery file */
+        unlink(doc->recov_file_name());
     }
     
     return ret;
@@ -680,7 +740,12 @@ sub mp.prev()
 sub mp_doc.state(doc)
 /* returns a structure to be store into the state */
 {
-    return { vy: doc.txt.vy, o: doc->get_offset() };
+    local state = NULL;
+
+    if (!regex(doc.name, "/^</") && !doc.no_state && !doc.is_new)
+        state = { vy: doc.txt.vy, o: doc->get_offset(), t: time() };
+
+    return state;
 }
 
 
@@ -696,14 +761,12 @@ sub mp.close()
 
     local state = l->state();
 
-    if (state != NULL) {
-        state.t = time();
+    if (state != NULL)
         mp.state.files[l.name] = state;
 
-        /* if the file is specially marked as no_state, delete it */
-        if (regex(l.name, '/^<') || l.no_state || l.is_new)
-            del(mp.state.files, l.name);
-    }
+    /* delete the recovery file */
+    if (l->exists("recov_file_name"))
+        unlink(l->recov_file_name());
 
     /* delete from the list */
     del(mp.docs, mp.active_i);

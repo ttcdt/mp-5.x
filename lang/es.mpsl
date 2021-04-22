@@ -255,5 +255,6 @@ __I18N__ = {
 	"Internal error" => "Error interno",
 	"Release notes" => "Notas sobre la versi\x{00f3}n",
 	"Lines: %d\nWords: %d\nPages: %d" => "L\x{00ed}neas: %d\nPalabras: %d\nP\x{00e1}ginas: %d",
+	"Replace next" => "Reemplazar siguiente",
 	"-" => "-"
 };

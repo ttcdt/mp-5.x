@@ -661,22 +661,18 @@ sub mp_doc.insert(doc, a)
 
         /* more than two lines? */
         if (size(a)) {
-            if (doc->visual_wrap()) {
-                /* insert all lines one by one, possibly wrapping */
-                foreach (l, a)
-                    doc->insert_string(l)->break_line();
-            }
-            else {
-                /* raw insertion */
+            /* raw insertion */
 
-                /* open room */
-                expand(txt.lines, txt.y, size(a));
+            /* open room */
+            expand(txt.lines, txt.y, size(a));
 
-                foreach (l, a) {
-                    txt.lines[txt.y] = l;
-                    txt.y += 1;
-                }
+            foreach (l, a) {
+                txt.lines[txt.y] = l;
+                txt.y += 1;
             }
+
+            if (doc->visual_wrap())
+                doc->vw_wrap();
         }
     }
 

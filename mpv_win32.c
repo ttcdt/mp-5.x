@@ -1228,7 +1228,6 @@ static mpdm_t win32_drv_sys_to_clip(mpdm_t a, mpdm_t ctxt)
 
         /* and set as the clipboard */
         mpdm_set_wcs(MP, d, L"clipboard");
-        mpdm_set_wcs(MP, MPDM_I(0), L"clipboard_vertical");
 
         GlobalUnlock(hclp);
 

@@ -127,7 +127,7 @@ global mp_mptxt = {
             local title = mp.config.html_title;
 
             local ret = [
-                "<!doctype html>\n",
+                "<!DOCTYPE html>\n",
                 "<html>\n",
                 "<head>\n",
                 "<meta name=\"generator\" content=\"Minimum Profit " + mp.VERSION, "\"/>\n",

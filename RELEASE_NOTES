@@ -1,6 +1,21 @@
 Minimum Profit Release Notes
 ============================
 
+5.49
+----
+
+* New features:
+
+Periodic saving of documents has been implemented (not overwriting the original path, but in a different place) to prevent data loss in case of editor or computer crashes. On startup, if recovery files are detected, they are opened for further inspection. The period (in seconds) can be configurable by the `mp.config.auto_save_period' variable. If it's set to 0, automatic saving of files is disabled.
+
+New action `replace_next' (not bound by default to any key, only from the menu).
+
+* Bug fixes:
+
+The usage of & as a placeholder for the matched text in the `replace' functions works again.
+
+Vertical copy works again under GUI interfaces.
+
 5.48
 ----
 

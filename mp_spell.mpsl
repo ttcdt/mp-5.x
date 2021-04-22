@@ -165,7 +165,7 @@ sub mp.spell_document(doc)
         mp.busy(1);
 
         foreach (l, doc.txt.lines)
-            foreach (w, mp.split_by_words(l))
+            foreach (w, mp.split_by_words_sscanf(l))
                 mp.is_word_misspelled(w);
 
         mp.busy(0);
@@ -212,27 +212,38 @@ sub mp_doc.search_misspelled(doc)
     local y = txt.y;
 
     while (y < size(txt.lines)) {
-        local l = txt.lines[y];
-        local w;
+        local l = txt.lines[y]->slice(x, -1);
 
-        while ((w = regex(l, mp.word_regex, x)) != NULL) {
-            local n = regex();
+        while ((l = sscanf(l, "%*W%n%w%r"))->size() >= 2) {
+            local w = l[1];
             local r = mp.is_word_misspelled(w);
 
             /* error? fail immediately */
             if (r < 0)
                 return 0;
 
-            x = n[0] + n[1];
+            /* add the start of the word position */
+            x += l[0] + count(w);
 
             if (r == 1) {
+                /* delete previous word */
+                mp.word_color->del(mp.last_misspelled_word);
+
                 /* store word for later */
                 mp.last_misspelled_word = w;
 
-                doc->set_y(y)->set_x(x);
+                /* set a color for the word */
+                mp.word_color[w] = mp.colors.spell.attr;
+
+                mp.redraw();
+
+                doc->search_set_y(y)->set_x(x);
 
                 return 1;
             }
+
+            /* process the rest of the line */
+            l = l[2];
         }
 
         x = 0;

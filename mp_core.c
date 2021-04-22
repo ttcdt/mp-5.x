@@ -13,6 +13,7 @@
 
 #include <stdio.h>
 #include <wchar.h>
+#include <wctype.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -392,40 +393,44 @@ static int drw_fill_attr_regex(int attr)
 static void drw_words(void)
 /* fills the attributes for separate words */
 {
-    mpdm_t word_color = NULL;
+    mpdm_t wcolor, func;
+    int o = drw_2.visible;
 
-    /* take the hash of word colors, if any */
-    if ((word_color = mpdm_ref(mpdm_get_wcs(MP, L"word_color"))) != NULL) {
-        mpdm_t r;
+    wcolor = mpdm_get_wcs(MP, L"word_color");
+    func   = drw_1.word_color_func;
 
-        /* get the regex for words */
-        if ((r = mpdm_ref(mpdm_get_wcs(MP, L"word_regex"))) != NULL) {
-            mpdm_t func, t;
-            int o = drw_2.visible;
+    if (mpdm_count(wcolor) || func) {
+        while (drw_2.ptr[o]) {
+            int ws;
 
-            /* get the word color function */
-            func = mpdm_ref(mpdm_get_wcs(MP, L"word_color_func"));
+            /* skip non-alpha characters */
+            while (drw_2.ptr[o] && !iswalpha(drw_2.ptr[o]))
+                o++;
 
-            while ((t = mpdm_ref(mpdm_regex(drw_2.v, r, o))) != NULL) {
+            ws = o;
+
+            /* count alpha characters */
+            while(iswalpha(drw_2.ptr[o]))
+                o++;
+
+            if (ws != o) {
                 int attr = -1;
-                mpdm_t v;
+                mpdm_t w, v;
 
-                if ((v = mpdm_get(word_color, t)) != NULL)
+                /* create a word */
+                w = mpdm_ref(MPDM_NS(&drw_2.ptr[ws], o - ws));
+
+                if ((v = mpdm_get(wcolor, w)) != NULL)
                     attr = mpdm_ival(v);
                 else
                 if (func != NULL)
-                    attr = mpdm_ival(mpdm_exec_1(func, t, NULL));
+                    attr = mpdm_ival(mpdm_exec_1(func, w, NULL));
 
-                o = drw_fill_attr_regex(attr);
+                drw_fill_attr(attr, ws, o - ws);
 
-                mpdm_unref(t);
+                mpdm_unref(w);
             }
-
-            mpdm_unref(func);
-            mpdm_unref(r);
         }
-
-        mpdm_unref(word_color);
     }
 }
 

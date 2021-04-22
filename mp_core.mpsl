@@ -71,11 +71,18 @@ global mp = {
         time_stamp_format:      "%a, %d %b %Y %H:%M:%S %z",
         visual_wrap:            1,
         use_unicode:            1,
-        dark_mode:              1
+        dark_mode:              1,
+        font_face:              "Mono",
+        font_weight:            0,
+        hw_cursor:              0,
+        auto_save_period:       120
     },
 
     /* regular expression matching a word (test fallback) */
     word_regex:     "/[[:alnum:]_]+/i",
+
+    /* regular expression for matching programming language tokens */
+    token_regex:    "/[a-zA-Z_]+[a-zA-Z0-9_]*/",
 
     /* viewport size */
     window:         {},
@@ -176,6 +183,9 @@ global mp = {
     /* state saved from run to run (window size, etc.) */
     state:      {},
 
+    /* redraw counter */
+    redraw_counter: 0,
+
     /* the menu */
     menu:       [
         [
@@ -203,7 +213,8 @@ global mp = {
         [
             LL("&Search"), [
                 'seek', 'seek_next', 'seek_prev', '-',
-                'replace', 'replace_tabs_with_spaces', 'replace_spaces_with_tabs', '-',
+                'replace', 'replace_next',
+                'replace_tabs_with_spaces', 'replace_spaces_with_tabs', '-',
                 'complete', '-',
                 'grep'
             ]
@@ -704,7 +715,7 @@ sub mp.process_cmdline()
     mp.binary_name = shift(ARGV);
 
     /* files requested to be opened */
-    mp.active_pending = [];
+    mp.active_pending = glob(HOMEDIR + ".mp-*.recov");
 
     while (o = shift(ARGV)) {
         if (o == '-h' || o == '--help') {
@@ -922,7 +933,7 @@ sub mp.prepare()
         mp.colors.matching.gui      |= [ 0x000000, 0x00aaaa ];
         mp.colors.word1.gui         |= [ 0x00aa00, 0x1b1b1b ];
         mp.colors.word2.gui         |= [ 0xff6666, 0x1b1b1b ];
-        mp.colors.word3.gui         |= [ 0xe0e0e0, 0x1b1b1b ];
+        mp.colors.word3.gui         |= [ 0xaaaaaa, 0x1b1b1b ];
         mp.colors.tag.gui           |= [ 0x8888ff, 0x1b1b1b ];
         mp.colors.spell.gui         |= [ 0xff8888, 0x1b1b1b ];
         mp.colors.search.gui        |= [ 0x000000, 0x00cc77 ];
@@ -940,7 +951,7 @@ sub mp.prepare()
         mp.colors.matching.gui      |= [ 0x000000, 0xffff00 ];
         mp.colors.word1.gui         |= [ 0x00aa00, 0xffffff ];
         mp.colors.word2.gui         |= [ 0xff6666, 0xffffff ];
-        mp.colors.word3.gui         |= [ 0x000088, 0xffffff ];
+        mp.colors.word3.gui         |= [ 0x0000aa, 0xffffff ];
         mp.colors.tag.gui           |= [ 0x8888ff, 0xffffff ];
         mp.colors.spell.gui         |= [ 0xff8888, 0xffffff ];
         mp.colors.search.gui        |= [ 0x000000, 0x00cc77 ];

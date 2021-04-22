@@ -1,8 +1,7 @@
 Minimum Profit Keycodes
 =======================
 
-Table with Minimum Profit's keycodes and their default assigned ­
-actions.
+Table with Minimum Profit's keycodes and their default assigned actions.
 
  +---------------------+--------------------------+
  |             Keycode |                   Action |
@@ -28,6 +27,8 @@ actions.
  |        alt-kp-minus |            insert_m_dash |
  +---------------------+--------------------------+
  |           alt-minus |            insert_m_dash |
+ +---------------------+--------------------------+
+ |               alt-o |               ctrl-enter |
  +---------------------+--------------------------+
  |           alt-space |                     menu |
  +---------------------+--------------------------+
@@ -154,6 +155,8 @@ actions.
  |                  f9 |                 mark_tag |
  +---------------------+--------------------------+
  |                home |                 move_bol |
+ +---------------------+--------------------------+
+ |                idle |                     idle |
  +---------------------+--------------------------+
  |              insert |            toggle_insert |
  +---------------------+--------------------------+

@@ -75,7 +75,7 @@ sub mp_doc.word_count(doc)
     local w = 0;
 
     foreach (l, doc->get_active_area())
-        w += size(mp.split_by_words(l, regcomp("/[^ \t\x{ad}]+/")));
+        w += size(mp.split_by_words_sscanf(l));
 
     return w;
 }
@@ -100,10 +100,6 @@ sub mp_doc.repeated_words(doc, num_chars, max_dist)
     local y = doc.txt.y;
     local l;
 
-    /* build regexes */
-    local s_rx = sprintf('/^.{1,%d}/i', num_chars);
-    local e_rx = sprintf('/.{1,%d}$/i', num_chars);
-
     /* if there were previous repeated words, no longer
        consider them as 'typos' */
     if (mp.last_repeated_words) {
@@ -127,8 +123,8 @@ sub mp_doc.repeated_words(doc, num_chars, max_dist)
                         w,
                         c[0] + size(w),
                         y,
-                        lc(regex(w, s_rx)),
-                        lc(regex(w, e_rx))
+                        lc(slice(w, 0, num_chars)),
+                        lc(slice(w, -num_chars, -1))
                     ], max_dist);
                 }
 
@@ -150,7 +146,7 @@ sub mp_doc.repeated_words(doc, num_chars, max_dist)
             /* seek each word in the queue */
             foreach (w2, q) {
                 /* does the word and any other in
-                   the queue match the regexes? */
+                   the queue match the starts and ends? */
                 if ((w1[3] == w2[3]) || (w1[4] == w2[4])) {
                     /* add both to the word color hash */
                     mp.word_color[w1[0]] =

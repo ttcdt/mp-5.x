@@ -2,7 +2,7 @@
     'id'        =>  'perl',
     'name'      =>  'Perl',
     'help'      =>  [ 'perldoc -f %s', 'perldoc %s' ],
-    'help_word_regex' =>    '/[A-Z_][A-Z0-9_:]*/i',
+    'help_token_regex' =>    '/[A-Z_][A-Z0-9_:]*/i',
     'defs'  =>  [
         'word1',    [
             mp.syn_token_list( [

@@ -519,6 +519,20 @@ sub mp.split_by_words(s, r)
 }
 
 
+sub mp.split_by_words_sscanf(s)
+/* splits a string by words using sscanf() */
+{
+    local a = [];
+
+    while ((s = s->sscanf("%*W%w%r"))->size()) {
+        a->push(s[0]);
+        s = s[1];
+    }
+
+    return a;
+}
+
+
 sub mp_doc.split_line_by_words(doc, r)
 /* splits current line by words and returns a three element array containing
    the list of words, the list of offsets and the current position */

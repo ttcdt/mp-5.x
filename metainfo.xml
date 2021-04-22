@@ -32,14 +32,17 @@
 
   <releases>
 
-    <release version="5.48" type="stable" date="2021-03-21">
+    <release version="5.49" type="stable" date="2021-04-23">
       <description>
-        <p>Improvements:</p>
+        <p>New features:</p>
         <ul>
-        <li>[ANSI] Added double buffering, improving general speed and response (Theo).</li>
-        <li>Words explicitly ignored from the spellchecker (detected by calling the `seek_misspelled' action and disabled by calling `ignore_last_misspell') are now stored in the state so that they are not forgotten in next sessions (Tiny).</li>
-        <li>Also, these user-included words are also taken into account for completion if spellchecking is active (Tiny).</li>
-        <li>New syntax highlight definitions for Gemini / Gemtext files (contributed by cox778).</li>
+        <li>Periodic saving of documents has been implemented (not overwriting the original path, but in a different place) to prevent data loss in case of editor or computer crashes. On startup, if recovery files are detected, they are opened for further inspection. The period (in seconds) can be configurable by the `mp.config.auto_save_period' variable. If it's set to 0, automatic saving of files is disabled.</li>
+        <li>New action `replace_next' (not bound by default to any key, only from the menu).</li>
+        </ul>
+        <p>Bug fixes:</p>
+        <ul>
+        <li>The usage of & as a placeholder for the matched text in the `replace' functions works again.</li>
+        <li>Vertical copy works again under GUI interfaces.</li>
         </ul>
       </description>
       <artifacts>

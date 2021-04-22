@@ -26,6 +26,12 @@ mp.config.auto_indent
 
 Set to 1 if automatic indentation is wanted (default: 0, no indentation).
 
+mp.config.auto_save_period
+--------------------------
+
+Number of seconds for the automatic saving of files. If set to 0, auto
+save is disabled.
+
 mp.config.auto_sessions
 -----------------------
 

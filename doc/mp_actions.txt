@@ -260,6 +260,11 @@ _Hexadecimal viewer..._
 
 Shows a dialog to open a read-only, hexadecimal view of a file.
 
+idle
+----
+
+Called when the idle timeout expires.
+
 ignore_last_misspell
 --------------------
 
