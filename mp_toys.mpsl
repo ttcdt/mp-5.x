@@ -280,6 +280,9 @@ global mp_pipes = new(mp_base, {
             game_map[-1][5]      = pieces['out_pipe'];
             game_map[-1][wx - 5] = pieces['out_pipe'];
 
+            x = sx;
+            y = 1;
+
             mode = 'PLAY';
 
             pipes->verify();

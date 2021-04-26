@@ -72,7 +72,6 @@ global mp = {
         visual_wrap:            1,
         use_unicode:            1,
         dark_mode:              1,
-        font_face:              "Mono",
         font_weight:            0,
         hw_cursor:              0,
         auto_save_period:       120
@@ -930,7 +929,7 @@ sub mp.prepare()
         mp.colors.comments.gui      |= [ 0x00cc77, 0x1b1b1b ];
         mp.colors.documentation.gui |= [ 0x8888ff, 0x1b1b1b ];
         mp.colors.quotes.gui        |= [ 0x629FCF, 0x1b1b1b ];
-        mp.colors.matching.gui      |= [ 0x000000, 0x00aaaa ];
+        mp.colors.matching.gui      |= [ 0xf0f0f0, 0x4b4b4b ];
         mp.colors.word1.gui         |= [ 0x00aa00, 0x1b1b1b ];
         mp.colors.word2.gui         |= [ 0xff6666, 0x1b1b1b ];
         mp.colors.word3.gui         |= [ 0xaaaaaa, 0x1b1b1b ];

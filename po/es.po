@@ -60,15 +60,15 @@ msgstr "Tag a buscar"
 msgid "Word wrap on column (0, no word wrap)"
 msgstr "Word wrap en columna (0, ninguno)"
 
-#: mp_tui.mpsl:527
+#: mp_tui.mpsl:533
 msgid " [ENTER]"
 msgstr " [ENTER]"
 
-#: mpv_gtk.c:1886 mp_tui.mpsl:416
+#: mpv_gtk.c:1885 mp_tui.mpsl:422
 msgid "Yes"
 msgstr "Sí"
 
-#: mpv_gtk.c:1887 mp_tui.mpsl:417
+#: mpv_gtk.c:1886 mp_tui.mpsl:423
 msgid "No"
 msgstr "No"
 
@@ -248,7 +248,7 @@ msgstr "Editar fichero de moldes"
 msgid "Edit configuration file"
 msgstr "Editar fichero de configuración"
 
-#: mp_drv.mpsl:26 mp_tui.mpsl:494
+#: mp_drv.mpsl:26 mp_tui.mpsl:500
 msgid "Menu"
 msgstr "Menú"
 
@@ -465,7 +465,7 @@ msgstr "Contar palabras"
 msgid "Toggle spellchecking"
 msgstr "Conmutar ortografía"
 
-#: mp_tui.mpsl:822
+#: mp_tui.mpsl:828
 msgid "Please, wait..."
 msgstr "Por favor, espere..."
 
@@ -919,12 +919,12 @@ msgstr "Insertar salto de página (FF)"
 msgid "Insert m-dash character"
 msgstr "Insertar raya"
 
-#: mpv_gtk.c:1888 mpv_gtk.c:1917 mpv_gtk.c:2183 mpv_gtk.c:2192 mpv_gtk.c:2193
-#: mpv_gtk.c:2202
+#: mpv_gtk.c:1887 mpv_gtk.c:1916 mpv_gtk.c:2182 mpv_gtk.c:2191 mpv_gtk.c:2192
+#: mpv_gtk.c:2201
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: mpv_gtk.c:1918 mpv_gtk.c:2185 mpv_gtk.c:2193 mpv_gtk.c:2204
+#: mpv_gtk.c:1917 mpv_gtk.c:2184 mpv_gtk.c:2192 mpv_gtk.c:2203
 msgid "OK"
 msgstr "Aceptar"
 
@@ -1106,3 +1106,7 @@ msgstr ""
 #: mp_search.mpsl:254
 msgid "Replace next"
 msgstr "Reemplazar siguiente"
+
+#: mp_tui.mpsl:54
+msgid "(TAB: browse)"
+msgstr ""

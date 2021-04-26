@@ -188,7 +188,7 @@ msgstr "N"
 msgid " [Y/N]"
 msgstr "[J/N]"
 
-#: mp_tui.mpsl:527
+#: mp_tui.mpsl:533
 msgid " [ENTER]"
 msgstr "[ENTER]"
 
@@ -239,20 +239,20 @@ msgstr ""
 "Modi für die Syntax-Hervorhebung:\n"
 "\t"
 
-#: mpv_gtk.c:1886 mp_tui.mpsl:416
+#: mpv_gtk.c:1885 mp_tui.mpsl:422
 msgid "Yes"
 msgstr "Ja"
 
-#: mpv_gtk.c:1887 mp_tui.mpsl:417
+#: mpv_gtk.c:1886 mp_tui.mpsl:423
 msgid "No"
 msgstr "Nein"
 
-#: mpv_gtk.c:1918 mpv_gtk.c:2185 mpv_gtk.c:2193 mpv_gtk.c:2204
+#: mpv_gtk.c:1917 mpv_gtk.c:2184 mpv_gtk.c:2192 mpv_gtk.c:2203
 msgid "OK"
 msgstr "Übernehmen"
 
-#: mpv_gtk.c:1888 mpv_gtk.c:1917 mpv_gtk.c:2183 mpv_gtk.c:2192 mpv_gtk.c:2193
-#: mpv_gtk.c:2202
+#: mpv_gtk.c:1887 mpv_gtk.c:1916 mpv_gtk.c:2182 mpv_gtk.c:2191 mpv_gtk.c:2192
+#: mpv_gtk.c:2201
 msgid "Cancel"
 msgstr "Abbrechen"
 
@@ -498,7 +498,7 @@ msgstr "Zum Anfang der Zeile"
 msgid "Select last succesful search"
 msgstr "Letzte erfolgreiche Suche markieren"
 
-#: mp_drv.mpsl:26 mp_tui.mpsl:494
+#: mp_drv.mpsl:26 mp_tui.mpsl:500
 msgid "Menu"
 msgstr "Menü"
 
@@ -807,7 +807,7 @@ msgstr ""
 msgid "Toggle spellchecking"
 msgstr ""
 
-#: mp_tui.mpsl:822
+#: mp_tui.mpsl:828
 msgid "Please, wait..."
 msgstr ""
 
@@ -1459,4 +1459,8 @@ msgstr ""
 
 #: mp_search.mpsl:254
 msgid "Replace next"
+msgstr ""
+
+#: mp_tui.mpsl:54
+msgid "(TAB: browse)"
 msgstr ""

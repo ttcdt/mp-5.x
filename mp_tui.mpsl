@@ -47,7 +47,13 @@ sub mp.tui.readline(prompt, history, default, flags)
 {
     local c, r, h, i, x;
 
-    mp.tui.prompt(prompt + ' ', flags.y);
+    local p = prompt;
+
+    /* if it's a file, say that TAB opens the browser */
+    if (flags.file)
+        p = p->sregex("/:$/", " " + L("(TAB: browse)") + ":");
+
+    mp.tui.prompt(p + " ", flags.y);
     c = mp.tui.getxy();
     r = default || '';
 

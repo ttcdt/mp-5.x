@@ -1,6 +1,13 @@
 Minimum Profit Release Notes
 ============================
 
+5.50
+----
+
+* Critical bug fixes:
+
+Fixed a severe font bug in both MS Windows 32 and 64 bit.
+
 5.49
 ----
 

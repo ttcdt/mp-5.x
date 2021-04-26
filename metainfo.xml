@@ -32,17 +32,11 @@
 
   <releases>
 
-    <release version="5.49" type="stable" date="2021-04-23">
+    <release version="5.50" type="stable" date="2021-04-27">
       <description>
-        <p>New features:</p>
+        <p>Critical bug fixes:</p>
         <ul>
-        <li>Periodic saving of documents has been implemented (not overwriting the original path, but in a different place) to prevent data loss in case of editor or computer crashes. On startup, if recovery files are detected, they are opened for further inspection. The period (in seconds) can be configurable by the `mp.config.auto_save_period' variable. If it's set to 0, automatic saving of files is disabled.</li>
-        <li>New action `replace_next' (not bound by default to any key, only from the menu).</li>
-        </ul>
-        <p>Bug fixes:</p>
-        <ul>
-        <li>The usage of & as a placeholder for the matched text in the `replace' functions works again.</li>
-        <li>Vertical copy works again under GUI interfaces.</li>
+        <li>Fixed a severe font bug in both MS Windows 32 and 64 bit.</li>
         </ul>
       </description>
       <artifacts>
