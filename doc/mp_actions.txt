@@ -504,6 +504,16 @@ _Mouse wheel up_ (`mouse-wheel-up')
 
 Moves the cursor four lines up.
 
+move_para_down
+--------------
+
+Moves the cursor down to the next paragraph.
+
+move_para_up
+------------
+
+Moves the cursor up to the previous paragraph.
+
 move_pgdn
 ---------
 
@@ -710,6 +720,11 @@ replace
 _Replace..._ (`ctrl-r')
 
 Shows the search and replace dialog box.
+
+replace_next
+------------
+
+Replace next ocurrence of the found word.
 
 replace_spaces_with_tabs
 ------------------------

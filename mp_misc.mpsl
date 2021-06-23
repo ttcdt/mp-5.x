@@ -49,7 +49,7 @@ mp.actions['eval']  = sub {
 };
 
 mp_doc.actions['eval_doc']  = sub (d) {
-    local t = join(d->get_active_area(), "\n");
+    local t = join(d->get_active_area()->clone()->mp_c.vw_unwrap(), "\n");
 
     if (t != NULL) {
         t = eval(t);

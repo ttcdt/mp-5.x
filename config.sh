@@ -245,6 +245,7 @@ else
         echo "OK"
         DRIVERS="win32 $DRIVERS"
         DRV_OBJS="mpv_win32.o mpv_win32c.o $DRV_OBJS"
+        MORE_OBJS="$MORE_OBJS mp_res.o"
         WITHOUT_UNIX_GLOB=1
         WITHOUT_KDE4=1
         WITHOUT_GTK=1

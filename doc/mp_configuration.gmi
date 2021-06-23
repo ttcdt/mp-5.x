@@ -1,0 +1,281 @@
+# Minimum Profit Configuration Directives
+
+The following configuration variables can be set in the configuration files, from the command line or from the `Execute MPSL code...' option in the `Edit' menu.
+
+For example, if you always want automatic indentation, word wrapping at column 75 and a special ispell command, you can add the following MPSL code to `~/.config/mp.mpsl' (user-specific) or `/etc/mp.mpsl' (system-wide):
+
+```
+mp.config.auto_indent = 1;
+mp.config.word_wrap = 75;
+mp.config.ispell_cmd = "aspell -a";
+```
+
+As well, you can disable dark mode from the command line (only for the current session):
+
+```
+mp-5 -e "mp.config.dark_mode = 0"
+```
+
+All configuration variables are inside the `mp.config' object.
+
+## mp.config.ansi_rgbcolor
+
+If set to non-zero, the ANSI driver shall use the GUI colors instead of the text ones. Obviously, it should only be used in terminals that support RGB color mode; almost all modern terminal emulators do (default: 0, use standard text colors).
+
+This snippet activates ANSI RGB color only if the TERM environment variable contains the string "256color":
+
+```
+mp.config.ansi_rgbcolor = ENV.TERM->regex("/256color/") && 1 || 0;
+```
+
+This setting can only be set on startup (from the configuration file or the command line).
+
+## mp.config.auto_indent
+
+Set to 1 if automatic indentation is wanted (default: 0, no indentation).
+
+## mp.config.auto_save_period
+
+Number of seconds for the automatic saving of files. If set to 0, auto save is disabled (default: 120).
+
+## mp.config.auto_sessions
+
+Set to 1 to automatically load / save sessions on startup / exit (default: 0, no automatic sessions).
+
+## mp.config.case_sensitive_search
+
+Set to 1 if searches are to be done in a case-sensitive way (default: 1).
+
+## mp.config.ctags_cmd
+
+The external command to be executed when a tag search is requested. By default it's "ctags *". Other useful value is "ctags -R", that search for tags recursively in subdirectories.
+
+## mp.config.dark_mode
+
+Selects dark (1) or light (0) color modes (default: 1).
+
+## mp.config.double_page
+
+Set the screen width (in characters) where the double page mode is automatically enabled. If no double page mode is desired, set it to 0 (default: 120).
+
+## mp.config.dynamic_tabs
+
+Set to 1 if tab columns are to be inferred from the previous line (default: 0).
+
+## mp.config.emacs_scrolling
+
+Set to 1 to select scrolling by partial screen jumps instead of line-by-line (default: 0).
+
+## mp.config.eol
+
+The end of line character sequence (default: "\n" on Unix/Linux systems or "\r\n" on MS Windows).
+
+## mp.config.font_face
+
+The font face to be used in GUI environments (default: "Lucida Console" on MS Windows, "Mono" in the rest of GUI systems).
+
+## mp.config.font_size
+
+The font size to be used in GUI environments (default: 10).
+
+## mp.config.font_weight
+
+The font weight to be used in GUI environments. It's a floating point number from 0 to 1, where lower values give thinner fonts and higher values bolder ones. The special value 0 (default) means don't care about the font weight.
+
+## mp.config.global_replace
+
+Set to 1 if the `replace' operation must be done upto the end of the file (default: 0, do it only once).
+
+## mp.config.html_title
+
+The title to be used when exporting a mptxt file to HTML (default: the output file name).
+
+## mp.config.hw_cursor
+
+In text modes, moves the hardware terminal cursor to the position of the cursor (default: 0).
+
+## mp.config.ispell_cmd
+
+The external command to be executed as a pipe for spellchecking. It must be compatible with ispell, and by default it's "ispell -a". Other useful values are "aspell -a", if you have aspell installed (a better alternative), or "ispell -a -Tutf8", if you happen to be in an UTF-8 environment and must use ispell.
+
+## mp.config.keep_eol
+
+If this option is set, each document will keep its original end of line sequence when saved. If not set, the string set in `mp.config.eol' will be used regardless of the original one (default: 1).
+
+## mp.config.local_sessions
+
+Set to 1 to store session information in the currently working directory instead of in the home directory (default: 0, save sessions in the home directory).
+
+## mp.config.make_opts
+
+Additional flags for the `make' program (if you have a 4-core CPU, it's useful to set it as "-j 4") (default: "").
+
+## mp.config.mark_eol
+
+If set to 1, end-of-line characters are marked with a special character, instead of being invisible (default: 0, don't mark).
+
+## mp.config.maximize
+
+Set to 1 if the GUI window must open maximized (default: 0, no maximize).
+
+## mp.config.move_seek_to_line
+
+The line number to be set the cursor to when a successful search is hit (default: 5). If set to 0, the position is not touched.
+
+## mp.config.no_text_mouse
+
+Set to 1 to disable mouse support in Curses and win32 console modes (default: 0).
+
+## mp.config.preread_lines
+
+The number of lines to read above the first visible line to calculate syntax highlight in blocks (default: 60 lines). There is probably no need to change this, unless using very big comment blocks or the like.
+
+## mp.config.recursive_grep
+
+If set, the `grep' action is done recursively (default: 0).
+
+## mp.config.rtf_font_face
+
+Font face to be used in RTF exporting as normal text. Default is "Times New Roman".
+
+## mp.config.rtf_font_size
+
+Font size to be used in RTF exporting for normal text. Default is 12.
+
+## mp.config.rtf_mono_font_face
+
+Font face to be used in RTF exporting as verbatim text. Default is "Courier New".
+
+## mp.config.rtf_mono_font_size
+
+Font size to be used in RTF exporting for verbatim text. Default is 10.
+
+## mp.config.rtf_style_center
+
+RTF export code for centered paragraphs.
+
+## mp.config.rtf_style_default
+
+RTF export code for default paragraphs.
+
+## mp.config.rtf_style_first
+
+RTF export code for first paragraphs.
+
+## mp.config.rtf_style_para
+
+RTF export code for normal paragraphs.
+
+## mp.config.rtf_style_verbatim
+
+RTF export code for verbatim paragraphs.
+
+## mp.config.rw_max_dist
+
+Used by the `seek_repeated_word' action as the maximum distance that two similar words must be separated apart to be considered a repetition (default: 40 words).
+
+## mp.config.rw_num_chars
+
+Used by the `seek_repeated_word' action as the number of characters (from the start or the end) that two words must match to be considered similar and taken into account for repetitions (default: 4 characters).
+
+## mp.config.show_line_numbers
+
+Set to 1 to show line numbers (default: 0).
+
+## mp.config.smart_bol
+
+If set, the `move_bol' action will first move the cursor to the first non-whitespace character on the line. If the cursor is already on the first non-whitespace character the the cursor will move to column position 1 (default: 1).
+
+## mp.config.status_format
+
+The status format string to be shown in the status line. By default it's "%m%n %x,%y [%l] %R%O%W %s %e %t", where each percent-tag means:
+
+```
++----+-----------------------------------------------------------+
+|Tag | Description                                               |
++----+-----------------------------------------------------------+
+| %V | Current MP version                                        |
++----+-----------------------------------------------------------+
+| %m | Modify flag (asterisk or the empty string). If there      |
+|    | are pending disk operations (e.g. the file is still being |
+|    | loaded or saved) an exclamation mark is shown instead     |
++----+-----------------------------------------------------------+
+| %x | X coordinate (column)                                     |
++----+-----------------------------------------------------------+
+| %y | Y coordinate (line)                                       |
++----+-----------------------------------------------------------+
+| %l | Total number of lines in current document                 |
++----+-----------------------------------------------------------+
+| %R | Macro recording flag (R or the empty string)              |
++----+-----------------------------------------------------------+
+| %O | Overwrite flag (O or the empty string if inserting)       |
++----+-----------------------------------------------------------+
+| %s | Syntax highlight in use                                   |
++----+-----------------------------------------------------------+
+| %t | Tag target over the cursor, or the empty string if none   |
++----+-----------------------------------------------------------+
+| %n | Document name                                             |
++----+-----------------------------------------------------------+
+| %e | Encoding used in the file, or the empty string if using   |
+|    | current locale                                            |
++----+-----------------------------------------------------------+
+| %w | Number of words in the current document (or in the        |
+|    | current selection, if any). Slow in big documents.        |
++----+-----------------------------------------------------------+
+| %u | Unicode codepoint of the character under the cursor       |
++----+-----------------------------------------------------------+
+| %W | Visuap wrapping on flag (W or the empty string)           |
++----+-----------------------------------------------------------+
+| %% | A percent sign                                            |
++----+-----------------------------------------------------------+
+```
+
+## mp.config.tabs_as_spaces
+
+Set to 1 if tabs must be converted to spaces (default: 0, no conversion).
+
+## mp.config.tab_size
+
+Tab size in column spaces (default: 4).
+
+## mp.config.time_stamp_format
+
+The format for the time stamp (default: "%a, %d %b %Y %H:%M:%S %z").
+
+## mp.config.troff_font_size
+
+The font size when exporting an mptxt file to troff.
+
+## mp.config.troff_page_height
+
+The page height when exporting an mptxt file to troff.
+
+## mp.config.undo_levels
+
+Maximum number of undo levels per document (default: 100).
+
+## mp.config.unlink
+
+Set to 1 if the file must be unlinked just before being overwritten (default: 1, do it).
+
+## mp.config.use_unicode
+
+If set to nonzero, extended Unicode characters are used in several places like text menus, special characters, games, etc. If set to 0, uses only ASCII or ISO8859-1 characters (default: 1).
+
+The following snippet sets this variable only when the LANG environment variable contains the string "UTF-8":
+
+```
+mp.config.use_unicode = !!(ENV.LANG->regex("/UTF-8/"));
+```
+
+## mp.config.visual_wrap
+
+If set to nonzero, lines longer that the window or terminal are wrapped automatically to the next line (showing a special mark that a special, soft-break happened). If set to 0, long lines are cropped beyond the right margin (default: 1).
+
+## mp.config.word_wrap
+
+The column where word wrapping occurs (default: 0, no word wrapping).
+
+
+----
+ttcdt <dev@triptico.com>

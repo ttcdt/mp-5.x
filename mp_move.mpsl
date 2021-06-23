@@ -26,6 +26,8 @@ mp_doc.actions['move_bof']          = sub (d) { d->move(d.move_bof); };
 mp_doc.actions['move_eof']          = sub (d) { d->move(d.move_eof); };
 mp_doc.actions['move_word_left']    = sub (d) { d->move(d.move_word_left); };
 mp_doc.actions['move_word_right']   = sub (d) { d->move(d.move_word_right); };
+mp_doc.actions['move_para_up']      = sub (d) { d->move(d.move_para_up); };
+mp_doc.actions['move_para_down']    = sub (d) { d->move(d.move_para_down); };
 mp_doc.actions['scroll_up']         = sub (d) { d->scroll_up(); };
 mp_doc.actions['scroll_down']       = sub (d) { d->scroll_down(); };
 
@@ -152,6 +154,8 @@ mp.actdesc['move_mouse_wheel_up']       = LL("Mouse wheel down");
 mp.actdesc['document_list']             = LL("Document list");
 mp.actdesc['scroll_down']               = LL("Scroll document down");
 mp.actdesc['scroll_up']                 = LL("Scroll document up");
+mp.actdesc['move_para_up']              = LL("Paragraph up");
+mp.actdesc['move_para_down']            = LL("Paragraph down");
 
 /** code **/
 
@@ -493,6 +497,46 @@ sub mp_doc.move_word_right(doc)
         txt.y += 1;
         txt.x = 0;
     }
+
+    return doc;
+}
+
+
+sub mp_doc.move_para_up(doc)
+/* moves up to previous paragraph */
+{
+    /* move up while it's not an empty line */
+    while (doc.txt.y > 0 && doc.txt.lines[doc.txt.y] != "")
+        doc->move_up();
+
+    /* move down while it's an empty line */
+    while (doc.txt.y > 0 && doc.txt.lines[doc.txt.y] == "")
+        doc->move_up();
+
+    /* move up while it's not an empty line */
+    while (doc.txt.y > 0 && doc.txt.lines[doc.txt.y] != "")
+        doc->move_up();
+
+    /* move down to the first line */
+    if (doc.txt.lines[doc.txt.y] == "")
+        doc->move_down();
+
+    return doc;
+}
+
+
+sub mp_doc.move_para_down(doc)
+/* moves down a previous paragraph */
+{
+    local m = doc.txt.lines->count() - 1;
+
+    /* move down while it's not an empty line */
+    while (doc.txt.y < m && doc.txt.lines[doc.txt.y] != "")
+        doc->move_down();
+
+    /* move down while it's an empty line */
+    while (doc.txt.y < m && doc.txt.lines[doc.txt.y] == "")
+        doc->move_down();
 
     return doc;
 }

@@ -82,36 +82,48 @@ sub mp_doc.actions.section_list(d) {
 
 
 sub mp_doc.actions.move_section_up(d) {
-    local pos = -1;
+    local s = d->section_list();
 
-    foreach (e, d->section_list()) {
-        if (e[1] >= d.txt.y)
-            break;
+    if (s != NULL) {
+        local pos = -1;
 
-        pos = e[1];
+        foreach (e, d->section_list()) {
+            if (e[1] >= d.txt.y)
+                break;
+
+            pos = e[1];
+        }
+
+        if (pos != -1) {
+            d.txt.x = 0;
+            d.txt.y = pos;
+        }
     }
-
-    if (pos != -1) {
-        d.txt.x = 0;
-        d.txt.y = pos;
-    }
+    else
+        d->move_para_up();
 
     return d;
 }
 
 
 sub mp_doc.actions.move_section_down(d) {
-    local pos = d.txt.y;
+    local s = d->section_list();
 
-    foreach (e, d->section_list()) {
-        if (e[1] > pos) {
-            pos = e[1];
-            break;
+    if (s != NULL) {
+        local pos = d.txt.y;
+
+        foreach (e, d->section_list()) {
+            if (e[1] > pos) {
+                pos = e[1];
+                break;
+            }
         }
-    }
 
-    d.txt.x = 0;
-    d.txt.y = pos;
+        d.txt.x = 0;
+        d.txt.y = pos;
+    }
+    else
+        d->move_para_down();
 
     return d;
 }

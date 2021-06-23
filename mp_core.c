@@ -619,36 +619,24 @@ static void drw_matching_paren(void)
     int o = drw_2.cursor;
     int i = 0;
     wchar_t c;
+    wchar_t *ptr, *m_open, *m_close;
+
+    /* get definitions */
+    m_open  = mpdm_string(mpdm_get_wcs(MP, L"matching_open"));
+    m_close = mpdm_string(mpdm_get_wcs(MP, L"matching_close"));
 
     /* by default, no offset has been found */
     drw_2.matchparen_offset = -1;
 
-    /* find the opposite and the increment (direction) */
-    switch (drw_2.ptr[o]) {
-    case L'(':
-        c = L')';
+    /* search for the character in both sets */
+    if ((ptr = wcschr(m_open, drw_2.ptr[o])) != NULL) {
+        c = m_close[ptr - m_open];
         i = 1;
-        break;
-    case L'{':
-        c = L'}';
-        i = 1;
-        break;
-    case L'[':
-        c = L']';
-        i = 1;
-        break;
-    case L')':
-        c = L'(';
+    }
+    else
+    if ((ptr = wcschr(m_close, drw_2.ptr[o])) != NULL) {
+        c = m_open[ptr - m_close];
         i = -1;
-        break;
-    case L'}':
-        c = L'{';
-        i = -1;
-        break;
-    case L']':
-        c = L'[';
-        i = -1;
-        break;
     }
 
     /* if a direction is set, do the searching */

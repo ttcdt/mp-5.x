@@ -256,5 +256,7 @@ __I18N__ = {
 	"Release notes" => "Notas sobre la versi\x{00f3}n",
 	"Lines: %d\nWords: %d\nPages: %d" => "L\x{00ed}neas: %d\nPalabras: %d\nP\x{00e1}ginas: %d",
 	"Replace next" => "Reemplazar siguiente",
+	"Paragraph up" => "P\x{00e1}rrafo arriba",
+	"Paragraph down" => "P\x{00e1}rrafo abajo",
 	"-" => "-"
 };

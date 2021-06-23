@@ -372,6 +372,7 @@ struct _str_to_code {
     { "\033[5;3~",          L"alt-page-up" },
     { "\033[6;3~",          L"alt-page-down" },
     { "\033-",              L"alt-minus" },
+    { "\033 ",              L"alt-space" },
     { "\033\033[A",         L"alt-cursor-up" },
     { "\033\033[B",         L"alt-cursor-down" },
     { "\033\033[C",         L"alt-cursor-right" },
@@ -390,6 +391,7 @@ struct _str_to_code {
     { "\033[12~",           L"f2" },
     { "\033[13~",           L"f3" },
     { "\033[14~",           L"f4" },
+    { "\033[E",             L"super-5" },
     { NULL,                 NULL }
 };
 
@@ -435,11 +437,18 @@ static mpdm_t ansi_getkey(mpdm_t args, mpdm_t ctxt)
         }
 
         /* esc+letter? alt-letter */
-        if (str[0] == '\033' && str[1] >= 'a' &&
-            str[1] <= 'z' && str[2] == '\0') {
+        if (str[0] == '\033' && str[1] >= '!' &&
+            str[1] <= '~' && str[2] == '\0') {
             char tmp[16];
-    
-            sprintf(tmp, "alt-%c", str[1]);
+
+            if (str[1] == '-')
+                strcpy(tmp, "alt-minus");
+            else
+            if (str[1] == '+')
+                strcpy(tmp, "alt-plus");
+            else
+                sprintf(tmp, "alt-%c", str[1]);
+
             k = MPDM_MBS(tmp);
         }
 
@@ -542,6 +551,39 @@ static mpdm_t ansi_drv_suspend(mpdm_t a, mpdm_t ctxt)
     kill(getpid(), SIGSTOP);
 
     ansi_raw_tty(1);
+
+    return NULL;
+}
+
+
+static mpdm_t ansi_drv_clip_to_sys(mpdm_t a, mpdm_t ctxt)
+/* driver-dependent mp to system clipboard */
+{
+    mpdm_t d = mpdm_ref(mpdm_join_wcs(mpdm_get_wcs(MP, L"clipboard"), L"\n"));
+    char *ptr = mpdm_wcstombs(mpdm_string(d), NULL);
+    char *b64;
+
+    /* if text is longer than 74994 (hard limit), truncate it */
+    if (strlen(ptr) > 74994) {
+        char *msg = "\n[Clipboard too big for ANSI copying]";
+        strcpy(ptr + 74994 - strlen(msg) - 1, msg);
+    }
+
+    b64 = mpdm_base64enc_mbs((unsigned char *)ptr, strlen(ptr));
+
+    /* use the OSC 52 ANSI code */
+
+    /* empty clipboard */
+    printf("\033]52;c;!\a");
+
+    /* copy clipboard in base64 format */
+    printf("\033]52;c;%s\a", b64);
+
+    fflush(stdout);
+
+    mpdm_unref(d);
+    free(b64);
+    free(ptr);
 
     return NULL;
 }
@@ -813,6 +855,7 @@ static void ansi_register_functions(void)
     mpdm_set_wcs(drv, MPDM_X(ansi_drv_idle),        L"idle");
     mpdm_set_wcs(drv, MPDM_X(ansi_drv_shutdown),    L"shutdown");
     mpdm_set_wcs(drv, MPDM_X(ansi_drv_suspend),     L"suspend");
+    mpdm_set_wcs(drv, MPDM_X(ansi_drv_clip_to_sys), L"clip_to_sys");
 
     /* execute tui */
     tui = mpsl_eval(MPDM_S(L"load('mp_tui.mpsl');"), NULL, NULL);

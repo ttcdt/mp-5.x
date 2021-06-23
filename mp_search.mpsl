@@ -291,8 +291,8 @@ sub mp_doc.search_set_y(doc, y)
  */
 sub mp_doc.seek_matching(doc)
 {
-    local matching_open  = [ '(', '{', '[' ];
-    local matching_close = [ ')', '}', ']' ];
+    local matching_open  = mp.matching_open->split();
+    local matching_close = mp.matching_close->split();
     local txt = doc.txt;
 
     /* get current char, it's the increment char */

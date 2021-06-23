@@ -137,14 +137,14 @@ static void build_fonts(HDC hdc)
     n = -MulDiv(font_size, GetDeviceCaps(hdc, LOGPIXELSY), 72);
 
     if ((font_normal = CreateFont(n, 0, 0, 0, (int) font_weight, 0, 0,
-                             0, 0, 0, 0, 0, 0, font_face)) == NULL)
+                             0, 0, 0, 0, 0, FIXED_PITCH, font_face)) == NULL)
         font_normal = CreateFont(n, 0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0, font_face);
+                             0, 0, 0, 0, 0, FIXED_PITCH, font_face);
 
     if ((font_underline = CreateFont(n, 0, 0, 0, (int) font_weight, 0, 1,
-                                0, 0, 0, 0, 0, 0, font_face)) == NULL)
+                                0, 0, 0, 0, 0, FIXED_PITCH, font_face)) == NULL)
         font_underline = CreateFont(n, 0, 0, 0, 0, 0, 1,
-                                0, 0, 0, 0, 0, 0, font_face);
+                                0, 0, 0, 0, 0, FIXED_PITCH, font_face);
 
     SelectObject(hdc, font_normal);
     GetTextMetrics(hdc, &tm);
@@ -254,7 +254,7 @@ static void build_menu(void)
                 memset(&mi, '\0', sizeof(mi));
                 mi.cbSize = sizeof(mi);
                 mi.fMask = MIIM_DATA;
-                mi.dwItemData = (unsigned long) v;
+                mi.dwItemData = (ULONG_PTR) v;
 
                 SetMenuItemInfo(submenu, win32_menu_id, FALSE, &mi);
 
@@ -263,7 +263,7 @@ static void build_menu(void)
         }
 
         /* now store the popup inside the menu */
-        AppendMenuW(menu, MF_STRING | MF_POPUP, (UINT) submenu, mpdm_string(v));
+        AppendMenuW(menu, MF_STRING | MF_POPUP, (UINT_PTR) submenu, mpdm_string(v));
     }
 
     SetMenu(hwnd, menu);
@@ -1788,6 +1788,8 @@ static mpdm_t win32_drv_idle(mpdm_t a, mpdm_t ctxt)
 
     if (idle_msecs > 0)
         SetTimer(hwnd, 1, idle_msecs, NULL);
+
+    return NULL;
 }
 
 

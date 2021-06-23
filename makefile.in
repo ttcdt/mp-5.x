@@ -14,16 +14,18 @@ LIBS:
 
 PROJ=mp
 
+ARCHFILES=*.mpsl lang/*.mpsl syntax/*.mpsl RELEASE_NOTES LICENSE
+
 ADD_DOCS=README LICENSE RELEASE_NOTES mp_templates.sample
 GRUTATXT_DOCS=doc/mp_index.html doc/mp_cookbook.html doc/mp_internals.html \
-	doc/mp_configuration.html doc/mp_data_model.html \
+	doc/mp_data_model.html \
 	doc/mp_man.html doc/mp_interactive_dialog_boxes.html \
 	doc/mp_actions.html doc/mp_keycodes.html \
 	doc/mp_encoding.html $(APPNAME).1
 MP_DOCCER_DOCS=doc/mp_api.txt
 G_AND_MP_DOCS=doc/mp_api.html
 
-OBJS=mp_core.o $(DRV_OBJS) $(MORE_OBJS)
+OBJS=mp_core.o $(MORE_OBJS)
 
 DIST_TARGET=/tmp/$(PROJ)-$(VERSION)
 
@@ -38,21 +40,21 @@ dep:
 		sed -e 's;$(MPDM)/;$$(MPDM)/;g' \
 			-e 's;$(MPSL)/;$$(MPSL)/;g' > makefile.depend
 
-mp.tar: *.mpsl lang/*.mpsl syntax/*.mpsl RELEASE_NOTES LICENSE
-	$(TAR) cvf $@ *.mpsl lang/*.mpsl syntax/*.mpsl RELEASE_NOTES LICENSE
+mp.tar: $(ARCHFILES)
+	$(TAR) cvf $@ $(ARCHFILES)
 
 mp.tar.o: mp.tar
 	$(LD) -r -b binary mp.tar -o $@
 
-mp.zip: *.mpsl lang/*.mpsl syntax/*.mpsl RELEASE_NOTES LICENSE
+mp.zip: $(ARCHFILES)
 	rm -f $@
-	zip -r $@ *.mpsl lang/*.mpsl syntax/*.mpsl RELEASE_NOTES LICENSE
+	zip -r $@ $(ARCHFILES)
 
 mp.zip.o: mp.zip
 	$(LD) -r -b binary mp.zip -o $@
 
-$(APPNAME): $(OBJS) $(MPDM)/libmpdm.a $(MPSL)/libmpsl.a
-	$(CCLINK) $(CFLAGS) $(OBJS) `cat config.ldflags` -o $@
+$(APPNAME): $(OBJS) $(DRV_OBJS) $(MPDM)/libmpdm.a $(MPSL)/libmpsl.a
+	$(CCLINK) $(CFLAGS) $(OBJS) $(DRV_OBJS) `cat config.ldflags` -o $@
 
 mpv_kde4.o: mpv_kde4.cpp mpv_qk_common.moc
 	$(CPP) $(CFLAGS) -I. `cat config.cflags` -c $<
@@ -66,11 +68,11 @@ mpv_qk_common.moc: mpv_qk_common.cpp
 mp_res.o: mp_res.rc
 	$(WINDRES) mp_res.rc mp_res.o
 
-mp-5.exe: mp_core.o $(MORE_OBJS) mpv_win32.o mp_res.o $(MPDM)/libmpdm.a $(MPSL)/libmpsl.a
-	$(CC) $(CFLAGS) mp_core.o $(MORE_OBJS) mpv_win32.o mp_res.o `cat config.ldflags` -o $@
+mp-5.exe: $(OBJS) mpv_win32.o $(MPDM)/libmpdm.a $(MPSL)/libmpsl.a
+	$(CC) $(CFLAGS) $(OBJS) mpv_win32.o `cat config.ldflags` -o $@
 
-mp-5c.exe: mp_core.o $(MORE_OBJS) mpv_win32c.o mp_res.o $(MPDM)/libmpdm.a $(MPSL)/libmpsl.a
-	$(CC) $(CFLAGS) mp_core.o $(MORE_OBJS) mpv_win32c.o mp_res.o `grep -v mwindows config.ldflags` -o $@
+mp-5c.exe: $(OBJS) mpv_win32c.o $(MPDM)/libmpdm.a $(MPSL)/libmpsl.a
+	$(CC) $(CFLAGS) $(OBJS) mpv_win32c.o `grep -v mwindows config.ldflags` -o $@
 
 distclean: clean
 	rm -f config.h config.cflags config.ldflags \

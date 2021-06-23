@@ -11,19 +11,19 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 1.10.2\n"
 
-#: mp_core.mpsl:192
+#: mp_core.mpsl:191
 msgid "&File"
 msgstr "&Arkiv"
 
-#: mp_core.mpsl:203
+#: mp_core.mpsl:202
 msgid "&Edit"
 msgstr "&Redigera"
 
-#: mp_core.mpsl:214
+#: mp_core.mpsl:213
 msgid "&Search"
 msgstr "&Sök"
 
-#: mp_core.mpsl:223
+#: mp_core.mpsl:222
 msgid "&Go to"
 msgstr "&Gå till"
 
@@ -82,7 +82,7 @@ msgstr "Olänkade funktioner"
 msgid "Error executing user defined function"
 msgstr "Fel vid exekvering av definerad funktion"
 
-#: mp_move.mpsl:37
+#: mp_move.mpsl:39
 msgid "Line to go to"
 msgstr "Rad att gå till"
 
@@ -153,7 +153,7 @@ msgstr "grep"
 msgid "Tag to seek"
 msgstr "Tagg-namn att söka"
 
-#: mp_edit.mpsl:116
+#: mp_edit.mpsl:120
 msgid "Word wrap on column (0, no word wrap)"
 msgstr "Radbrytning vid kolumn (0, ingen radbrytning)"
 
@@ -346,7 +346,7 @@ msgstr "Spara LF som CR/LF"
 msgid "Save tabs"
 msgstr "Spara tabbtecken"
 
-#: mp_edit.mpsl:122
+#: mp_edit.mpsl:126
 msgid "Automatic indentation"
 msgstr "Automatisk indentering"
 
@@ -428,11 +428,11 @@ msgstr "Nästa"
 msgid "Open..."
 msgstr "Öppna..."
 
-#: mp_move.mpsl:145
+#: mp_move.mpsl:147
 msgid "Word left"
 msgstr "Ord vänster"
 
-#: mp_move.mpsl:146
+#: mp_move.mpsl:148
 msgid "Word right"
 msgstr "Ord höger"
 
@@ -440,15 +440,15 @@ msgstr "Ord höger"
 msgid "New"
 msgstr "Ny"
 
-#: mp_move.mpsl:137
+#: mp_move.mpsl:139
 msgid "Line up"
 msgstr "Rad upp"
 
-#: mp_move.mpsl:140
+#: mp_move.mpsl:142
 msgid "Page down"
 msgstr "Sida ner"
 
-#: mp_move.mpsl:139
+#: mp_move.mpsl:141
 msgid "Page up"
 msgstr "Sida upp"
 
@@ -456,7 +456,7 @@ msgstr "Sida upp"
 msgid "Move to previous instance of current char"
 msgstr "Flytta till föregående förekomst av aktuellt tecken"
 
-#: mp_move.mpsl:136
+#: mp_move.mpsl:138
 msgid "Character right"
 msgstr "Tecken höger"
 
@@ -472,23 +472,23 @@ msgstr "Sök text..."
 msgid "Move to next instance of current char"
 msgstr "Flytta till nästa förekomst av aktuellt tecken"
 
-#: mp_move.mpsl:144
+#: mp_move.mpsl:146
 msgid "End of document"
 msgstr "Slut av dokument"
 
-#: mp_move.mpsl:142
+#: mp_move.mpsl:144
 msgid "End of line"
 msgstr "Radslut"
 
-#: mp_move.mpsl:135
+#: mp_move.mpsl:137
 msgid "Character left"
 msgstr "Tecken vänster"
 
-#: mp_move.mpsl:143
+#: mp_move.mpsl:145
 msgid "Beginning of document"
 msgstr "Början på dokument"
 
-#: mp_move.mpsl:141
+#: mp_move.mpsl:143
 msgid "Beginning of line"
 msgstr "Början av rad"
 
@@ -502,7 +502,7 @@ msgstr "Meny"
 msgid "Position cursor with mouse"
 msgstr "Positionera markör med musen"
 
-#: mp_move.mpsl:138
+#: mp_move.mpsl:140
 msgid "Line down"
 msgstr "Rad ner"
 
@@ -521,14 +521,14 @@ msgstr "Hoppa till matchande parentes"
 msgid "Insert new line below cursor"
 msgstr "Infoga ny rad under nedanför markören"
 
-#: mp_edit.mpsl:233
+#: mp_edit.mpsl:237
 msgid "Insert tab"
 msgstr "Infoga tabbtecken"
 
 msgid "Help for word under cursor"
 msgstr "Hjälp om ord vid markören"
 
-#: mp_edit.mpsl:229
+#: mp_edit.mpsl:233
 msgid "Insert line"
 msgstr "Infoga rad"
 
@@ -543,7 +543,7 @@ msgstr "Infoga mall..."
 msgid "Mark beginning/end of block"
 msgstr "Markera början/slutet av blocket"
 
-#: mp_move.mpsl:147
+#: mp_move.mpsl:149
 msgid "Go to line..."
 msgstr "Gå till rad..."
 
@@ -564,7 +564,7 @@ msgstr "Kör systemkommando..."
 msgid "Execute editor function..."
 msgstr "Exekvera editorfunktion..."
 
-#: mp_move.mpsl:96 mp_move.mpsl:152
+#: mp_move.mpsl:98 mp_move.mpsl:154
 msgid "Document list"
 msgstr "Dokumentlista"
 
@@ -589,7 +589,7 @@ msgstr "Radera till början av ordet"
 msgid "Delete char to the left of cursor"
 msgstr "Radera tecken till vänster om markören"
 
-#: mp_edit.mpsl:230
+#: mp_edit.mpsl:234
 msgid "Delete line"
 msgstr "Radera rad"
 
@@ -631,27 +631,27 @@ msgstr ""
 msgid "Word wrapping must be set"
 msgstr ""
 
-#: mp_edit.mpsl:232
+#: mp_edit.mpsl:236
 msgid "Insert space"
 msgstr ""
 
-#: mp_edit.mpsl:235
+#: mp_edit.mpsl:239
 msgid "Delete character"
 msgstr ""
 
-#: mp_edit.mpsl:236
+#: mp_edit.mpsl:240
 msgid "Delete character to the left"
 msgstr ""
 
-#: mp_edit.mpsl:239
+#: mp_edit.mpsl:243
 msgid "Undo"
 msgstr ""
 
-#: mp_edit.mpsl:241
+#: mp_edit.mpsl:245
 msgid "Join a paragraph in one line"
 msgstr ""
 
-#: mp_edit.mpsl:242
+#: mp_edit.mpsl:246
 msgid "Word-wrap a paragraph"
 msgstr ""
 
@@ -693,15 +693,15 @@ msgstr ""
 msgid "Smaller font"
 msgstr ""
 
-#: mp_move.mpsl:149
+#: mp_move.mpsl:151
 msgid "Move cursor to mouse click"
 msgstr ""
 
-#: mp_move.mpsl:150
+#: mp_move.mpsl:152
 msgid "Mouse wheel up"
 msgstr ""
 
-#: mp_move.mpsl:151
+#: mp_move.mpsl:153
 msgid "Mouse wheel down"
 msgstr ""
 
@@ -730,7 +730,7 @@ msgstr ""
 msgid "<help on '%s'>"
 msgstr ""
 
-#: mp_syntax.mpsl:129
+#: mp_syntax.mpsl:141
 msgid "Help on word over cursor"
 msgstr ""
 
@@ -758,23 +758,23 @@ msgstr ""
 msgid "Template to insert"
 msgstr ""
 
-#: mp_edit.mpsl:127
+#: mp_edit.mpsl:131
 msgid "Line termination"
 msgstr ""
 
-#: mp_edit.mpsl:167
+#: mp_edit.mpsl:171
 msgid "Tab size"
 msgstr ""
 
-#: mp_edit.mpsl:171
+#: mp_edit.mpsl:175
 msgid "Convert tabs to spaces"
 msgstr ""
 
-#: mp_edit.mpsl:243
+#: mp_edit.mpsl:247
 msgid "Line options..."
 msgstr ""
 
-#: mp_edit.mpsl:244
+#: mp_edit.mpsl:248
 msgid "Tab options..."
 msgstr ""
 
@@ -821,7 +821,7 @@ msgstr ""
 msgid "Error writing to command '%s'"
 msgstr ""
 
-#: mp_edit.mpsl:240
+#: mp_edit.mpsl:244
 msgid "Redo"
 msgstr ""
 
@@ -851,7 +851,7 @@ msgstr ""
 msgid "Unknown action '%s'"
 msgstr ""
 
-#: mp_edit.mpsl:799
+#: mp_edit.mpsl:803
 #, c-format
 msgid "Unbound keystroke '%s'"
 msgstr ""
@@ -880,7 +880,7 @@ msgstr ""
 msgid "Mark using mouse dragging"
 msgstr ""
 
-#: mp_edit.mpsl:137
+#: mp_edit.mpsl:141
 msgid "Mark end of lines"
 msgstr ""
 
@@ -924,7 +924,7 @@ msgstr ""
 msgid "Section list"
 msgstr ""
 
-#: mp_syntax.mpsl:130
+#: mp_syntax.mpsl:142
 msgid "Section list..."
 msgstr ""
 
@@ -970,7 +970,7 @@ msgstr ""
 msgid "Delete block"
 msgstr ""
 
-#: mp_edit.mpsl:132
+#: mp_edit.mpsl:136
 msgid "Keep original end of lines"
 msgstr ""
 
@@ -982,7 +982,7 @@ msgstr ""
 msgid "Open dropped files"
 msgstr ""
 
-#: mp_edit.mpsl:174
+#: mp_edit.mpsl:178
 msgid "Use previous line for tab columns"
 msgstr ""
 
@@ -990,7 +990,7 @@ msgstr ""
 msgid "Insert next item"
 msgstr ""
 
-#: mp_edit.mpsl:246
+#: mp_edit.mpsl:250
 msgid "Toggle insert/overwrite mode"
 msgstr ""
 
@@ -1018,15 +1018,15 @@ msgstr ""
 msgid "Cut lines containing a string..."
 msgstr ""
 
-#: mp_edit.mpsl:234
+#: mp_edit.mpsl:238
 msgid "Insert real tab character"
 msgstr ""
 
-#: mp_edit.mpsl:237
+#: mp_edit.mpsl:241
 msgid "Indent block"
 msgstr ""
 
-#: mp_edit.mpsl:238
+#: mp_edit.mpsl:242
 msgid "Unindent block"
 msgstr ""
 
@@ -1034,7 +1034,7 @@ msgstr ""
 msgid "Template file to edit"
 msgstr ""
 
-#: mp_edit.mpsl:142
+#: mp_edit.mpsl:146
 msgid "'Smart' move to beginning of line"
 msgstr ""
 
@@ -1106,11 +1106,11 @@ msgstr ""
 msgid "Error opening file '%s': %s"
 msgstr ""
 
-#: mp_syntax.mpsl:131
+#: mp_syntax.mpsl:143
 msgid "Move one section up"
 msgstr ""
 
-#: mp_syntax.mpsl:132
+#: mp_syntax.mpsl:144
 msgid "Move one section down"
 msgstr ""
 
@@ -1230,7 +1230,7 @@ msgstr ""
 msgid "Error executing '%s'"
 msgstr ""
 
-#: mp_edit.mpsl:147
+#: mp_edit.mpsl:151
 msgid "Show line numbers"
 msgstr ""
 
@@ -1254,7 +1254,7 @@ msgstr ""
 msgid "Suspend"
 msgstr ""
 
-#: mp_move.mpsl:148
+#: mp_move.mpsl:150
 msgid "Select word under cursor"
 msgstr ""
 
@@ -1266,7 +1266,7 @@ msgstr ""
 msgid "Move to the matching bracket"
 msgstr ""
 
-#: mp_edit.mpsl:231
+#: mp_edit.mpsl:235
 msgid "Cut line"
 msgstr ""
 
@@ -1276,23 +1276,23 @@ msgstr ""
 msgid "Export as RTF..."
 msgstr ""
 
-#: mp_move.mpsl:153
+#: mp_move.mpsl:155
 msgid "Scroll document down"
 msgstr ""
 
-#: mp_move.mpsl:154
+#: mp_move.mpsl:156
 msgid "Scroll document up"
 msgstr ""
 
-#: mp_edit.mpsl:247
+#: mp_edit.mpsl:251
 msgid "Insert page break character (FF)"
 msgstr ""
 
-#: mp_edit.mpsl:248
+#: mp_edit.mpsl:252
 msgid "Insert m-dash character"
 msgstr ""
 
-#: mp_edit.mpsl:249
+#: mp_edit.mpsl:253
 msgid "Insert raw string"
 msgstr ""
 
@@ -1367,7 +1367,7 @@ msgstr ""
 msgid "Maze - help %s to find the treasure. As always, the %s marks the spot."
 msgstr ""
 
-#: mp_toys.mpsl:216 mp_toys.mpsl:393 mp_toys.mpsl:602
+#: mp_toys.mpsl:216 mp_toys.mpsl:396 mp_toys.mpsl:605
 msgid "You won! Press ENTER."
 msgstr ""
 
@@ -1416,11 +1416,11 @@ msgid ""
 " -ni                Non-interactive (to be used with -e or -f)\n"
 msgstr ""
 
-#: mp_edit.mpsl:191
+#: mp_edit.mpsl:195
 msgid "C/C++ clang options"
 msgstr ""
 
-#: mp_edit.mpsl:245
+#: mp_edit.mpsl:249
 msgid "Code completion options..."
 msgstr ""
 
@@ -1443,7 +1443,7 @@ msgstr ""
 msgid "No completion found"
 msgstr ""
 
-#: mp_toys.mpsl:485
+#: mp_toys.mpsl:488
 msgid "Puzzle - order the list by moving the blank"
 msgstr ""
 
@@ -1504,4 +1504,12 @@ msgstr ""
 
 #: mp_tui.mpsl:54
 msgid "(TAB: browse)"
+msgstr ""
+
+#: mp_move.mpsl:157
+msgid "Paragraph up"
+msgstr ""
+
+#: mp_move.mpsl:158
+msgid "Paragraph down"
 msgstr ""

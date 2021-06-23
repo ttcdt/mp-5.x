@@ -66,8 +66,10 @@ mp_doc.actions['join_paragraph'] = sub (d) {
 
         /* while not at EOF, word wrap everything */
         while (p.txt.y < size(p.txt.lines) - 1) {
-            p->join_paragraph()->move_down()->move_down();
+            p->join_paragraph()->move_para_down();
         }
+
+        mp_c.vw_unwrap(p.txt.lines);
 
         /* insert the content */
         d->insert(p.txt.lines)->busy(0);
@@ -93,8 +95,10 @@ mp_doc.actions['word_wrap_paragraph'] = sub (d) {
 
             /* while not at EOF, word wrap everything */
             while (p.txt.y < size(p.txt.lines) - 1) {
-                p->word_wrap_paragraph()->move_down()->move_down();
+                p->word_wrap_paragraph()->move_para_down();
             }
+
+            mp_c.vw_unwrap(p.txt.lines);
 
             /* insert the content */
             d->insert(p.txt.lines)->busy(0);

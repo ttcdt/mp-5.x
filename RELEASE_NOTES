@@ -1,6 +1,35 @@
 Minimum Profit Release Notes
 ============================
 
+5.51
+----
+
+* New features:
+
+New actions `move_para_up' and `move_para_down', to move the cursor to the beginning of the previous or next paragraph (Claire).
+
+Related to the above, actions `move_section_up' and `move_section_down' behave like `move_para_up' and `move_para_down' when the file being edited has no section definitions (e.g. on plain text files) (Claire).
+
+[ANSI] When copying text into the clipboard, ANSI code OSC 52 is emmited; if the underlying terminal emulator supports it (for example, xterm under X11), this code will transfer MP's clipboard to the system one. This works even if MP is running on a remote server via SSH (Theo).
+
+* Improvements:
+
+Added section detection for Gemini / Gemtext files (contributed by cox778).
+
+[ANSI] Added more alt+character keycodes (unused, free for user remappings). Specifically, all alt+number keycodes are usable (Theo).
+
+Added more bracket and quoting character pairs for 'seek_matching' action and visual matching (contributed by aov).
+
+* Bug fixes:
+
+Fixed a wrapping-related error in the directory editor, that could cause failures when renaming files (contributed by MrNix94).
+
+[win32] Force fonts to be FIXED_PITCH (contributed by Michael F. Woods).
+
+* Other changes:
+
+[GTK] Set default font size to 10, like in Qt and windows drivers (contributed by Michael F. Woods).
+
 5.50
 ----
 

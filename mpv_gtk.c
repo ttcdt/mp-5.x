@@ -167,7 +167,7 @@ static void build_fonts(void)
     char tmp[128];
     mpdm_t c;
     mpdm_t w = NULL;
-    int font_size           = 12;
+    int font_size           = 10;
     const char *font_face   = "Mono";
     double font_weight      = 0.0;
 

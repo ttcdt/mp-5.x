@@ -32,18 +32,35 @@
 
   <releases>
 
-    <release version="5.50" type="stable" date="2021-04-27">
+    <release version="5.51" type="stable" date="2021-06-23">
       <description>
-        <p>Critical bug fixes:</p>
+        <p>New features:</p>
         <ul>
-        <li>Fixed a severe font bug in both MS Windows 32 and 64 bit.</li>
+            <li>New actions `move_para_up' and `move_para_down', to move the cursor to the beginning of the previous or next paragraph (Claire).</li>
+            <li>Related to the above, actions `move_section_up' and `move_section_down' behave like `move_para_up' and `move_para_down' when the file being edited has no section definitions (e.g. on plain text files) (Claire).</li>
+            <li>[ANSI] When copying text into the clipboard, ANSI code OSC 52 is emmited; if the underlying terminal emulator supports it (for example, xterm under X11), this code will transfer MP's clipboard to the system one. This works even if MP is running on a remote server via SSH (Theo).</li>
+        </ul>
+        <p>Improvements:</p>
+        <ul>
+            <li>Added section detection for Gemini / Gemtext files (contributed by cox778).</li>
+            <li>[ANSI] Added more alt+character keycodes (unused, free for user remappings). Specifically, all alt+number keycodes are usable (Theo).</li>
+            <li>Added more bracket and quoting character pairs for 'seek_matching' action and visual matching (contributed by aov).</li>
+        </ul>
+        <p>Bug fixes:</p>
+        <ul>
+            <li>Fixed a wrapping-related error in the directory editor, that could cause failures when renaming files (contributed by MrNix94).</li>
+            <li>[win32] Force fonts to be FIXED_PITCH (contributed by Michael F. Woods).</li>
+        </ul>
+        <p>Other changes:</p>
+        <ul>
+            <li>[GTK] Set default font size to 10, like in Qt and windows drivers (contributed by Michael F. Woods).</li>
         </ul>
       </description>
       <artifacts>
         <artifact type="source">
           <location>https://triptico.com/download/mp-5.tar.gz</location>
         </artifact>
-        <artifact type="binary" platform="win32">
+        <artifact type="binary" platform="x86_64-windows-msvc">
           <location>https://triptico.com/download/mp-5-portable-64.exe</location>
         </artifact>
       </artifacts>
@@ -51,7 +68,7 @@
 
   </releases>
   
-  <launchable type="desktop-id">minimum_profit.desktop​</launchable>
+  <launchable type="desktop-id">minimum_profit.desktop</launchable>
   <screenshots>
     <screenshot type="default">
       <image>https://triptico.com/img/mp-5-qt4.png</image>

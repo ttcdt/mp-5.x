@@ -8,7 +8,7 @@
 
 */
 
-sub load_ref_document(file)
+sub load_ref_document_txt(file)
 /* loads a document and returns a structure with header,
    data entries and signature */
 {
@@ -67,7 +67,7 @@ sub load_ref_document(file)
 }
 
 
-sub save_ref_document(file, r, hash, prefix, def)
+sub save_ref_document_txt(file, r, hash, prefix, def)
 /* saves a parsed document filling empty entries from hash */
 {
     local f;
@@ -94,17 +94,129 @@ sub save_ref_document(file, r, hash, prefix, def)
 }
 
 
-sub update_ref_document(file, hash, prefix, def)
+sub load_ref_document_gmi(file)
+/* loads a document and returns a structure with header,
+   data entries and signature (Gemtext) */
+{
+    local f, d, k;
+    local r = {
+        'header'    => NULL,
+        'data'      => {},
+        'sig'       => ''
+    };
+
+    if ((f = open(file, "r")) == NULL)
+        return NULL;
+
+    d = [];
+    k = NULL;
+
+    foreach (l, f) {
+        l = sregex(l, "/\r?\n$/");
+
+        /* all ---? signature and end */
+        if (l->regex("/^-+$/")) {
+            r.sig = join([l, read(f)], "\n");
+
+            r.data[k] = d->join("\n")->
+                sregex("/^\n/")->sregex("/\n+$/");
+
+            break;
+        }
+
+        /* starts with ##? */
+        if (regex(l, '/^## /')) {
+            /* concat all data and reset */
+            local b = join(d, "\n");
+            d = [];
+
+            /* flush previous data: is this the first one? */
+            if (k == NULL) {
+                /* yes; everything is the header */
+                r.header = b;
+            }
+            else {
+                /* there is a previous one; store */
+                r.data[k] = b->sregex("/\n$/")->sregex("/^\n/");
+            }
+
+            k = l->slice(3, -1);
+        }
+        else
+            push(d, l);
+    }
+
+    close(f);
+
+    return r;
+}
+
+
+sub save_ref_document_gmi(file, r, hash, prefix, def)
+/* saves a parsed document filling empty entries from hash (Gemtext) */
+{
+    local f;
+
+    if ((f = open(file, "w"))) {
+        f->write(r.header, "\n");
+
+        foreach (k, sort(map(hash, sub (v, i) { i; }))) {
+            if (prefix)
+                k = prefix + '.' + k;
+
+            f->write("## ", k, "\n\n");
+
+            f->write(r.data[k] || def[k] || "To be written.");
+            f->write("\n\n");
+        }
+
+        if (r.sig != "")
+            f->write("\n", r.sig);
+
+        f->close();
+    }
+}
+
+
+sub update_ref_document_txt_txt(file, hash, prefix, def)
 {
     local r;
 
-    if (r = load_ref_document(file))
-        save_ref_document(file, r, hash, prefix, def);
+    if (r = load_ref_document_txt(file))
+        save_ref_document_txt(file, r, hash, prefix, def);
 }
+
+sub update_ref_document_txt_gmi(txt_file, gmi_file, hash, prefix, def)
+{
+    local r;
+
+    if (r = load_ref_document_txt(txt_file))
+        save_ref_document_gmi(gmi_file, r, hash, prefix, def);
+}
+
+
+sub update_ref_document(in_file, out_file, hash, prefix, def)
+{
+    local r;
+
+    if (in_file->regex("/\.gmi$"))
+        r = load_ref_document_gmi(in_file);
+    else
+        r = load_ref_document_txt(in_file);
+
+    if (out_file->regex("/\.gmi$"))
+        save_ref_document_gmi(out_file, r, hash, prefix, def);
+    else
+        save_ref_document_txt(out_file, r, hash, prefix, def);
+}
+
 
 /*****************/
 
-update_ref_document('doc/mp_configuration.txt', mp.config, 'mp.config');
+update_ref_document(
+    "doc/mp_configuration.gmi",
+    "doc/mp_configuration.gmi",
+    mp.config, "mp.config");
 
 local all_keycodes = mp.keycodes + mp_doc.keycodes;
 
@@ -126,7 +238,10 @@ foreach (v, i, mp.actdesc) {
     def[k] = l;
 }
 
-update_ref_document('doc/mp_actions.txt', mp.actdesc, NULL, def);
+update_ref_document(
+    "doc/mp_actions.txt",
+    "doc/mp_actions.txt",
+    mp.actdesc, NULL, def);
 
 local f;
 

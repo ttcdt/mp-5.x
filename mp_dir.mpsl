@@ -56,7 +56,7 @@ sub mp_doc_dir.save(doc)
     log.txt.lines = [];
 
     /* rename changed files */
-    foreach (l, doc.txt.lines) {
+    foreach (l, doc.txt.lines->clone()->mp_c.vw_unwrap()) {
         local p = l->sscanf(" %d: %S");
         local n;
 
