@@ -93,8 +93,8 @@ QString v_to_qstring(mpdm_t s)
 #define MAX_COLORS 100
 QPen inks[MAX_COLORS];
 QBrush papers[MAX_COLORS];
-bool underlines[MAX_COLORS];
-int normal_attr = 0;
+static bool underlines[MAX_COLORS];
+static int normal_attr = 0;
 
 static void qk_build_colors(void)
 /* builds the colors */
@@ -153,7 +153,7 @@ static QFont *qk_build_font(void)
     mpdm_t c;
     mpdm_t w = NULL;
     int font_size       = 10;
-    char *font_face     = (char *) "Courier";
+    char *font_face     = (char *) "Mono";
     double font_weight  = 0.0;
 
     if ((c = mpdm_get_wcs(MP, L"config")) != NULL) {
@@ -1016,7 +1016,11 @@ void MPArea::mouseMoveEvent(QMouseEvent *event)
 
 void MPArea::wheelEvent(QWheelEvent *event)
 {
+#ifdef CONFOPT_QT5
+    if (event->angleDelta().y() > 0)
+#else
     if (event->delta() > 0)
+#endif
         mp_process_event(MPDM_S(L"mouse-wheel-up"));
     else
         mp_process_event(MPDM_S(L"mouse-wheel-down"));

@@ -195,7 +195,7 @@ sub update_ref_document_txt_gmi(txt_file, gmi_file, hash, prefix, def)
 }
 
 
-sub update_ref_document(in_file, out_file, hash, prefix, def)
+sub load_ref_document(in_file)
 {
     local r;
 
@@ -204,10 +204,25 @@ sub update_ref_document(in_file, out_file, hash, prefix, def)
     else
         r = load_ref_document_txt(in_file);
 
+    return r;
+}
+
+
+sub save_ref_document(out_file, r, hash, prefix, def)
+{
     if (out_file->regex("/\.gmi$"))
         save_ref_document_gmi(out_file, r, hash, prefix, def);
     else
         save_ref_document_txt(out_file, r, hash, prefix, def);
+}
+
+
+sub update_ref_document(in_file, out_file, hash, prefix, def)
+{
+    local r;
+
+    if (r = load_ref_document(in_file))
+        save_ref_document(out_file, r, hash, prefix, def);
 }
 
 
@@ -230,18 +245,16 @@ foreach (v, i, mp.actdesc) {
 
     l = '_' + v + '_';
 
-    if (kc[k])
-        l = l + " (`" + kc[k] + "')";
+    if (kc[i])
+        l = l + " (`" + kc[i] + "')";
 
     l = l + "\n\nTo be written.";
 
-    def[k] = l;
+    def[i] = l;
 }
 
-update_ref_document(
-    "doc/mp_actions.txt",
-    "doc/mp_actions.txt",
-    mp.actdesc, NULL, def);
+local r = load_ref_document("doc/mp_actions.txt");
+save_ref_document("doc/mp_actions.txt", r, mp.actdesc, NULL, def);
 
 local f;
 

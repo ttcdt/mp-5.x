@@ -518,7 +518,7 @@ static mpdm_t qt4_drv_idle(mpdm_t a, mpdm_t ctxt)
 
     window->area->timer->stop();
 
-    if (msecs)
+    if (idle_msecs)
         window->area->timer->start(idle_msecs);
 
     return NULL;

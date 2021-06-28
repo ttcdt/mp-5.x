@@ -592,6 +592,11 @@ sub mp.auto_save()
                         f->write("\n")->write(l);
 
                     f->close();
+
+                    mp.message = {
+                        timeout: time(),
+                        string: L("Autosaving...")
+                    };
                 }
 
                 /* store checked time */

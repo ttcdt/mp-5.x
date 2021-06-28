@@ -1,6 +1,15 @@
 Minimum Profit Release Notes
 ============================
 
+5.52
+----
+
+* Bug fixes:
+
+[Qt] Fixed compilation issues (contributed by PamM0rel).
+
+Memory leak in double screen mode (Tiny).
+
 5.51
 ----
 

@@ -56,6 +56,7 @@ struct drw_1_info {
     wchar_t wc_unknown;         /* char for marking unknown characters */
     wchar_t wc_wordwrap;        /* char for marking word wraps */
     wchar_t wc_m_dash;          /* char for the m-dash */
+    wchar_t wc_vert;            /* vertical separator */
 };
 
 struct drw_1_info drw_1;
@@ -305,6 +306,8 @@ static int drw_prepare(mpdm_t doc)
         drw_1.wc_m_dash = *ptr;
     if ((ptr = mpdm_string(mpdm_get_wcs(v, L"unknown"))) != NULL)
         drw_1.wc_unknown = *ptr;
+    if ((ptr = mpdm_string(mpdm_get_wcs(v, L"vert"))) != NULL)
+        drw_1.wc_vert = *ptr;
 
     /* compare drw_1 with drw_1_o; if they are the same,
        no more expensive calculations on drw_2 are needed */
@@ -879,7 +882,7 @@ static void drw_double_page(void)
 
             /* put the column separator */
             drw_2.amap[o] = drw_1.normal_attr;
-            drw_2.cmap[o] = L'\x2502';
+            drw_2.cmap[o] = drw_1.wc_vert;
             o++;
 
             /* copy the second column */
@@ -902,6 +905,8 @@ static void drw_double_page(void)
 
         free(dp_cmap);
         free(dp_amap);
+        free(dp_vx2x);
+        free(dp_vy2y);
     }
 }
 

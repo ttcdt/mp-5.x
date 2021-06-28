@@ -32,6 +32,24 @@
 
   <releases>
 
+    <release version="5.52" type="stable" date="2021-06-28">
+      <description>
+        <p>Bug fixes:</p>
+        <ul>
+        <li>[Qt] Fixed compilation issues (contributed by PamM0rel).</li>
+        <li>Memory leak in double screen mode (Tiny).</li>
+        </ul>
+      </description>
+      <artifacts>
+        <artifact type="source">
+          <location>https://triptico.com/download/mp-5.tar.gz</location>
+        </artifact>
+        <artifact type="binary" platform="x86_64-windows-msvc">
+          <location>https://triptico.com/download/mp-5-portable-64.exe</location>
+        </artifact>
+      </artifacts>
+    </release>
+
     <release version="5.51" type="stable" date="2021-06-23">
       <description>
         <p>New features:</p>
