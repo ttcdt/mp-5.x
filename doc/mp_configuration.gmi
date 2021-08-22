@@ -238,6 +238,10 @@ Set to 1 if tabs must be converted to spaces (default: 0, no conversion).
 
 Tab size in column spaces (default: 4).
 
+## mp.config.text_mode
+
+Set to 1 if text mode is explicitly requested (i.e. by using the -txt command line argument).
+
 ## mp.config.time_stamp_format
 
 The format for the time stamp (default: "%a, %d %b %Y %H:%M:%S %z").

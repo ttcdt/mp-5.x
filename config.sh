@@ -640,9 +640,11 @@ else
 fi
 
 if [ "$WITHOUT_ZIP" = "1" ] ; then
+    ARCH_FILE="mp.tar"
     ARCH_OBJ="mp.tar.o"
     ARCH_SYM="mp_tar"
 else
+    ARCH_FILE="mp.zip"
     ARCH_OBJ="mp.zip.o"
     ARCH_SYM="mp_zip"
     echo "#define CONFOPT_WITH_ZIP 1" >> config.h
@@ -702,8 +704,8 @@ if [ "$WITH_EXTERNAL_ARCH" = "1" ] ; then
     echo "#define CONFOPT_EXTERNAL_ARCH 1" >> config.h
     echo "#define ARCH_START NULL" >> config.h
     echo "#define ARCH_END NULL" >> config.h
-    MORE_TARGETS="mp.tar"
-    MORE_INSTALL_TARGETS="install-tar $MORE_INSTALL_TARGETS"
+    MORE_TARGETS="$ARCH_FILE"
+    MORE_INSTALL_TARGETS="install-arch $MORE_INSTALL_TARGETS"
 fi
 
 echo >> config.h
@@ -732,6 +734,7 @@ echo "DRV_OBJS=$DRV_OBJS" >> makefile.opts
 echo "MORE_OBJS=$MORE_OBJS" >> makefile.opts
 echo "MORE_TARGETS=$MORE_TARGETS" >> makefile.opts
 echo "MORE_INSTALL_TARGETS=$MORE_INSTALL_TARGETS" >> makefile.opts
+echo "ARCH_FILE=$ARCH_FILE" >> makefile.opts
 echo "CONF_ARGS=$CONF_ARGS" >> makefile.opts
 echo >> makefile.opts
 

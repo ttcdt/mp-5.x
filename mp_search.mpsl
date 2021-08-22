@@ -34,7 +34,7 @@ mp_doc.actions['seek'] = sub (d) {
         ]
     );
 
-    if (t != NULL) {
+    if (t != NULL && t[0] != "") {
         mp.config.case_sensitive_search = t[1];
 
         d = mp_doc.actions.seek_next(d, mp.backslash_codes(t[0]));
@@ -112,7 +112,7 @@ mp_doc.actions['replace'] = sub (d) {
         ]
     );
 
-    if (r != NULL) {
+    if (r != NULL && r[0] != "") {
         mp.config.case_sensitive_search = r[2];
         mp.config.global_replace = r[3];
         mp.last_replace_with = mp.backslash_codes(r[1]);
@@ -281,68 +281,60 @@ sub mp_doc.search_set_y(doc, y)
     return doc;
 }
 
-/**
- * mp_doc.seek_matching - Move to the matching brace char if the cursor if
- * on a brace.
- * @doc: the document
- *
- * This can not use regex based searching because of the recurrence issue.
- * This accepts ( { and [ type braces.
- */
+
 sub mp_doc.seek_matching(doc)
+/* move the cursor to the matching brace / quote */
 {
     local matching_open  = mp.matching_open->split();
     local matching_close = mp.matching_close->split();
     local txt = doc.txt;
+    local dir = 0, idx, c, oc, cnt;
+    local s_txt = clone(txt);
 
-    /* get current char, it's the increment char */
-    local inc = slice(txt.lines[txt.y], txt.x, 1);
-    local i = 1; local j = 0;
-    local p = seek(matching_open, inc);
-    if (p != -1)
-    {   
-        /* forward searching */
-        local dec = matching_close[p];
-        txt.x += 1;
-        while (i > 0 && txt.y < (size(txt.lines) - 1)) {
-            local line = split(txt.lines[txt.y]);
-            for (j = txt.x; i && j < size(line); j += 1) {
-                if (line[j] == inc) i += 1;
-                else if (line[j] == dec) i -= 1;   
-            }    
-            if (!i) 
-                return doc->set_y(txt.y)->set_x(j-1);
-            txt.y += 1;
-            txt.x = 0;
-        }
-        return doc;
+    c = txt.lines[txt.y][txt.x];
+
+    /* find the char and the direction */
+    if ((idx = seek(matching_open, c)) != -1) {
+        dir = 1;
+        oc  = matching_close[idx];
+        cnt = 0;
+    }
+    else
+    if ((idx = seek(matching_close, c)) != -1) {
+        dir = -1;
+        oc  = matching_open[idx];
+        cnt = 1;
+        doc->move_right();
     }
 
-    p = seek(matching_close, inc);
-    if (p != -1)
-    {
-        /* backward searching */
-        local dec = matching_open[p];
-        if (txt.x) txt.x -= 1;
-        else {
-            txt.y -= 1;
-            if (txt.y >= 0) txt.x = size(txt.lines[txt.y]) - 1;
+    if (dir != 0) {
+        local str = "(\\" + c + "|" + "\\" + oc + ")";
+        local ls = mp.last_search;
+
+        /* search the char or the opposite, counting pairs */
+        while (doc->search_dir(str, dir)) {
+            if (mp.search_match == c)
+                cnt += 1;
+            else
+                cnt -= 1;
+
+            if (cnt == 0)
+                break;
         }
-        while (i > 0 && txt.y >= 0) {
-            local line = split(txt.lines[txt.y]);
-            for (j = txt.x; i && j >= 0; j -= 1) {
-                if (line[j] == inc) i += 1;
-                else if (line[j] == dec) i -= 1;
-            }    
-            if (!i)
-                return doc->set_y(txt.y)->set_x(j + 1);
-            txt.y -= 1;
-            if (txt.y >= 0) txt.x = size(txt.lines[txt.y]) - 1;
-        }
+
+        if (cnt != 0)
+            doc.txt = s_txt;
+        else
+            /* fix position */
+            doc->move_left();
+
+        /* restore last search */
+        mp.last_search = ls;
     }
 
     return doc;
 }
+
 
 sub mp.prefix_regex(str)
 /* set str to be a valid regex */
@@ -450,6 +442,9 @@ sub mp_doc.search_dir(doc, str, dir)
         n += dir;
 
     if (r) {
+        /* store match */
+        mp.search_match = l->slice(r[0], r[1]);
+
         /* if it was found in the first line, add offset */
         r[0] += (n == 0 && bx);
 

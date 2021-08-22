@@ -119,7 +119,7 @@ static int drw_wcwidth(int x, wchar_t c)
 int drw_vx2x(mpdm_t str, int vx)
 /* returns the character in str that is on column vx */
 {
-    const wchar_t *ptr = str->data;
+    const wchar_t *ptr = mpdm_string(str);
     int n, x;
 
     for (n = x = 0; n < vx && ptr[x] != L'\0'; x++)
@@ -136,7 +136,7 @@ int drw_x2vx(mpdm_t str, int x)
     int n, vx = 0;
 
     if (str) {
-        ptr = str->data;
+        ptr = mpdm_string(str);
         for (n = vx = 0; n < x && ptr[n] != L'\0'; n++)
             vx += drw_wcwidth(vx, ptr[n]);
     }
@@ -240,7 +240,7 @@ static int drw_prepare(mpdm_t doc)
     drw_1.preread_lines = mpdm_ival(mpdm_get_wcs(drw_1.syntax, L"preread_lines"));
 
     /* if it's 0, get it from the configuration */
-    if (drw_1.preread_lines == 0)
+    if (drw_1.preread_lines == 0 && drw_1.syntax != NULL)
         drw_1.preread_lines = mpdm_ival(mpdm_get_wcs(config, L"preread_lines"));
 
     n = mpdm_ival(mpdm_get_wcs(config, L"double_page"));

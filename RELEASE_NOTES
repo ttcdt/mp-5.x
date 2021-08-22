@@ -1,6 +1,23 @@
 Minimum Profit Release Notes
 ============================
 
+5.53
+----
+
+* New features:
+
+Added italic text in syntax highlight comments to all drivers that support it.
+
+* Bug fixes:
+
+Some cursor positioning issues in the `seek_matching' action.
+
+* Other changes:
+
+Some tweaks to syntax highlight definitions (C, JSON) and a new one for email messages.
+
+On architectures that don't support archive embedding, zip files can also be used.
+
 5.52
 ----
 
@@ -27,7 +44,7 @@ Added section detection for Gemini / Gemtext files (contributed by cox778).
 
 [ANSI] Added more alt+character keycodes (unused, free for user remappings). Specifically, all alt+number keycodes are usable (Theo).
 
-Added more bracket and quoting character pairs for 'seek_matching' action and visual matching (contributed by aov).
+Added more bracket and quoting character pairs for `seek_matching' action and visual matching (contributed by aov).
 
 * Bug fixes:
 

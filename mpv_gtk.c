@@ -46,12 +46,14 @@ static GtkWidget *menu_bar = NULL;
 static int font_width = 0;
 static int font_height = 0;
 static PangoFontDescription *font = NULL;
+static PangoFontDescription *font_italic = NULL;
 
 /* the attributes */
 #define MAX_COLORS 100
 static GdkColor inks[MAX_COLORS];
 static GdkColor papers[MAX_COLORS];
 static int underlines[MAX_COLORS];
+static int italics[MAX_COLORS];
 
 #if CONFOPT_GTK == 2
 static GdkColor normal_paper;
@@ -89,12 +91,14 @@ static char *translate_mbs(char *from)
     if ((h = mpdm_get_wcs(mpdm_root(), L"__I18N_MBS__")) == NULL)
         h = mpdm_set_wcs(mpdm_root(), MPDM_O(), L"__I18N_MBS__");
 
-    v = mpdm_gettext(MPDM_MBS(from));
+    v = mpdm_ref(mpdm_gettext(MPDM_MBS(from)));
 
     if ((w = mpdm_get(h, v)) == NULL)
         w = mpdm_set(h, MPDM_2MBS(mpdm_string(v)), v);
 
-    return (char *)w->data;
+    mpdm_unref(v);
+
+    return (char *)mpdm_data(w);
 }
 
 
@@ -189,8 +193,8 @@ static void build_fonts(void)
             mpdm_set_wcs(c, MPDM_R(font_weight / 1000.0), L"font_weight");
 
         if ((v = mpdm_get_wcs(c, L"font_face")) != NULL) {
-            w = mpdm_ref(MPDM_2MBS(v->data));
-            font_face = w->data;
+            w = mpdm_ref(MPDM_2MBS(mpdm_string(v)));
+            font_face = mpdm_data(w);
         }
         else
             mpdm_set_wcs(c, MPDM_MBS(font_face), L"font_face");
@@ -203,6 +207,14 @@ static void build_fonts(void)
 
     if (font_weight > 0.0)
         pango_font_description_set_weight(font, font_weight);
+
+    snprintf(tmp, sizeof(tmp) - 1, "%s Thin italic %d", font_face, font_size);
+    tmp[sizeof(tmp) - 1] = '\0';
+
+    font_italic = pango_font_description_from_string(tmp);
+
+    if (font_weight > 0.0)
+        pango_font_description_set_weight(font_italic, font_weight);
 
     update_window_size();
 
@@ -254,6 +266,7 @@ static void build_colors(void)
         /* flags */
         w = mpdm_get_wcs(v, L"flags");
         underlines[n] = mpdm_seek_wcs(w, L"underline", 1) != -1 ? 1 : 0;
+        italics[n] = mpdm_seek_wcs(w, L"italic", 1) != -1 ? 1 : 0;
 
         if (mpdm_seek_wcs(w, L"reverse", 1) != -1) {
             int t;
@@ -311,7 +324,7 @@ static void build_submenu(GtkWidget * menu, mpdm_t labels)
         mpdm_t v = mpdm_get_i(labels, n);
 
         /* if the action is a separator... */
-        if (*((wchar_t *) v->data) == L'-')
+        if (*mpdm_string(v) == L'-')
             menu_item = gtk_separator_menu_item_new();
         else {
             char *ptr;
@@ -623,6 +636,7 @@ static void gtk_drv_render(mpdm_t doc, int optimize)
         char *str = NULL;
         int u;
         int p = 0;
+        int italic = 0;
 
         if (l == NULL)
             continue;
@@ -668,6 +682,18 @@ static void gtk_drv_render(mpdm_t doc, int optimize)
             /* underline? */
             if (underlines[attr]) {
                 pa = pango_attr_underline_new(TRUE);
+
+                pa->start_index = u;
+                pa->end_index   = p;
+
+                pango_attr_list_insert(pal, pa);
+            }
+
+            /* italic? */
+            if (italic != italics[attr]) {
+                italic = italics[attr];
+
+                pa = pango_attr_font_desc_new(italic ? font_italic : font);
 
                 pa->start_index = u;
                 pa->end_index   = p;

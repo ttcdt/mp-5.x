@@ -1,0 +1,13 @@
+{
+    'id'        =>  'msg',
+    'name'      =>  'Email Message',
+    'defs'      =>  [
+        'word2',    [ '/^[^:]+: /m' ],
+        'comments', [
+            "/^>[^\n\x{ad}]*(\x{ad}\n[^\n]*)*/m"
+        ],
+        'documentation', [
+            "/^> >[^\n\x{ad}]*(\x{ad}\n[^\n]*)*/m"
+        ]
+    ]
+};

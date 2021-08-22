@@ -1,0 +1,784 @@
+# Minimum Profit Action Reference
+
+Minimum Profit actions are editor commands that can be directly bound to the menu or a key.
+
+## about
+
+About
+
+Shows the "About Minimum Profit" information.
+
+## build
+
+Build project... [f2]
+
+Invokes the building of a Make project. If the `Makefile' file exists in the working directory, all targets are extracted from it and shown in a list dialog for the user to select one. The selected one will be called as the only argument for the `make' program and its output read. All output will be catched and shown in a read-only document. Compiler errors and warnings will be highlighted and can be navigated by using the `seek_next' and `seek_prev' actions. The `open_under_cursor' action can be used to edit each error or warning.
+
+## check_for_updates
+
+Check for updates
+
+Checks if there is a new version in https://triptico.com (Minimum Profit Project Site).
+
+## close
+
+Close [ctrl-w]
+
+Closes the active document. If there are unsaved changes, a confirmation dialog is shown.
+
+## close_all
+
+Close all
+
+Closes all open documents.
+
+## complete
+
+Complete... [ctrl-space]
+
+Takes the (probably partial) word under the cursor and searches for words in the current document that start with it. If more than one is found, a list dialog is shown to make a selection. The word will be replaced with the selected one.
+
+## complete_options
+
+Code completion options...
+
+Shows a form to set the `clang' command line options for code completion.
+
+## complete_symbol
+
+Symbol completion...
+
+Uses a similar approach than the `complete' action, but using the current tags file as the completion list. If no _tags_ file exist in the working directory, the *ctags* program is invoked to build it.
+
+For other uses of the tags file, see `find_tag'.
+
+## complete_with_clang
+
+Completion with clang...
+
+Does code completion using the `clang' tool.
+
+## copy_mark
+
+Copy block [ctrl-c]
+
+Copies the currently selected block to the clipboard.
+
+## cut_line
+
+Cut line
+
+Cuts current line.
+
+## cut_lines_with_string
+
+Cut lines containing a string...
+
+Cuts to the clipboard all lines from the document or block that match a regular expression.
+
+## cut_mark
+
+Cut block [ctrl-x]
+
+Copies the currently selected block to the clipboard and deletes the block.
+
+## delete
+
+Delete character [delete]
+
+Delete the character over the cursor.
+
+## delete_left
+
+Delete character to the left [backspace]
+
+Deletes the character to the left of the cursor.
+
+## delete_line
+
+Delete line [ctrl-y]
+
+Deletes the line under the cursor.
+
+## delete_mark
+
+Delete block
+
+Deletes the currently selected block.
+
+## document_list
+
+Document list [ctrl-e]
+
+Shows a dialog with the list of currently open documents. The list cursor will be over the active one and the documents with pending modifications will be prefixed with an asterisk. Selecting a different one will make it become the active.
+
+## encoding
+
+Set charset encoding...
+
+Shows a dialog asking for a string describing the charset encoding that will be used when saving or opening new documents. If an empty string is entered, the current locale will be used.
+
+See ./mp_encoding.html (Mininum Profit character encoding support) for more information.
+
+## eval
+
+Execute MPSL code... [escape]
+
+Shows a dialog asking for a string of MPSL code that will be executed.
+
+## eval_doc
+
+Execute document as MPSL
+
+Executes the active document as MPSL code.
+
+## exec_action
+
+Execute action on document...
+
+Shows the full list of available actions in a dialog and ask the user to execute one of it over the current document.
+
+## exec_command
+
+Run system command...
+
+Shows a dialog asking for a system command to execute. If the command is preceded by the pipe symbol (|), the active document will be fed as the standard input of the command; otherwise, the standard output of the command will be inserted in the cursor position.
+
+## exit
+
+Exit [close-window, ctrl-q]
+
+Closes all documents and exists Minimum Profit.
+
+## export
+
+Export...
+
+Exports the current document to an external format. The document must be in the mptxt format. Please see the mptxt_format.txt document for the markup and the supported output formats.
+
+## filter_selection
+
+Filter selection through system command...
+
+Filters the block selection (or the full document, if no selection is active) through a system command.
+
+## find_tag
+
+Search tag... [ctrl-t]
+
+Shows a dialog asking for a tag to search. The tags file will be read from the working directory and the tag searched there; all symbols starting with it will be shown in a list dialog. When selecting a tag from that list, the file containing it will be open and the cursor moved to where the tag is. This is a useful way of finding where a function or variable is defined.
+
+If no tags file exist in the working directory, the `ctags' program is invoked to build it.
+
+For other uses of the tags file, see `complete_symbol'.
+
+## goto
+
+Go to line... [ctrl-g]
+
+Shows a dialog asking for a line number. If accepted, the current document cursor will move to that line (if existent).
+
+## grep
+
+Grep (find inside) files... [alt-g]
+
+Shows a dialog asking for a string to be searched, and an optional spec of files to search the string in. If no spec is given, all files in the working directory are scanned. Matches are shown in a read-only document, and each match can be directly open by using the 'open_under_cursor' action.
+
+This is a useful way to find where a function or variable is used.
+
+## help
+
+Help on word over cursor [f1]
+
+Picks the word under the cursor and asks the underlying system for help about that term.
+
+## hex_view
+
+Hexadecimal viewer...
+
+Shows a dialog to open a read-only, hexadecimal view of a file.
+
+## idle
+
+Called when idle [idle]
+
+Called when the idle timeout expires.
+
+## ignore_last_misspell
+
+Ignore last misspelled word
+
+Ignores the last misspelled word found by `seek_misspelled' by adding it to a whitelist so it won't be found again.
+
+## indent_block
+
+Indent block [alt-cursor-right]
+
+Indents the block by one tab space, or the current line if the is no selected block.
+
+## insert_line
+
+Insert line [enter]
+
+Inserts a new line. If the cursor is in the middle of a line, it's split in two.
+
+## insert_m_dash
+
+Insert m-dash character [alt-kp-minus, alt-minus]
+
+Inserts an m-dash character.
+
+## insert_next_item
+
+Insert next item
+
+Inserts a new numbered item into the text. Numbered items are as this way:
+
+```
+ * 1: 
+ * 2: 
+```
+
+Every time a new item is requested, the current document is scanned for the greatest number and the next one is inserted.
+
+## insert_page_break
+
+Insert page break character (FF)
+
+Inserts a page break (form feed) character.
+
+## insert_raw_string
+
+Insert raw string [insert-raw-string]
+
+Inserts a string into the document.
+
+## insert_real_tab
+
+Insert real tab character [shift-tab]
+
+Inserts a tab character (\t or ASCII 9) in the cursor position. This is done regardless of the `tabs_as_spaces' configuration variable; see the `insert_tab' action for more configurable tab operations.
+
+## insert_space
+
+Insert space [space]
+
+Inserts a space, triggering word wrapping, if active.
+
+## insert_tab
+
+Insert tab [tab]
+
+Inserts a tabulator, triggering word wrapping, if active. The tab will be a real tab or a set of spaces regarding the `tabs_as_spaces' configuration variable. For a hardcoded tab character (\t) see the `insert_real_tab' action.
+
+## insert_template
+
+Insert template...
+
+Shows a list dialog with the names of the templates for the user to select one, that will be inserted in the cursor position.
+
+## insert_time_stamp
+
+Insert time stamp
+
+Inserts a time stamp in the cursor position. The format is the one given in the `mp.config.time_stamp_format' configuration directive.
+
+## join_paragraph
+
+Join a paragraph in one line
+
+Joins the text from the cursor position to the next empty line as one paragraph.
+
+## line_options
+
+Line options...
+
+Shows a dialog asking for line configuration options, like word wrapping, end of line string, etc.
+
+## load_session
+
+Load session
+
+Loads a session, previously saved by `save_session'.
+
+## mark
+
+Mark selection block
+
+Marks a selection block.
+
+## mark_all
+
+Mark all
+
+Marks (selects) all the document.
+
+## mark_tag
+
+Mark beginning/end of block [f9]
+
+Marks the beginning or the end of the block.
+
+## mark_tag_vertical
+
+Mark vertical block [ctrl-b]
+
+Marks the beginning or the end of a vertical (also known as rectangular) block.
+
+## mark_vertical
+
+Mark vertical selection block
+
+Marks a vertical block.
+
+## maze
+
+Play "Maze"
+
+Executes the "Maze" game.
+
+## menu
+
+Menu [alt-a, ctrl-a, mouse-menu, shift-f10, alt-space]
+
+Calls the menu.
+
+## mouse_drag_mark
+
+Mark using mouse dragging [mouse-drag]
+
+This action is called by the underlying driver when the mouse is used to drag over text. It must not be called nor bound to a key.
+
+## move_bof
+
+Beginning of document [ctrl-home]
+
+Moves the cursor to the beginning of the document (first line, first column).
+
+## move_bol
+
+Beginning of line [home]
+
+Moves the cursor to the beginning of the current line (first column).
+
+## move_down
+
+Line down [cursor-down]
+
+Moves the cursor to the next line.
+
+## move_eof
+
+End of document [ctrl-end]
+
+Moves the cursor to the last line of the document.
+
+## move_eol
+
+End of line [end]
+
+Moves the cursor to the end of the current line.
+
+## move_left
+
+Character left [cursor-left]
+
+Moves the cursor one character to the left. If it's in the beginning of a line, moves to the last character of the previous line.
+
+## move_mouse_wheel_down
+
+Mouse wheel up [mouse-wheel-down]
+
+Moves the cursor four lines down.
+
+## move_mouse_wheel_up
+
+Mouse wheel down [mouse-wheel-up]
+
+Moves the cursor four lines up.
+
+## move_para_down
+
+Paragraph down
+
+Moves the cursor down to the next paragraph.
+
+## move_para_up
+
+Paragraph up
+
+Moves the cursor up to the previous paragraph.
+
+## move_pgdn
+
+Page down [page-down]
+
+Moves the cursor a page down.
+
+## move_pgup
+
+Page up [page-up]
+
+Moves the cursor a page up.
+
+## move_right
+
+Character right [cursor-right]
+
+Moves the cursor one character to the right. If it's over the end of the line, moves to the first character of the next line.
+
+## move_section_down
+
+Move one section down [ctrl-cursor-down]
+
+Moves to the previous section, if the current document has a syntax detection that include sections.
+
+## move_section_up
+
+Move one section up [ctrl-cursor-up]
+
+Moves to the next section, if the current document has a syntax detection that include sections.
+
+## move_to_mouse_position
+
+Move cursor to mouse click [mouse-left-button]
+
+Moves the cursor to where the mouse is. This action is called by the underlying system and must not be directly called nor bound to a key.
+
+## move_up
+
+Line up [cursor-up]
+
+Moves the cursor to the previous line.
+
+## move_word_left
+
+Word left [ctrl-cursor-left]
+
+Moves the cursor to the beginning of the previous word.
+
+## move_word_right
+
+Word right [ctrl-cursor-right]
+
+Moves the cursor to the beginning of the next word.
+
+## new
+
+New
+
+Creates a new unnamed document.
+
+## next
+
+Next [ctrl-n]
+
+Select the next document as the active one. The list of documents is circular; if the active one is the last, the first one is selected.
+
+## open
+
+Open... [ctrl-o]
+
+Shows a dialog to open a file. Its behaviour and look are system-dependent.
+
+If the document to be opened is password-protected, a dialog asking for the password will also appear.
+
+## open_config_file
+
+Edit configuration file
+
+Opens the user configuration file for editing. It doesn't have to exist.
+
+## open_dropped_files
+
+Open dropped files [dropped-files]
+
+Opens all files dropped by the user from an external file manager.
+
+## open_folder
+
+Open folder...
+
+Opens a folder with the directory editor.
+
+## open_recent
+
+Open recent files...
+
+Shows a list of the recently open files to select one to reopen.
+
+## open_templates_file
+
+Edit templates file
+
+Opens the templates file for edition. Templates defined here can be later inserted by calling `insert_template'. See the `mp_templates.sample' file included in the documentation for an example of the accepted format.
+
+## open_under_cursor
+
+Open file under cursor [ctrl-enter]
+
+Picks the word in the current document under the cursor, accepts it as a document name and tries to open it. If it's in the format string:number, is accepted as a file name and a line number.
+
+## paste_mark
+
+Paste block [ctrl-v]
+
+Pastes the text in the clipboard into the cursor position.
+
+## pipes
+
+Play "Pipes"
+
+Executes the "Pipes" game.
+
+## play_macro
+
+Play macro [f7]
+
+Replays all keystrokes recorded during the previous recording mode, activated by a call to `record_macro'.
+
+## prev
+
+Previous
+
+Select the previous document as the active one. The list of documents is circular; if the active one is the first, the last one is selected.
+
+## puzzle
+
+Play "Puzzle"
+
+## record_macro
+
+Record macro [f10]
+
+Toggles recording mode. When active, all keystrokes are recorded to further execute them by a call to `play_macro'.
+
+## redo
+
+Redo
+
+Redoes the previously undone operation, if any.
+
+## release_notes
+
+Release notes
+
+Shows the notes for this release.
+
+## repeated_words_options
+
+Repeated words options...
+
+Sets the options for the `seek_repeated_word' action.
+
+## replace
+
+Replace... [ctrl-r]
+
+Shows the search and replace dialog box.
+
+## replace_next
+
+Replace next
+
+## replace_spaces_with_tabs
+
+Replace spaces with tabs
+
+Replaces all spaces in the document with real tabs (\t). The current tab size configuration is taken into account.
+
+## replace_tabs_with_spaces
+
+Replace tabs with spaces
+
+Replaces all real tabs (\t) in the document with spaces. The current tab size configuration is taken into account.
+
+## revert
+
+Revert
+
+Reverts the active document to the state on disk.
+
+## save
+
+Save... [ctrl-s]
+
+Saves the active document. If it's unnamed, `save_as' is called instead.
+
+## save_as
+
+Save as...
+
+Shows a dialog asking for a file name to save the current document as. Its behaviour and look are system-dependent.
+
+## save_session
+
+Save session
+
+Saves all documents and its positions as a session to be later loaded by `load_session'.
+
+## scroll_down
+
+Scroll document down [alt-cursor-down]
+
+Scrolls the document down.
+
+## scroll_up
+
+Scroll document up [alt-cursor-up]
+
+Scrolls the document up.
+
+## section_list
+
+Section list... [ctrl-d]
+
+Shows a list with the sections found in the current document. Selecting one of them moves the cursor there.
+
+## seek
+
+Search text... [ctrl-f]
+
+Shows the search text dialog.
+
+## seek_matching
+
+Move to the matching bracket [ctrl-j]
+
+Jump to the bracket matching the character under the cursor.
+
+## seek_misspelled
+
+Search misspelled word [f5]
+
+Searches for the next misspelled word in the current document. If one is found, the cursor is moved there. If it's a false positive, the `ignore_last_misspell' action can be called to add the recently found word to a whitelist so it won't be found again.
+
+## seek_next
+
+Search next [f3]
+
+Searches the next occurrence of the string entered by the `seek' action.
+
+## seek_next_char
+
+Move to next instance of current char [ctrl-page-down]
+
+Searches for the next occurrence of the char under the cursor. This is useful, for instance, to jump to the next paren or brace.
+
+## seek_prev
+
+Search previous [ctrl-f3]
+
+Same as `seek_next', but searching backwards.
+
+## seek_prev_char
+
+Move to previous instance of current char [ctrl-page-up]
+
+Searches for the previous occurrence of the char under the cursor. This is useful, for instance, to jump to the previous paren or brace.
+
+## seek_repeated_word
+
+Search repeated word [f6]
+
+Searches for repeated words. Controlled by the configuration directives `mp.config.rw_num_chars' and `mp.config.rw_max_dist'. A searching is done from the cursor position trying to find two words nearer from each other up to a maximum of the specified distance and that start or end with the same letters. If a pair is found, the words are highlighted as spelling errors and the cursor moved over the first one. Otherwise, a message marking the end is shown and nothing is done.
+
+## select_word_under_cursor
+
+Select word under cursor [mouse-left-dblclick]
+
+Creates a selection block containing the work under the cursor.
+
+## set_password
+
+Password protect...
+
+Shows a dialog asking (twice) for a password to protect the active document with when it's saved. From that moment on, each time the document is tried to open the password will be asked for.
+
+Minimum Profit encrypts documents using a variant of the ARCFOUR algorithm.
+
+## suspend
+
+Suspend [ctrl-l]
+
+Suspends the editor. Get back by typing `fg' in the shell.
+
+## sync
+
+Save modified texts
+
+Saves all texts with pending modifications.
+
+## tab_options
+
+Tab options...
+
+Shows a dialog asking for tabulator configuration options, like tab size, convert to spaces, etc.
+
+## toggle_insert
+
+Toggle insert/overwrite mode [insert]
+
+Toggles between insert and overwrite modes.
+
+## toggle_spellcheck
+
+Toggle spellchecking
+
+toggles spellchecking. When active, misspelled words will be shown underlined.
+
+## toggle_visual_wrap
+
+Toggle visual wrap [ctrl-k]
+
+## undo
+
+Undo [ctrl-z]
+
+Undoes the last operation.
+
+## unindent_block
+
+Unindent block [alt-cursor-left]
+
+Unindents the block by one tab space, or the current line if the is no selected block.
+
+## unmark
+
+Unmark block [f8]
+
+Unmarks the selected block.
+
+## vcs
+
+Version Control... [ctrl-p]
+
+Opens the version control options, if current directory has a detected one.
+
+## word_count
+
+Count words
+
+Counts the number of words and lines in the active document.
+
+## word_wrap_paragraph
+
+Word-wrap a paragraph [f4]
+
+Rebuilds the text from the cursor position to the following empty line using the wordwrapping setup. Wordwrapping must be set (see `line_options').
+
+## zoom_in
+
+Bigger font [ctrl-kp-plus, f12]
+
+Selects a bigger font (only for GUIs).
+
+## zoom_out
+
+Smaller font [ctrl-kp-minus, f11]
+
+Selects a smaller font (only for GUIs).
+
+
+----
+ttcdt <dev@triptico.com>

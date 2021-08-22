@@ -160,7 +160,7 @@ sub save_ref_document_gmi(file, r, hash, prefix, def)
     if ((f = open(file, "w"))) {
         f->write(r.header, "\n");
 
-        foreach (k, sort(map(hash, sub (v, i) { i; }))) {
+        foreach (k, hash->map(index)->sort()) {
             if (prefix)
                 k = prefix + '.' + k;
 
@@ -233,28 +233,41 @@ update_ref_document(
     "doc/mp_configuration.gmi",
     mp.config, "mp.config");
 
-local all_keycodes = mp.keycodes + mp_doc.keycodes;
+local axns = load_ref_document("doc/mp_actions.gmi");
 
-local kc = all_keycodes->omap(swap);
-
-local def = {};
-
-/* fill now the default descriptions */
-foreach (v, i, mp.actdesc) {
-    local l;
-
-    l = '_' + v + '_';
-
-    if (kc[i])
-        l = l + " (`" + kc[i] + "')";
-
-    l = l + "\n\nTo be written.";
-
-    def[i] = l;
+/* travel all actions and fill undefined ones with a template */
+foreach (axn, (mp.actions + mp_doc.actions)->map(index)) {
+    if (!exists(axns.data, axn)) {
+        axns.data[axn] = "__\n\nTo be written.";
+    }
 }
 
-local r = load_ref_document("doc/mp_actions.txt");
-save_ref_document("doc/mp_actions.txt", r, mp.actdesc, NULL, def);
+/* now travel the document and fill descriptions and keycodes */
+local all_keycodes = mp.keycodes + mp_doc.keycodes;
+foreach (axn, axns.data->map(index)) {
+    /* split content by lines */
+    local c = axns.data[axn]->split("\n");
+
+    /* get action description */
+    local fl = mp.actdesc[axn];
+    local kcs = [];
+
+    /* now iterate all keycodes and add the ones that trigger this action */
+    foreach (kaxn, kc, all_keycodes) {
+        if (kaxn == axn)
+            kcs->push(kc);
+    }
+
+    /* if there is any keycode, add to first line */
+    if (size(kcs))
+        fl += " [" + kcs->join(", ") + "]";
+
+    /* substitute first line and replace */
+    c[0] = fl;
+    axns.data[axn] = c->join("\n");
+}
+
+save_ref_document("doc/mp_actions.gmi", axns, axns.data);
 
 local f;
 

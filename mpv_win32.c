@@ -41,6 +41,7 @@ HWND hwstatus = NULL;
 /* font handlers and metrics */
 HFONT font_normal = NULL;
 HFONT font_underline = NULL;
+HFONT font_italic = NULL;
 int font_width = 0;
 int font_height = 0;
 
@@ -57,6 +58,7 @@ int is_wm_keydown = 0;
 static COLORREF inks[MAX_COLORS];
 static COLORREF papers[MAX_COLORS];
 int underlines[MAX_COLORS];
+int italics[MAX_COLORS];
 HBRUSH bgbrush;
 
 /* code for the 'normal' attribute */
@@ -126,8 +128,8 @@ static void build_fonts(HDC hdc)
             mpdm_set_wcs(c, MPDM_R(font_weight / 1000.0), L"font_weight");
 
         if ((v = mpdm_get_wcs(c, L"font_face")) != NULL) {
-            v = mpdm_ref(MPDM_2MBS(v->data));
-            font_face = (char *) v->data;
+            v = mpdm_ref(MPDM_2MBS(mpdm_string(v)));
+            font_face = (char *) mpdm_data(v);
         }
         else
             mpdm_set_wcs(c, MPDM_MBS(font_face), L"font_face");
@@ -144,6 +146,11 @@ static void build_fonts(HDC hdc)
     if ((font_underline = CreateFont(n, 0, 0, 0, (int) font_weight, 0, 1,
                                 0, 0, 0, 0, 0, FIXED_PITCH, font_face)) == NULL)
         font_underline = CreateFont(n, 0, 0, 0, 0, 0, 1,
+                                0, 0, 0, 0, 0, FIXED_PITCH, font_face);
+
+    if ((font_italic = CreateFont(n, 0, 0, 0, (int) font_weight, 1, 0,
+                                0, 0, 0, 0, 0, FIXED_PITCH, font_face)) == NULL)
+        font_italic = CreateFont(n, 0, 0, 0, 0, 1, 0,
                                 0, 0, 0, 0, 0, FIXED_PITCH, font_face);
 
     SelectObject(hdc, font_normal);
@@ -191,6 +198,7 @@ static void build_colors(void)
         w = mpdm_get_wcs(v, L"flags");
 
         underlines[n] = mpdm_seek_wcs(w, L"underline", 1) != -1 ? 1 : 0;
+        italics[n] = mpdm_seek_wcs(w, L"italic", 1) != -1 ? 1 : 0;
 
         if (mpdm_seek_wcs(w, L"reverse", 1) != -1) {
             COLORREF t;
@@ -239,7 +247,7 @@ static void build_menu(void)
             mpdm_t v = mpdm_get_i(l, i);
 
             /* if the action is a separator... */
-            if (*((wchar_t *) v->data) == L'-')
+            if (*mpdm_string(v) == L'-')
                 AppendMenu(submenu, MF_SEPARATOR, 0, NULL);
             else {
                 MENUITEMINFO mi;
@@ -289,7 +297,7 @@ static void draw_filetabs(void)
             mpdm_t v = mpdm_get_i(names, n);
 
             /* convert to mbs */
-            ptr = mpdm_wcstombs(v->data, NULL);
+            ptr = mpdm_wcstombs(mpdm_string(v), NULL);
 
             ti.mask = TCIF_TEXT;
             ti.pszText = ptr;
@@ -346,12 +354,7 @@ void draw_status(void)
     mpdm_t t;
 
     if (hwstatus != NULL && (t = mpdm_ref(mp_build_status_line())) != NULL) {
-        mpdm_t v = mpdm_ref(MPDM_2MBS(t->data));
-
-        if (v->data != NULL)
-            SetWindowText(hwstatus, v->data);
-
-        mpdm_unref(v);
+        SetWindowTextW(hwstatus, mpdm_string(t));
         mpdm_unref(t);
     }
 }
@@ -406,9 +409,11 @@ static void win32_draw(HWND hwnd)
             SetBkColor(hdc, papers[attr]);
 
             SelectObject(hdc, underlines[attr] ?
-                         font_underline : font_normal);
+                         font_underline :
+                         italics[attr] ? 
+                            font_italic : font_normal);
 
-            TextOutW(hdc, r2.left, r2.top, s->data, mpdm_size(s));
+            TextOutW(hdc, r2.left, r2.top, mpdm_string(s), mpdm_size(s));
             r2.left += mpdm_size(s) * font_width;
         }
 
@@ -1186,7 +1191,7 @@ static mpdm_t win32_drv_clip_to_sys(mpdm_t a, mpdm_t ctxt)
 
     if (mpdm_size(d)) {
         v = mpdm_ref(mpdm_join_wcs(d, L"\r\n"));
-        ptr = mpdm_wcstombs(v->data, &s);
+        ptr = mpdm_wcstombs(mpdm_string(v), &s);
 
         /* allocates a handle and copies */
         hclp = GlobalAlloc(GHND, s + 1);
@@ -1363,7 +1368,7 @@ BOOL CALLBACK formDlgProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
                     for (i = 0; i < mpdm_size(t); i++) {
                         mpdm_t v = mpdm_get_i(t, i);
 
-                        if ((ptr = mpdm_wcstombs(v->data, NULL)) != NULL) {
+                        if ((ptr = mpdm_wcstombs(mpdm_string(v), NULL)) != NULL) {
                             SendDlgItemMessage(hwnd,
                                                ctrl,
                                                CB_INSERTSTRING, 0,

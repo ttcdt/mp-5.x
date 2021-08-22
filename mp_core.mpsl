@@ -73,6 +73,7 @@ global mp = {
         use_unicode:            1,
         dark_mode:              1,
         font_weight:            0,
+        font_face:              NULL,
         hw_cursor:              0,
         auto_save_period:       120
     },
@@ -111,11 +112,13 @@ global mp = {
         },
         comments: {
             text:   [ 'green', 'default' ],
-            gui:    NULL
+            gui:    NULL,
+            flags:  [ 'italic' ]
         },
         documentation: {
             text:   [ 'cyan', 'default' ],
-            gui:    NULL
+            gui:    NULL,
+            flags:  [ 'italic' ]
         },
         quotes: {
             text:   [ 'blue', 'default' ],
@@ -123,7 +126,7 @@ global mp = {
             flags:  [ 'bright' ]
         },
         matching: {
-            text:   [ 'black', 'cyan' ],
+            text:   [ 'white', 'blue' ],
             gui:    NULL
         },
         word1: {
@@ -137,9 +140,8 @@ global mp = {
             flags:  [ 'bright' ]
         },
         word3: {
-            text:   [ 'default', 'default' ],
-            gui:    NULL,
-            flags:  [ 'bright' ]
+            text:   [ 'cyan', 'default' ],
+            gui:    NULL
         },
         tag: {
             text:   [ 'cyan', 'default' ],
@@ -876,8 +878,8 @@ sub mp.assert_version(found, minimal, package)
 sub mp.test_versions()
 /* tests component versions */
 {
-    mp.assert_version(MPDM.version, "2.72", "MPDM");
-    mp.assert_version(MPSL.VERSION, "2.62", "MPSL");
+    mp.assert_version(MPDM.version, "2.79", "MPDM");
+    mp.assert_version(MPSL.VERSION, "2.68", "MPSL");
 }
 
 
@@ -935,15 +937,21 @@ sub mp.prepare()
         mp.colors.comments.gui      |= [ 0x00cc77, 0x1b1b1b ];
         mp.colors.documentation.gui |= [ 0x8888ff, 0x1b1b1b ];
         mp.colors.quotes.gui        |= [ 0x629FCF, 0x1b1b1b ];
-        mp.colors.matching.gui      |= [ 0xf0f0f0, 0x4b4b4b ];
+        mp.colors.matching.gui      |= [ 0xf0f0f0, 0x0000ff ];
         mp.colors.word1.gui         |= [ 0x00aa00, 0x1b1b1b ];
         mp.colors.word2.gui         |= [ 0xff6666, 0x1b1b1b ];
         mp.colors.word3.gui         |= [ 0xaaaaaa, 0x1b1b1b ];
         mp.colors.tag.gui           |= [ 0x8888ff, 0x1b1b1b ];
         mp.colors.spell.gui         |= [ 0xff8888, 0x1b1b1b ];
         mp.colors.search.gui        |= [ 0x000000, 0x00cc77 ];
-        mp.colors.search.gui        |= [ 0x000000, 0x00cc77 ];
         mp.colors.suggest.gui       |= [ 0x000000, 0x808080 ];
+
+/* alternative:
+        mp.colors.comments.gui      |= [ 0x009E73, 0x1b1b1b ];
+        mp.colors.quotes.gui        |= [ 0x56B4E9, 0x1b1b1b ];
+        mp.colors.word1.gui         |= [ 0xE69F00, 0x1b1b1b ];
+        mp.colors.word2.gui         |= [ 0xF0E442, 0x1b1b1b ];
+*/
     }
     else {
         /* Minimum Profit Classic */

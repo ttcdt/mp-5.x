@@ -20,7 +20,7 @@ ADD_DOCS=README LICENSE RELEASE_NOTES mp_templates.sample
 GRUTATXT_DOCS=doc/mp_index.html doc/mp_cookbook.html doc/mp_internals.html \
 	doc/mp_data_model.html \
 	doc/mp_man.html doc/mp_interactive_dialog_boxes.html \
-	doc/mp_actions.html doc/mp_keycodes.html \
+	doc/mp_keycodes.html \
 	doc/mp_encoding.html $(APPNAME).1
 MP_DOCCER_DOCS=doc/mp_api.txt
 G_AND_MP_DOCS=doc/mp_api.html
@@ -129,11 +129,10 @@ innosetup: mp-5.exe mp-5c.exe docs
 	cp mp-5.exe mp-5-portable.exe
 	cp mp-5c.exe mp-5c-portable.exe
 
-install-tar: mp.tar
+install-arch: $(ARCH_FILE)
 	./mkinstalldirs $(PREFIX)/share/$(APPNAME)
 	chmod 755 $(PREFIX)/share/$(APPNAME)
-	rm -f $(PREFIX)/share/$(APPNAME)/mp-dist.tar
-	install -m 644 mp.tar $(PREFIX)/share/$(APPNAME)/ || true
+	install -m 644 $(ARCH_FILE) $(PREFIX)/share/$(APPNAME)/ || true
 
 install: $(INSTALL_MSG) installdoc $(INSTALLMO) $(MORE_INSTALL_TARGETS)
 	install -m 755 $(APPNAME) $(PREFIX)/bin/$(APPNAME)

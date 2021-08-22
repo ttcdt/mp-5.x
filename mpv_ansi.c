@@ -258,6 +258,8 @@ static void ansi_build_colors(void)
             cf |= 0x02;
         if (mpdm_seek_wcs(w, L"underline", 1) != -1)
             cf |= 0x04;
+        if (mpdm_seek_wcs(w, L"italic", 1) != -1)
+            cf |= 0x08;
 
         if (rgbcolor) {
             w = mpdm_get_wcs(v, L"gui");
@@ -290,6 +292,10 @@ static void ansi_build_colors(void)
                 c1 + 40
             );
         }
+
+        /* add italic */
+        if (cf & 0x08)
+            strcat(ansi_attrs[n], "\033[3m");
 
         /* store the attr */
         mpdm_set_wcs(v, MPDM_I(n), L"attr");

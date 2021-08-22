@@ -270,7 +270,7 @@ mp_doc.actions['exec_command'] = sub (d, cmd) {
                 foreach (l, d->get_active_area()->clone()->mp_c.vw_unwrap())
                     write(p, l + mp.config.eol);
 
-                pclose(p);
+                close(p);
                 mp.busy(0);
             }
             else
@@ -299,7 +299,7 @@ mp_doc.actions['exec_command'] = sub (d, cmd) {
                 /* invalidate window size to trigger a visual re-wrap */
                 mp.txt.last_tx = 0;
 
-                pclose(p);
+                close(p);
                 mp.busy(0);
             }
             else
@@ -342,13 +342,13 @@ mp_doc.actions['filter_selection'] = sub (d, cmd) {
 
         if (p != NULL) {
             write(p[1], join(mp.clipboard, "\n"));
-            pclose(p[1]);
+            close(p[1]);
 
             local l;
             while ((l = read(p[0])) != NULL)
                 d->insert(l);
 
-            pclose(p[0]);
+            close(p[0]);
         }
     }
 

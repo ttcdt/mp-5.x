@@ -201,7 +201,7 @@ mp.actions['release_notes'] = sub {
         d.txt.lines = t->split("\n");
         d->move_bof()->set_read_only();
         d.force_visual_wrap = 1;
-        d.syntax = mp.get_syntax("release_notes");
+        d.syntax = mp.load_syntax("release_notes");
     }
 };
 
@@ -315,7 +315,7 @@ mp.actions.check_for_updates = sub {
 
     d.txt.lines = c;
     d.force_visual_wrap = 1;
-    d.syntax = mp.get_syntax("release_notes");
+    d.syntax = mp.load_syntax("release_notes");
 };
 
 
@@ -358,7 +358,7 @@ sub dump(v)
 
     d->move_eof()->insert(dumper(v));
     d->set_read_only();
-    d.syntax = mp.get_syntax("mpsl");
+    d.syntax = mp.load_syntax("mpsl");
 
     return NULL;
 }

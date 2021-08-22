@@ -136,7 +136,7 @@ sub mp.build_execute(target)
             foreach (l, p)
                 log->insert(l);
 
-            pclose(p);
+            close(p);
         }
         else
             mp.alert(sprintf(L("Error executing '%s'"), target));
@@ -144,7 +144,7 @@ sub mp.build_execute(target)
 
     log->set_read_only();
 
-    log.syntax = mp.get_syntax('make_output');
+    log.syntax = mp.load_syntax('make_output');
 
     log.txt.vy = 0;
     log->move_eof();

@@ -229,6 +229,7 @@ sub mp.clang_complete(o, d) {
         ],
         'word3', [
             '/[-=<>:\?\+\*\/\!\%&\|~\^\.\{\}\(\)\[]+/',
+            '/^\s*#\s*[a-z]+/m',                        /* CPP directives */
             '/]/'
         ],
         'quotes', [
@@ -243,11 +244,13 @@ sub mp.clang_complete(o, d) {
             "/\<__(DATE|FILE|LINE|STDC|TIME|STDC_HOSTED|STDC_VERSION|func)__\>/", /* ISO macros */
             "/\<(true|false|NULL)\>/"                   /* symbolic constant names */
         ],
+        'word3', [
+            '/%[0-9]*[l]?[dxfsoic]/'
+        ],
         'comments', [
             [ '|/\*|', '|\*/|' ],                       /* C-like */
             [ '|#if 0|', '#endif' ],                    /* CPP "comments" */
-            "/\/\/[^\n\x{ad}]*(\x{ad}\n[^\n]*)*/",      /* C++-like */
-            '/^\s*#\s*[a-z]+/m'                         /* CPP directives */
+            "/\/\/[^\n\x{ad}]*(\x{ad}\n[^\n]*)*/"       /* C++-like */
         ],
         'documentation', [
             [ "|/\*\*\n|", '|\*/|' ],                   /* mp_doccer */

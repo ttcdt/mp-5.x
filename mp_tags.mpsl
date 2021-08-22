@@ -106,7 +106,7 @@ sub mp.load_tags(force)
 
         /* read (and discard) a line from it */
         read(f);
-        pclose(f);
+        close(f);
 
         /* try again */
         if ((f = open("tags", "r")) == NULL)

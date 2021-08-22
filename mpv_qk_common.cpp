@@ -94,6 +94,7 @@ QString v_to_qstring(mpdm_t s)
 QPen inks[MAX_COLORS];
 QBrush papers[MAX_COLORS];
 static bool underlines[MAX_COLORS];
+static bool italics[MAX_COLORS];
 static int normal_attr = 0;
 
 static void qk_build_colors(void)
@@ -133,6 +134,8 @@ static void qk_build_colors(void)
 
         underlines[n] = mpdm_seek_wcs(w, L"underline", 1) != -1 ? true : false;
 
+        italics[n] = mpdm_seek_wcs(w, L"italic", 1) != -1 ? true : false;
+
         inks[n] = QPen(QColor::fromRgbF((float) ((rgbi & 0x00ff0000) >> 16) / 256.0,
                                         (float) ((rgbi & 0x0000ff00) >> 8)  / 256.0,
                                         (float) ((rgbi & 0x000000ff)) / 256.0, 1));
@@ -170,8 +173,8 @@ static QFont *qk_build_font(void)
             mpdm_set_wcs(c, MPDM_R(font_weight / 100.0), L"font_weight");
 
         if ((v = mpdm_get_wcs(c, L"font_face")) != NULL) {
-            w = mpdm_ref(MPDM_2MBS((wchar_t *) v->data));
-            font_face = (char *) w->data;
+            w = mpdm_ref(MPDM_2MBS(mpdm_string(v)));
+            font_face = (char *) mpdm_data(w);
         }
         else
             mpdm_set_wcs(c, MPDM_MBS(font_face), L"font_face");
@@ -357,6 +360,7 @@ void MPArea::paintEvent(QPaintEvent *)
     mpdm_t w;
     int n, m, y, yb;
     bool underline = false;
+    bool italic = false;
     QPen *epen;
     int is_new = 0;
 
@@ -409,6 +413,9 @@ void MPArea::paintEvent(QPaintEvent *)
             painter.setPen(*epen);
             painter.setBrush(papers[normal_attr]);
             painter.drawRect(x, y + 1, ls_width - x, font_height);
+            italic = false;
+            font->setItalic(italic);
+            painter.setFont(*font);
 
             for (m = 0; m < (int) mpdm_size(l); m++) {
                 int attr;
@@ -426,6 +433,12 @@ void MPArea::paintEvent(QPaintEvent *)
                 if (underline != underlines[attr]) {
                     underline = underlines[attr];
                     font->setUnderline(underline);
+                    painter.setFont(*font);
+                }
+
+                if (italic != italics[attr]) {
+                    italic = italics[attr];
+                    font->setItalic(italic);
                     painter.setFont(*font);
                 }
 

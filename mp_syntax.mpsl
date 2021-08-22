@@ -37,6 +37,9 @@ sub mp_doc.actions.help(d) {
         hd.txt.y        = 0;
         hd.syntax       = d.syntax;
         hd->set_read_only();
+
+        /* change ENTER behaviour */
+        hd.keycodes.enter = "open_under_cursor";
     }
 }
 
@@ -153,7 +156,7 @@ sub mp.syn_token_list(l) { '/\<(' + join(l, "|") + ')\>/'; }
 
 /** code **/
 
-sub mp.get_syntax(key)
+sub mp.load_syntax(key)
 {
     local r = NULL;
 
@@ -173,6 +176,13 @@ sub mp.get_syntax(key)
 }
 
 
+sub mp_doc.set_syntax(doc, syntax)
+/* sets a syntax high definition for a document */
+{
+    doc.syntax = mp.load_syntax(syntax);
+}
+
+
 sub mp_doc.detect_syntax(doc)
 /* tries to detect the syntax of a document */
 {
@@ -182,13 +192,13 @@ sub mp_doc.detect_syntax(doc)
     /* try extensions */
     if ((v = doc.name->regex("/\.[^.]+$/"))) {
         v = v->sregex("/\./");
-        doc.syntax = mp.get_syntax(v);
+        doc.syntax = mp.load_syntax(v);
     }
 
     /* try full name (Makefile, etc.) */
     if (doc.syntax == NULL) {
         if ((v = doc.name->regex("/[^/]+$/"))) {
-            doc.syntax = mp.get_syntax(v);
+            doc.syntax = mp.load_syntax(v);
         }
     }
 
@@ -201,7 +211,7 @@ sub mp_doc.detect_syntax(doc)
             v = v->sregex("/^.*\//")->sregex("/ -[^ ]+/g");
 
             foreach (e, split(v, " ")) {
-                if ((doc.syntax = mp.get_syntax(e))) {
+                if ((doc.syntax = mp.load_syntax(e))) {
                     break;
                 }
             }
@@ -243,7 +253,7 @@ sub mp_doc.help(doc, word)
             }
 
             /* fails? */
-            if (pclose(f) != 0)
+            if (close(f) != 0)
                 h = NULL;
         }
 

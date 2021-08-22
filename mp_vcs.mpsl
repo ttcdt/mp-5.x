@@ -155,7 +155,7 @@ sub mp.vcs_form()
 
                 if (opt.unique_log) {
                     if (opt.syntax)
-                        log.syntax = mp.get_syntax(opt.syntax);
+                        log.syntax = mp.load_syntax(opt.syntax);
 
                     log->move_bof();
                 }

@@ -54,7 +54,7 @@ sub mp.open_ispell_pipe
 
     /* check for the signature */
     if (! regex(l, '/^@\(#\) International Ispell/')) {
-        pclose(p);
+        close(p);
         return NULL;
     }
 
@@ -68,7 +68,7 @@ sub mp.close_ispell_pipe
 {
     if (mp.ispell_pipe != NULL) {
         /* close and delete */
-        pclose(mp.ispell_pipe);
+        close(mp.ispell_pipe);
         mp.ispell_pipe = NULL;
     }
 }
