@@ -682,7 +682,7 @@ static void nc_build_colors(void)
 
     /* loop the colors */
     n = c = 0;
-    if (has_colors() == TRUE && can_change_color() != FALSE) {
+    if (has_colors() != FALSE && can_change_color() != FALSE) {
         /* The first index that's not a default color */
         int colors_used = 8; 
         while (mpdm_iterator(colors, &c, &v, &i)) {

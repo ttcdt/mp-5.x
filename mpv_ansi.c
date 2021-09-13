@@ -294,10 +294,6 @@ static void ansi_build_colors(void)
             );
         }
 
-        /* add italic */
-        if (cf & 0x08)
-            strcat(ansi_attrs[n], "\033[3m");
-
         /* store the attr */
         mpdm_set_wcs(v, MPDM_I(n), L"attr");
 
