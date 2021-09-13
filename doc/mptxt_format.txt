@@ -2,9 +2,9 @@
 
  Ángel Ortega <angel@triptico.com> 
 
-The mptxt format is a very lightweight text formatting markup that can be converted by the Minimum Profit text editor to other text formats. This document describes version 1.00 of the mptxt format.
+The mptxt format is a very lightweight text formatting markup that can be converted by the Minimum Profit text editor to other text formats. This document describes version 1.01 of the mptxt format.
 
-Output formats supported as of Minimum Profit 5.32 are rtf, troff and html.
+Output formats supported are: rtf, troff and html.
 
 Default paragraphs are delimited by blank lines; line breaks can be used arbitrarily and treated the same as spaces. On output they follow the de-facto Spanish literary convention: first line is indented unless it's the first paragraph of the text or if it follows a special section, like centered text or a section break.
 
@@ -25,9 +25,15 @@ If a paragraph is made of lines with a leading space *and* a trailing space, it'
  NO ENTRY 
  TRESPASSERS WILL BE SHOT ON SIGHT 
 
-Or to introduce a section separator, like this:
+Alternatively, centered lines can be marked between > and <, like in the following example:
 
- *** 
+>***<
+
+If a line is prepended with a > symbol, it's rendered right-aligned, like in the following stanza:
+
+>And on the pedestal these words appear:
+>"My name is Ozymandias, king of kings:
+>Look on my works, ye Mighty, and despair!"
 
 If the output format supports it somehow, URLs shall be made clickable, as when writing one like https://triptico.com or similar.
 
@@ -40,3 +46,9 @@ A set of more than one empty lines are respected as empty lines, as following:
 
 
 Some output formatting can be tweaked via configuration variables, see mp.config for details.
+
+Version log:
+
+1.01 — Center lines with > and <, right-aligned lines with > (MP 5.54).
+
+1.00 — First implementation (MP 5.32).

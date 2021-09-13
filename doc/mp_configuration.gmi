@@ -166,6 +166,10 @@ RTF export code for first paragraphs.
 
 RTF export code for normal paragraphs.
 
+## mp.config.rtf_style_right
+
+RTF export code for right-aligned paragraphs.
+
 ## mp.config.rtf_style_verbatim
 
 RTF export code for verbatim paragraphs.

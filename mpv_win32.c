@@ -972,7 +972,7 @@ static void dropped_files(HDROP hDrop)
 #define WM_MOUSEWHEEL           0x020A
 #endif
 
-long CALLBACK WndProc(HWND hwnd, UINT msg, UINT wparam, LONG lparam)
+LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 /* main window Proc */
 {
     int x, y;
@@ -1308,9 +1308,9 @@ static mpdm_t win32_drv_confirm(mpdm_t a, mpdm_t ctxt)
 static LPWORD lpwAlign(LPWORD lpIn)
 /* aligns a pointer to DWORD boundary (for dialog templates) */
 {
-    ULONG ul;
+    ULONG_PTR ul;
 
-    ul = (ULONG) lpIn;
+    ul = (ULONG_PTR) lpIn;
     ul++;
     ul >>= 1;
     ul <<= 1;

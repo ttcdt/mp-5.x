@@ -242,14 +242,14 @@ mp.actions.check_for_updates = sub {
     local f;
 
     /* try first fingerd */
-//    f = connect("triptico.com", 7979);
+//    f = socket.connect("triptico.com", 7979);
 
     if (f != NULL) {
         write(f, sprintf("mp_release_notes %s %s\r\n", mp.VERSION, mp_drv.id));
     }
     else {
         /* then try http */
-        f = connect("triptico.com", "www");
+        f = socket.connect("triptico.com", "www");
 
         if (f != NULL) {
             local l;

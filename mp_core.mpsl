@@ -614,9 +614,9 @@ sub mp.backslash_codes(s, d)
     else {
         r = s->
             sregex("/\\\\[rnt]/g", { '\r' => "\r", '\n' => "\n", '\t' => "\t" })->
-            sregex("/\\\\x\\{[0-9A-Za-z]+\\}/g", sub (e) {
+            sregex("/\\\\x\\{[0-9A-Fa-f]+\\}/g", sub (e) {
                     /* expand \x{HHHH} to character */
-                    e = ("0x" + e->regex("/[0-9A-Za-z]+/")) + 0;
+                    e = integer("0x" + e->regex("/[0-9A-Fa-f]+/"));
                     chr(e);
                 }
             );
@@ -878,8 +878,8 @@ sub mp.assert_version(found, minimal, package)
 sub mp.test_versions()
 /* tests component versions */
 {
-    mp.assert_version(MPDM.version, "2.79", "MPDM");
-    mp.assert_version(MPSL.VERSION, "2.68", "MPSL");
+    mp.assert_version(MPDM.version, "2.80", "MPDM");
+    mp.assert_version(MPSL.VERSION, "2.69", "MPSL");
 }
 
 

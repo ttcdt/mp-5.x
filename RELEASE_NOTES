@@ -1,22 +1,37 @@
 Minimum Profit Release Notes
 ============================
 
+5.54
+----
+
+* New features:
+
+New syntax highlight definitions for the Go language (contributed by HooverNixie).
+
+* Bug fixes:
+
+Using \x{HEX} to enter Unicode characters in search and replace works again (Claire).
+
+* Other changes:
+
+[mptxt] Right-aligned lines have been implemented; they are marked with a leading >. Additionally, centered lines can also be marked between and > and < (contributed by aov).
+
 5.53
 ----
 
 * New features:
 
-Added italic text in syntax highlight comments to all drivers that support it.
+Added italic text in syntax highlight comments to all drivers that support it (Theo, Tiny).
 
 * Bug fixes:
 
-Some cursor positioning issues in the `seek_matching' action.
+Some cursor positioning issues in the `seek_matching' action (Theo).
 
 * Other changes:
 
-Some tweaks to syntax highlight definitions (C, JSON) and a new one for email messages.
+Some tweaks to syntax highlight definitions (C, JSON) and a new one for email messages (Claire).
 
-On architectures that don't support archive embedding, zip files can also be used.
+On architectures that don't support archive embedding, zip files can also be used (Theo).
 
 5.52
 ----

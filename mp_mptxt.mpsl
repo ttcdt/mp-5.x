@@ -31,8 +31,8 @@ global mp_mptxt = {
     
             /** mode selection **/
     
-            /* space surrounded lines is centered */
-            if (l->regex("/^ .+ $/")) {
+            /* space or >< surrounded lines is centered */
+            if (l->regex("/^[> ].+[< ]$/")) {
                 l = l->slice(1, -2);
     
                 mode = 'center';
@@ -43,6 +43,13 @@ global mp_mptxt = {
                 l = l->slice(1, -1);
     
                 mode = 'verbatim';
+            }
+            else
+            /* > leaded lines are right-aligned */
+            if (l->regex("/^>/")) {
+                l = l->slice(1, -1);
+
+                mode = "right";
             }
             else
             /* page break */
@@ -132,7 +139,7 @@ global mp_mptxt = {
                 "<head>\n",
                 "<meta name=\"generator\" content=\"Minimum Profit " + mp.VERSION, "\"/>\n",
                 "<title>" + title + "</title>\n",
-                "<style>.center { text-align: center }</style>\n",
+                "<style>.center { text-align: center } .right { text-align: right }</style>\n",
                 "</head>\n",
                 "<body>\n"
             ];
@@ -183,6 +190,9 @@ global mp_mptxt = {
                 else
                 if (mode == 'break')
                     ret->push("<p class='break'>\n&nbsp;\n</p>\n");
+                else
+                if (mode == "right")
+                    ret->push("<p class='right'>\n" + str->split("\n")->join("<br/>\n") + "\n</p>\n");
             }
 
             ret->push("</body>\n</html>\n");
@@ -265,6 +275,10 @@ global mp_mptxt = {
                 else
                 if (mode == 'break')
                     ret->push(mp.config.rtf_style_first + tfont + "\r\n");
+                else
+                if (mode == "right")
+                    ret->push(mp.config.rtf_style_right + tfont + "\r\n" +
+                        str->split("\n")->join("\\line\r\n"));
             }
 
             if (rem)
@@ -328,6 +342,10 @@ global mp_mptxt = {
                 else
                 if (mode == 'break')
                     ret->push("\n\n");
+                else
+                if (mode == "right")
+                    ret->push(".ad r\n" +
+                        str->split("\n")->map(sub (e) {e + "\n.br\n"; })->join() + ".ad b\n\n");
             }
 
             return ret;

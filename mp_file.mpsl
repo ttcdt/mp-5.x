@@ -21,6 +21,7 @@ mp.config.rtf_style_first    = '\qj\fi0';
 mp.config.rtf_style_para     = '\qj\fi567';
 mp.config.rtf_style_center   = '\qc\fi0';
 mp.config.rtf_style_verbatim = '\ql\fi0\sl0';
+mp.config.rtf_style_right    = '\qr\fi0';
 mp.config.troff_font_size    = 12;
 mp.config.troff_page_height  = 10;
 mp.config.html_title         = '';

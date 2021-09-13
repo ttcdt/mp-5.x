@@ -1,0 +1,57 @@
+{
+    id:         'go',
+    name:       'go',
+    help:       [ "man 2 %s", "man 3 %s" ],
+    defs:       [
+        'word1', [
+            mp.syn_token_list(
+                [
+                    "break", "case", "const", "continue", "default",
+                    "defer", "else", "fallthrough", "for", "func",
+                    "go", "goto", "if", "interface", "range", "return",
+                    "select", "struct", "switch", "type", "var"
+                ]
+            )
+        ],
+        'word2', [
+            mp.syn_token_list(
+                [
+                    "bool", "byte", "chan", "complex64", "complex128",
+                    "error", "float32", "float64", "func",
+                    "int", "int8", "int16", "int32", "int64",
+                    "map", "rune", "string",
+                    "uint", "uint8", "uint16", "uint32", "uint64", "uintptr",
+                    "package", "import"
+                ]
+            )
+        ],
+        'word3', [
+            '/[-=<>:\?\+\*\/\!\%&\|~\^\.\{\}\(\)\[]+/',
+            mp.syn_token_list(
+                [
+                    "append", "cap", "close", "complex",
+                    "copy", "delete", "imag", "len",
+                    "make", "new", "panic", "real", "recover"
+                ]
+            ),
+            '/]/'
+        ],
+        'quotes', [
+            "/\"([^\"\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^\"\\\\\n]*)*)\"/", /* double quoted strings */
+            "/'([^'\\\\\n]*(\\\\.[^'\\\\\n]*)*)'/",     /* single-quoted strings */
+            "/\<-?[0-9]+\>/",                           /* numbers */
+            "/\<[0-9]+e[0-9]+\>/",                      /* numbers in exp format */
+            "/\<0[0-7]+\>/",                            /* octal numbers */
+            "/\<0x[0-9a-f]+\>/i",                       /* hex numbers */
+            "/\<(iota|nil|true|false)\>/"               /* symbolic constant names */
+        ],
+        'word3', [
+            '/%[0-9]*[l]?[dxfsoic]/'
+        ],
+        'comments', [
+            [ '|/\*|', '|\*/|' ],                       /* C-like */
+            "/\/\/[^\n\x{ad}]*(\x{ad}\n[^\n]*)*/"       /* C++-like */
+        ]
+    ],
+    section:    [ '/^\s*(import|func)/' ]
+};
