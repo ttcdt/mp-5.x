@@ -733,6 +733,8 @@ static void nc_build_colors(void)
                 cp |= A_REVERSE;
             if (mpdm_seek_wcs(w, L"underline", 1) != -1)
                 cp |= A_UNDERLINE;
+            if (mpdm_seek_wcs(w, L"italic", 1) != -1)
+                cp |= A_ITALIC;
     
             nc_attrs[n++] = cp;
         }
@@ -765,6 +767,8 @@ static void nc_build_colors(void)
                 cp |= A_REVERSE;
             if (mpdm_seek_wcs(w, L"underline", 1) != -1)
                 cp |= A_UNDERLINE;
+            if (mpdm_seek_wcs(w, L"italic", 1) != -1)
+                cp |= A_ITALIC;
     
             nc_attrs[n++] = cp; 
         }

@@ -266,9 +266,10 @@ static void ansi_build_colors(void)
             c0 = mpdm_ival(mpdm_get_i(w, 0));
             c1 = mpdm_ival(mpdm_get_i(w, 1));
 
-            sprintf(ansi_attrs[n], "\033[0;%s%s38;2;%d;%d;%dm\033[48;2;%d;%d;%dm",
+            sprintf(ansi_attrs[n], "\033[0;%s%s%s38;2;%d;%d;%dm\033[48;2;%d;%d;%dm",
                 cf & 0x1 ? "7;" : "",
                 cf & 0x4 ? "4;" : "",
+                cf & 0x8 ? "3;" : "",
                 (c0 >> 16) & 0xff, (c0 >> 8) & 0xff, c0 & 0xff,
                 (c1 >> 16) & 0xff, (c1 >> 8) & 0xff, c1 & 0xff
             );
@@ -284,9 +285,10 @@ static void ansi_build_colors(void)
             if ((--c0) == -1) c0 = 9;
             if ((--c1) == -1) c1 = 9;
 
-            sprintf(ansi_attrs[n], "\033[0;%s%s%d;%dm",
+            sprintf(ansi_attrs[n], "\033[0;%s%s%s%d;%dm",
                 cf & 0x1 ? "7;" : "",
                 cf & 0x4 ? "4;" : "",
+                cf & 0x8 ? "3;" : "",
                 cf & 0x2 ? (c0 + 90) : (c0 + 30),
                 c1 + 40
             );
