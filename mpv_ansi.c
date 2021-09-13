@@ -284,11 +284,10 @@ static void ansi_build_colors(void)
             if ((--c0) == -1) c0 = 9;
             if ((--c1) == -1) c1 = 9;
 
-            sprintf(ansi_attrs[n], "\033[0;%s%s%s%d;%dm",
+            sprintf(ansi_attrs[n], "\033[0;%s%s%d;%dm",
                 cf & 0x1 ? "7;" : "",
-                cf & 0x2 ? "1;" : "",
                 cf & 0x4 ? "4;" : "",
-                c0 + 30,
+                cf & 0x2 ? (c0 + 90) : (c0 + 30),
                 c1 + 40
             );
         }
