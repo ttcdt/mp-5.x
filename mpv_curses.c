@@ -682,35 +682,96 @@ static void nc_build_colors(void)
 
     /* loop the colors */
     n = c = 0;
-    while (mpdm_iterator(colors, &c, &v, &i)) {
-        mpdm_t w = mpdm_hget_s(v, L"text");
-        int cp, c0, c1;
+    if (has_colors() != FALSE && can_change_color() != FALSE) {
+        /* The first index that's not a default color */
+        int colors_used = 8; 
+        while (mpdm_iterator(colors, &c, &v, &i)) {
+            mpdm_t w = mpdm_get_wcs(v, L"gui");
 
-        /* get color indexes */
-        if ((c0 = mpdm_seek(color_names, mpdm_aget(w, 0), 1)) == -1 ||
-            (c1 = mpdm_seek(color_names, mpdm_aget(w, 1), 1)) == -1)
-            continue;
+            int ink   = mpdm_ival(mpdm_get_i(w, 0));
+            int paper = mpdm_ival(mpdm_get_i(w, 1));
 
-        /* store the 'normal' attribute */
-        if (wcscmp(mpdm_string(i), L"normal") == 0)
-            normal_attr = n;
+            mpdm_t color_name = mpdm_hget_s(v, L"text");
+            int cp, c0, c1;
+    
+            /* get color indexes */
+            if ((c0 = mpdm_seek(color_names, mpdm_aget(color_name, 0), 1)) == -1 ||
+                (c1 = mpdm_seek(color_names, mpdm_aget(color_name, 1), 1)) == -1)
+                continue;
+    
+            /* store the 'normal' attribute */
+            if (wcscmp(mpdm_string(i), L"normal") == 0)
+                normal_attr = n;
+    
+            /* store the attr */
+            mpdm_hset_s(v, L"attr", MPDM_I(n));
+    
+            /* extract the actual RGB color value */
+            int blue  = (ink & 0x000000ff);
+            int green = (ink & 0x0000ff00) >> 8;
+            int red   = (ink & 0x00ff0000) >> 16;
 
-        /* store the attr */
-        mpdm_hset_s(v, L"attr", MPDM_I(n));
+            int fg = colors_used++;
+            init_color(fg, (short)((red * 999) / 255), (short)((green * 999) / 255), (short)((blue * 999) / 255));
 
-        init_pair(n + 1, c0 - 1, c1 - 1);
-        cp = COLOR_PAIR(n + 1);
+            int bg = c1 - 1;
+            if (c1) {
+                blue  = (paper & 0x000000ff);
+                green = (paper & 0x0000ff00) >> 8;
+                red   = (paper & 0x00ff0000) >> 16;
+                bg = ++colors_used;
 
-        /* flags */
-        w = mpdm_hget_s(v, L"flags");
-        if (mpdm_seek_wcs(w, L"reverse", 1) != -1)
-            cp |= A_REVERSE;
-        if (mpdm_seek_wcs(w, L"bright", 1) != -1)
-            cp |= A_BOLD;
-        if (mpdm_seek_wcs(w, L"underline", 1) != -1)
-            cp |= A_UNDERLINE;
-
-        nc_attrs[n++] = cp;
+                init_color(bg, (short)((red * 999) / 255), (short)((green * 999) / 255), (short)((blue * 999) / 255));
+            }
+            /* finally create the (custom) color pair */
+            init_pair(n + 1, fg, bg);
+            cp = COLOR_PAIR(n + 1);
+    
+            /* flags */
+            w = mpdm_hget_s(v, L"flags");
+            if (mpdm_seek_wcs(w, L"reverse", 1) != -1)
+                cp |= A_REVERSE;
+            if (mpdm_seek_wcs(w, L"underline", 1) != -1)
+                cp |= A_UNDERLINE;
+            if (mpdm_seek_wcs(w, L"italic", 1) != -1)
+                cp |= A_ITALIC;
+    
+            nc_attrs[n++] = cp;
+        }
+    } else {
+        while (mpdm_iterator(colors, &c, &v, &i)) {
+            mpdm_t w = mpdm_hget_s(v, L"text");
+            int cp, c0, c1;
+    
+            /* get color indexes */
+            if ((c0 = mpdm_seek(color_names, mpdm_aget(w, 0), 1)) == -1 ||
+                (c1 = mpdm_seek(color_names, mpdm_aget(w, 1), 1)) == -1)
+                continue;
+    
+            /* store the 'normal' attribute */
+            if (wcscmp(mpdm_string(i), L"normal") == 0)
+                normal_attr = n;
+    
+            /* store the attr */
+            mpdm_hset_s(v, L"attr", MPDM_I(n));
+    
+            init_pair(n + 1, c0 - 1, c1 - 1);
+            cp = COLOR_PAIR(n + 1);
+    
+            /* flags */
+            w = mpdm_hget_s(v, L"flags");
+            if (mpdm_seek_wcs(w, L"bright", 1) != -1)
+                /* Default to old and wrong behavior to use bold instead of bright */
+                cp |= A_BOLD;
+            if (mpdm_seek_wcs(w, L"reverse", 1) != -1)
+                cp |= A_REVERSE;
+            if (mpdm_seek_wcs(w, L"underline", 1) != -1)
+                cp |= A_UNDERLINE;
+            if (mpdm_seek_wcs(w, L"italic", 1) != -1)
+                cp |= A_ITALIC;
+    
+            nc_attrs[n++] = cp; 
+        }
     }
 
     /* set the background filler */
