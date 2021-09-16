@@ -1,0 +1,2 @@
+msgid "This is a test string"
+msgstr "Esta es una cadena de prueba"

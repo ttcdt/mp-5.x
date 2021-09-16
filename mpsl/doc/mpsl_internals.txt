@@ -1,0 +1,324 @@
+MPSL internals
+==============
+
+This document describes some internal details of this MPSL implementation.
+
+The symbol table
+----------------
+
+There are three different scopes for a symbol in MPSL: global (accesible
+from everywhere), local to subroutine (accesible from the subroutine where
+it's defined) or local to block (accesible from the block where it's
+defined). The priority for symbols with the same name is, obviously,
+inverse: a local to block symbol obscures a local to subroutine one, and
+both a global one. Also, as blocks can be nested, local values defined in
+the inner blocks obscure the ones defined outside.
+
+The global symbol table
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The global symbol table is the simpler one: all global symbols are keys of
+the root hash (as returned from mpdm's function mpdm_root()). Once a
+global symbol is defined, it's stored there until explicit deletion or
+host program termination. MPSL library functions are also global symbols,
+and share the same namespace.
+
+The local symbol table
+~~~~~~~~~~~~~~~~~~~~~~
+
+The local symbol table is an array of hashes. The array is used as a stack,
+and symbols are searched in the stacked hashes from top to bottom.
+
+The bytecode
+------------
+
+When the compiler parses a MPSL source code file, it generates a bunch of
+MPSL instructions, each one stored in a mpdm array. This (usually small)
+array contains in the first element a scalar value, the _opcode_, and
+optionally other values, that are also MPSL instructions (unless in a very
+special case) and act as the opcode's arguments. All instructions return a
+value after execution. A MPSL compiled program is a chain of instructions
+that call each other.
+
+A description of each opcode follows:
+
+LITERAL
+~~~~~~~
+
+ LITERAL <value>
+
+A LITERAL instruction clones (using mpdm_clone()) and returns the stored
+value. This is the special case described in the introduction paragraph;
+the arguments for all other instructions are themselves instructions.
+
+MULTI
+~~~~~
+
+ MULTI <ins1> <ins2>
+
+A MULTI instruction executes `ins1', then `ins2', and returns the exit
+value of the second one.
+
+IMULTI
+~~~~~~
+
+ IMULTI <ins1> <ins2>
+
+An IMULTI instruction executes `ins1', then `ins2', and returns the exit
+value of the first one.
+
+SYMVAL
+~~~~~~
+
+ SYMVAL <ins1>
+
+A SYMVAL instruction executes `ins1' and accepts its return value as a
+symbol name, that is looked up in the symbol table and its assigned value
+(if any) returned.
+
+ASSIGN
+~~~~~~
+
+ ASSIGN <ins1> <ins2>
+
+An ASSIGN instruction executes `ins1' and accepts its return value as a
+symbol name; then `ins2' is executed and its return value assigned to that
+symbol. The new value is returned.
+
+EXECSYM
+~~~~~~~
+
+ EXECSYM <ins1>
+ EXECSYM <ins1> <ins2>
+
+An EXECSYM instruction takes the value of the symbol returned by `ins1' and
+accepts its return value as an executable one; if it exists, executes `ins2'
+and accepts its return value as a list of arguments for the executable
+value; then it's executed and its exit value returned.
+
+THREADSYM
+~~~~~~~~~
+
+ THREADSYM <ins1>
+ THREADSYM <ins1> <ins2>
+
+A THREADSYM instruction takes the value of the symbol returned by `ins1' and
+accepts its return value as an executable one; if it exists, executes `ins2'
+and accepts its return value as a list of arguments for the executable
+value; then it's executed as a new thread and a handle to it returned.
+
+IF
+~~
+
+ IF <ins1> <ins2>
+ IF <ins1> <ins2> <ins3>
+
+An IF instruction executes `ins1' and, if it returns a true value,
+executes `ins2' and returns its value. If it's not true, returns NULL or,
+if `ins3' is defined, executes it and returns its value.
+
+WHILE
+~~~~~
+
+ WHILE <ins1> <ins2>
+ WHILE <ins1> <ins2> <ins3> <ins4>
+
+A WHILE instruction executes `ins1' and, if it's a true value, executes
+`ins2'. This operation is repeated until `ins1' returns a non-true value.
+It always returns NULL.
+
+In the 4 argument version, `ins3' is executed just before entering the
+loop and `ins4' executed just after `ins2' on each loop (i.e. it
+behaves like C language's `for' construction).
+
+LOCAL
+~~~~~
+
+ LOCAL <ins1>
+
+A LOCAL instruction executes `ins1' and takes its return value as an array
+of symbol names to be created in the local symbol table. It always returns
+NULL.
+
+UMINUS
+~~~~~~
+
+ UMINUS <ins1>
+
+An UMINUS instruction executes `ins1', gets its value as a real number and
+returns the unary minus operation on it (effectively multiplying it by -1).
+
+Math operations
+~~~~~~~~~~~~~~~
+
+ ADD <ins1> <ins2>
+ SUB <ins1> <ins2>
+ MUL <ins1> <ins2>
+ DIV <ins1> <ins2>
+ MOD <ins1> <ins2>
+ POW <ins1> <ins2>
+
+These instructions execute the addition, substraction, multiply, divide,
+modulo and power math operations from the exit values of the two
+instructions, and return the result. Values are treated as real numbers
+except in MOD, where they are treated as integers.
+
+NOT
+~~~
+
+ NOT <ins1>
+
+A NOT instruction executes `ins1', takes its return value as a boolean
+one, and returns its negation.
+
+AND
+~~~
+
+ AND <ins1> <ins2>
+
+An AND instruction executes `ins1'. If its return value is accepted as a
+non-true value, returns it; otherwise, executes `ins2' and returns its
+value. This is a short-circuiting operation; if `ins1' is non-true, `ins2'
+is never executed.
+
+OR
+~~
+
+ OR <ins1> <ins2>
+
+An OR instruction executes `ins1'. If its return value is accepted as a
+true value, returns it; otherwise, executes `ins2' and returns its value.
+This is a short-circuiting operation; if `ins1' is true, `ins2' is never
+executed.
+
+Numeric comparisons
+~~~~~~~~~~~~~~~~~~~
+
+ NUMEQ <ins1> <ins2>
+ NUMLT <ins1> <ins2>
+ NUMLE <ins1> <ins2>
+ NUMGT <ins1> <ins2>
+ NUMGE <ins1> <ins2>
+
+These instructions execute the equality, less-than, less-or-equal-than,
+greater-than and greater-or-equal-than numeric comparisons on the exit
+values of `ins1' and `ins2', and return a boolean value.
+
+Bitwise operators
+~~~~~~~~~~~~~~~~~
+
+ BITAND <ins1> <ins2>
+ BITOR <ins1> <ins2>
+ BITXOR <ins1> <ins2>
+
+Returns the bitwise operation between the exit values of `ins1' and `ins2'.
+
+Bitwise shifts
+~~~~~~~~~~~~~~
+
+ SHL <ins1> <ins2>
+ SHR <ins1> <ins2>
+
+Returns the bitwise shifting of the exit value of `ins1', `ins2' bits
+to the left or right.
+
+JOIN
+~~~~
+
+ JOIN <ins1> <ins2>
+
+A JOIN instruction executes both `ins1' and `ins2', and joins the
+two exit values (being scalars, arrays, hashes or combinations, as accepted
+by the mpdm_join() function).
+
+STREQ
+~~~~~
+
+ STREQ <ins1> <ins2>
+
+A STREQ instruction executes both `ins1' and `ins2', tests for string equality
+of both values, and returns a boolean value.
+
+BREAK
+~~~~~
+
+ BREAK
+
+A BREAK instruction forces the exit of a loop as WHILE or FOREACH. Returns
+NULL.
+
+RETURN
+~~~~~~
+
+ RETURN
+ RETURN <ins1>
+
+A RETURN instruction forces the exit of the current subroutine. If `ins1'
+is defined, it's executed and its value returned, or NULL otherwise.
+
+FOREACH
+~~~~~~~
+
+ FOREACH <ins1> <ins2> <ins3>
+
+A FOREACH instruction executes `ins1' and accepts its return value as a
+symbol name, and executes `ins2' and accepts its return value as an array
+to be iterated onto. Then, in a loop, each element in `ins2' is assigned
+to `ins1' and `ins3' executed. NULL is always returned.
+
+RANGE
+~~~~~
+
+ RANGE <ins1> <ins2>
+
+A RANGE instruction executes both `ins1' and `ins2' and, taken their
+return values as real numbers, returns an array containing a sequence of
+all the values in between (including them).
+
+LIST
+~~~~
+
+ LIST <ins>
+ LIST <ins> <array_value>
+
+A LIST instruction returns an array. If `array_value' does not exist, a
+new one is created. The return value of `ins' is pushed into the array,
+which is returned.
+
+ILIST
+~~~~
+
+ ILIST <ins>
+ ILIST <ins> <array_value>
+
+Same as the LIST instruction, but the value is inserted from the start
+of the array instead of pushed at the end.
+
+HASH
+~~~~
+
+ HASH <ins1> <ins2>
+ HASH <ins1> <ins2> <hash_value>
+
+A HASH instruction returns a hash. If `hash_value' does not exist, a
+new one is created. The return values of `ins1' and `ins2' are used as
+a key, value pair that is inserted into the hash, which is returned.
+
+SUBFRAME
+~~~~~~~~
+
+ SUBFRAME <ins1>
+
+A SUBFRAME instruction creates a subroutine frame, executes `ins1',
+destroys the subroutine frame and returns `ins1' exit value.
+
+BLKFRAME
+~~~~~~~~
+
+ BLKFRAME <ins1>
+
+A BLKFRAME instruction creates a block frame, executes `ins1',
+destroys the block frame and returns `ins1' exit value.
+
+----
+ttcdt <dev@triptico.com>

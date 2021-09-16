@@ -1,0 +1,18 @@
+Minimum Profit Scripting Language (MPSL)
+========================================
+
+MPSL (Minimum Profit Scripting Language) is a programming language
+concieved as a scripting engine for the Minimum Profit Text Editor,
+though it can also be used as a general-purpose programming tool.
+
+This software is released into the public domain. See file LICENSE for details.
+
+More information
+----------------
+
+ * https://triptico.com/docs/mpsl_overview.html (Language overview).
+ * https://triptico.com/docs/mpsl_reference.html (Function reference).
+ * https://triptico.com/docs/mpsl_quickref.ps (Quickref, PostScript).
+
+---
+ttcdt <dev@triptico.com>

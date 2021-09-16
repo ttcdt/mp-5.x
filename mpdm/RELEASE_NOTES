@@ -1,0 +1,532 @@
+MPDM Release Notes
+==================
+
+2.81
+----
+
+* Internal changes:
+
+The repository has been moved in mp-5.x.
+
+2.80
+----
+
+* Internal changes:
+
+Integer values are stored directly into the payload of mpdm_t instead of in their own, allocated buffer, resulting in a somewhat significant memory saving.
+
+* New functions:
+
+mpdm_socket_timeout(sock, r_to, s_to), to set the receiving and/or sending timeouts for a socket (in seconds). If any timeout is set to NULL, it's not touched.
+
+* Bug fixes:
+
+mpdm_fmt() no longer miscalculates the size of non-string values printed with the %s command.
+
+2.79
+----
+
+* New functions:
+
+mpdm_data(), to return the data inside an mpdm_t.
+
+2.78
+----
+
+* Important changes:
+
+The memory footprint of an mpdm_t has been shrinked from 24 to 16 bytes.
+
+* New features:
+
+mpdm_read_zip_file() has been implemented (instead of being just a stub).
+
+2.77
+----
+
+* New functions:
+
+mpdm_divide(num, den) to divide two values. It works as expected for integers and reals, but additionally behaves as mpdm_split() if num is as string.
+
+* Bug fixes:
+
+Maximum size limitation in mpdm_fmt() when parsing %s.
+
+* Other changes:
+
+If the separator in mpdm_split() is the empty string (""), it behaves the same as if it's NULL.
+
+Added some whitespace to JSON output.
+
+2.76
+----
+
+* API changes:
+
+The macro MPDM_CAN_EXEC() no longer exists and has been replaced by function mpdm_can_exec().
+
+2.75
+----
+
+* New features:
+
+New Unicode NFD normalization functions mpdm_unicode_nfd() and mpdm_unicode_nfd_wcs().
+
+New Unicode NFC normalization functions mpdm_unicode_nfc() and mpdm_unicode_nfc_wcs().
+
+2.74
+----
+
+* Bug fixes:
+
+Memory leak in internal function string_persist().
+
+2.73
+----
+
+* New functions:
+
+mpdm_base64enc_mbs() and mpdm_base64enc(), to encode to BASE64 multibyte strings and values.
+
+* Bug fixes:
+
+Crash when stringifying very big floats.
+
+Fixed compilation under FreeBSD.
+
+* Other new features:
+
+File values can also be accessed by integer, that is used as a file offset.
+
+A new environment variable MPDM_HASH_FUNC allows the external choosing of the hashing functions in objects. Possible values are "fnv", "std" or "null".
+
+2.72
+----
+
+* New features:
+
+New function mpdm_md5(), that returns the MD5 of a string as an hexadecimal string.
+
+2.71
+----
+
+* New features:
+
+mpdm_sscanf() now implements `%w', to match alphabetic words (according to the locale); `%W', to match the inverse; and `%r', to match the rest of the string.
+
+2.70
+----
+
+* New functions:
+
+mpdm_server(addr, port), that creates a socket in listen mode.
+
+mpdm_accept(sock), that accepts a connection from a server socket created by mpdm_server().
+
+2.69
+----
+
+* New functions:
+
+mpdm_read_zip_mem(), to read a file from a compressed .zip file in memory.
+
+mpdm_read_arch_mem(), to read a file from any in-memory archive format with autodetection (by now, only tar and zip files are supported).
+
+mpdm_read_arch_mem_s(), to read a file from any in-memory archive as a string.
+
+mpdm_read_arch_file(), to read a file from an on-disk archive file (only tar files are supported).
+
+mpdm_read_arch_file_s(), to read a file from an on-disk archive as a string.
+
+2.68
+----
+
+* New features:
+
+omap() with two array arguments generates an object with values from the first one with indexes from the second one.
+
+2.67
+----
+
+* New features:
+
+omap() with a NULL filter returns a copy of the original set (instead of an inverse object).
+
+2.66
+----
+
+* New features:
+
+New function mpdm_flock(), implement UNIX flock(). Does nothing under win32.
+
+2.65
+----
+
+* New features:
+
+Fixed dubious code that was causing crashes in OpenBSD.
+
+2.64
+----
+
+* Important changes:
+
+Updated maintainers.
+
+2.63
+----
+
+* Internal changes:
+
+Support non-array return values in omap(): If the filter in omap() returns a non-array, use this as the value for the return object (keeping the same index).
+
+Use v, i order in omap() filter function: For symmetry, if the filter function in omap() returns an array, it must be in the original order [v, i] and not reversed.
+
+2.62
+----
+
+* Internal changes:
+
+the object hash function has been tweaked to improve distribution.
+
+2.61
+----
+
+* Internal changes:
+
+Many functions have been refactorized into the VC structures.
+
+Arrays are expanded and collapsed using a granularity value.
+
+2.60
+----
+
+* New features:
+
+Negative string subindexes work.
+
+MPDM.confopt contains the compiled-in configuration options.
+
+* Bug fixes:
+
+string[0] works.
+
+Ocassional errors when parsing empty JSON strings.
+
+Added environ prototype to avoid compiler error in BSDs.
+
+2.59
+----
+
+* Internal changes:
+
+mpdm_string() now uses mpdm_type_vc.
+
+2.58
+----
+
+* Internal changes:
+
+mpdm_get_i() now uses mpdm_type_vc. Also, mpdm_get_i() can be used on strings to get a one-char value.
+
+2.57
+----
+
+* Internal changes:
+
+mpdm_is_true() and mpdm_count() now use mpdm_type_vc.
+
+2.56
+----
+
+* Internal changes:
+
+Function mpdm_type_vc() now accepts as argument an mpdm_t instead of an mpdm_type_t.
+
+2.55
+----
+
+* Internal changes:
+
+There is a new structure per type that contains its name and pointers to the virtual calls for several functions (as of now, only destroy()).
+
+2.54
+----
+
+* New features:
+
+File descriptors are now executable; by executing one without arguments, a line is read; otherwise, it there are arguments, all of them are written into it.
+
+New function mpdm_utf8_to_wc().
+
+New function mpdm_chomp().
+
+mpdm_write() also accepts arrays and files as the argument to be written, iterating it recursively.
+
+* Important changes:
+
+The mpdm_hmap() function has been renamed to mpdm_omap().
+
+2.53
+----
+
+* New features:
+
+New function mpdm_feof().
+
+* Bug fixes:
+
+Fixed double quote escaping error in JSON export.
+
+Fix bug in pclose waiting for child termination on the first pipe (work by X-Ryl669).
+
+Fixed extern definition to mpdm_destroy().
+
+2.52
+----
+
+* New features:
+
+mpdm_fmt() now accepts the %J markup for 'lax' JSON, i.e., the root value can also be a literal.
+
+Ortogonally, the mpdm_sscanf() function also accepts the %J markup to parse 'lax' JSON.
+
+* Changes:
+
+The old API (hash functions and array functions named mpdm_a...) is now disabled by default; if you still have old code, defined MPDM_OLD_COMPAT before mpdm.h.
+
+Disable Zlib support by default; enable with config shell option `--with-zlib'.
+
+* Bug fixes:
+
+Some memory leaks.
+
+2.51
+----
+
+* New features:
+
+New function mpdm_multiply(), supporting number * number, string * number and array * number.
+
+New function mpdm_substract(), supporting number - number, array1 - array2 (returning a new array with the elements in array1 that are *not* in array2), array - object (returning an array with the keys *not* in object), object1 - object2 (returning a new object with the elements in object1 *not* in object2) and object - array (returning a new object with the elements in object that are *not* indexed by any element of array).
+
+Pipes now inherit the environment from the ENV object.
+
+New function mpdm_gzip_inflate().
+
+New functions mpdm_read_tar_mem() and mpdm_read_tar_file().
+
+mpdm_join() and mpdm_join_wcs() now can accept files.
+
+Read and write encoders for Windows-1252 code page.
+
+2.50
+----
+
+* New features:
+
+The object interface now replaces the old hash interface, that it's still available as a compatibility layer.
+
+New function mpdm_escape(), to escape a range of characters in a string.
+
+map() with a string filter is accepted as a mpdm_fmt() format and used as is, expecting one % mark (or none, in case of mapping string constants).
+
+In mpdm_fmt() the %b (output number as binary) now accepts zero-padding and maximum number of digits.
+
+2.42
+----
+
+* Important changes:
+
+License change: released into the public domain.
+
+* Architectural changes:
+
+Values now have a type and no flags.
+
+There is a clear differentiation between integers, reals and strings. Also, they can be iterated specially.
+
+A semantic change to mpdm_read(): EOLs are purely treated as line separators, so if a read reaches EOF but previous line had an EOL, a final, empty line is returned.
+
+Extended values no longer exist, nor cached ival and rval.
+
+Renamed most functions that used wide strings and ended with _s to _wcs (e.g. mpdm_cmp_s() to mpdm_cmp_wcs()).
+
+* New features:
+
+Files can work in auto-chomp mode (automatic clipping of the EOL sequence). This sequence can be retrieved using the file function mpdm_eol(). Auto-chomping is enabled by setting the global AUTO_CHOMP variable to true, checked on each call to mpdm_open().
+
+mpdm_join() can join integers and reals by summing them.
+
+utf-8 reading and writing is done upto 4 bytes.
+
+New function mpdm_random() (moved from MPSL). Accepts an integer [0, range), NULL [0.0, 1.0) or an array to pick one of its elements.
+
+mpdm_regcomp() is now non-static and can be used to use compiled regexes as pure values.
+
+mpdm_map() can map strings to regexes (providing the same functionality as the dropped 'g' flag in regexes).
+
+mpdm_map() can map iterable values to strings, returning an array with the same string many times.
+
+mpdm_map() can also map iterable values to arrays, using them as translation tables.
+
+New function mpdm_count(), to return a type-specific number of elements (values in arrays and objects and size of stringify value otherwise).
+
+Read and write encoders for MSDOS codepages 437 and 850.
+
+mpdm_splice() also works with arrays. Also, its syntax has changed and no longer returns a two-value array but accepts optional pointers to values.
+
+New function mpdm_del(), complementary to mpdm_get() and mpdm_set() (multitype).
+
+New function mpdm_type() to get a value's type.
+
+New function mpdm_type_wcs() to get a value's type as a string.
+
+* Dropped features:
+
+Flags `l' (last) and `g' (global) in regexes are no longer supported.
+
+mpdm_slice() no longer exists (use mpdm_splice()).
+
+As flags have disappeared, all macros for testing them are also gone. Do the checking using types.
+
+MPDM_LS() no longer exists; replace it with MPDM_S() and move on.
+
+Channels no longer exist.
+
+2.30
+----
+
+* Architectural changes:
+
+Moved "destroy" functions from the extended values to a global type information structure.
+
+2.21
+----
+
+* New features:
+
+Added the concept of "extended" values: they contain an addition "destroy" function, called when the value is destroyed. Also, only these extended values stored cached ival and rval. This way, many values use much less memory.
+
+* Other changes:
+
+mpdm_iterator() has changed the order of args from k, v to v, i.
+
+The version numbering has changed from X.X.X to X.XXX (real number).
+
+2.1.6
+-----
+
+* Bug fixes:
+
+Dump backslashes correctly in JSON.
+
+2.1.5
+-----
+
+* Bug fixes:
+
+Escape the base directory in glob().
+
+Fix a parsing bug in json_lexer().
+
+* New features:
+
+New array function mpdm_reverse().
+
+2.1.4
+-----
+
+* New features:
+
+Use the APPID variable in mpdm_app_dir().
+
+2.1.2
+-----
+
+* New features:
+
+mpdm_join() joins more types.
+
+mpdm_iterator() returns index/element pairs when iterating an array and can also iterate files and numbers.
+
+New function mpdm_fmt(), like mpdm_sprintf() but for only one value. As a bonus it includes the percent-commands `j' (output as JSON) and `t' (followed by a curly brace-enclosed strftime() format).
+
+mpdm_sscanf() also supports a %t command, to parse a time string (inverse of the one in mpdm_fmt(), and %j, to parse a JSON string.
+
+New channel implementation (bidirectional communication for threads).
+
+New function mpdm_rename().
+
+New function mpdm_slice().
+
+New function mpdm_getcwd().
+
+2.1.1
+-----
+
+* New features:
+
+mpdm_join() allows the joining of two arrays.
+
+New function mpdm_set().
+
+2.1.0
+-----
+
+* New features:
+
+Support for client TCP/IP connections via the new mpdm_connect() function.
+
+New function mpdm_tr(), to transliterate strings.
+
+* Bugfixes:
+
+The pclose() win32 implementation returns the process exit status correctly.
+
+2.0.1
+-----
+
+* Optimizations:
+
+Numeric values created with MPDM_I() and MPDM_R() do not have their string representation created until needed by a call to mpdm_string() (which can never happen).
+
+* New features:
+
+New function mpdm_sget_i().
+
+New macros MPDM_AA() and MPDM_AS(), for local stack-allocated (i.e. using alloca()) arrays and strings, meant to be used for optimized, short-lived temporary values.
+
+2.0.0
+-----
+
+* New features:
+
+The system has been refactored to be a pure reference counting system, so sweeping / garbage collection no longer exists.
+
+Executable values and functions now include a new argument to hold a context (used to implement local symbol tables and such).
+
+mpdm_adel() and mpdm_hdel() no longer return the deleted element.
+
+mpdm_aset() and mpdm_hset() no longer return the old element.
+
+mpdm_sort() sorts the array instead of returning a new one.
+
+New functions mpdm_strcat_sn(), mpdm_pokewsn(), mpdm_join_s(), mpdm_split_s(), mpdm_cmp_s(), mpdm_strcat_s().
+
+Some refactoring to diminish memory usage (no more `prev' pointers in the value list, less residual values).
+
+mpdm_regex() always return an array in global searches (maybe an empty one) and if searching for an array of regexes (maybe be a partial one).
+
+The following functions had had their arguments swapped:
+
+mpdm_split() and mpdm_split_s().
+
+mpdm_join() and mpdm_join_s().
+
+mpdm_sscanf().
+
+mpdm_regex().
+
+mpdm_sregex().
+

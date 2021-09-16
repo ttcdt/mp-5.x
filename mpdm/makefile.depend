@@ -1,0 +1,15 @@
+gnu_regex.o: gnu_regex.c config.h VERSION
+md5.o: md5.c md5.h
+mpdm-stress.o: mpdm-stress.c config.h VERSION mpdm.h
+mpdm_a.o: mpdm_a.c config.h VERSION mpdm.h
+mpdm_d.o: mpdm_d.c config.h VERSION mpdm.h
+mpdm_dd.o: mpdm_dd.c config.h VERSION mpdm.h
+mpdm_f.o: mpdm_f.c config.h VERSION mpdm.h
+mpdm_o.o: mpdm_o.c config.h VERSION mpdm.h
+mpdm_r.o: mpdm_r.c config.h VERSION mpdm.h
+mpdm_s.o: mpdm_s.c config.h VERSION mpdm.h unicode_tbls.c
+mpdm_t.o: mpdm_t.c config.h VERSION mpdm.h
+mpdm_v.o: mpdm_v.c config.h VERSION mpdm.h
+mpdm_x.o: mpdm_x.c config.h VERSION mpdm.h
+puff.o: puff.c
+wcwidth.o: wcwidth.c

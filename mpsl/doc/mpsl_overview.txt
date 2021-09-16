@@ -1,0 +1,1149 @@
+MPSL Overview
+=============
+
+MPSL (Minimum Profit Scripting Language) is a programming language
+concieved as a scripting engine for the Minimum Profit Text Editor,
+though it can also be used as a general-purpose programming tool.
+
+Basic Syntax
+------------
+
+An MPSL program consists of a sequence of statements which run from top to
+bottom. Loops, subroutines and other control structures allow you to jump
+around within the code. It is a free-form language, meaning that you can
+format and indent it however you like, as whitespace serves to separate
+tokens. MPSL borrows syntax and concepts from many languages: C, Perl, Java
+or JavaScript. Statements end in a semi-colon, blocks are enclosed between {
+and } (curly brackets).
+
+Comments
+~~~~~~~~
+
+Text enclosed between /* and */ is ignored, as in C. It can span multiple
+lines.
+
+Strings
+~~~~~~~
+
+Strings are enclosed around single or double quotes:
+
+ print("This a string");
+ print('This is also a string');
+
+However, double quotes give special treatment to backslash-escaped
+characters, also as in C:
+
+ print("Hello, world\n");	/* ends with a new line */
+ print('Hello, World\n');	/* prints Hello, World\n literally */
+
+Strings can be broken between lines by using backslashes:
+
+ print("Hello, "\
+ 	"world\n");
+
+Non-ASCII characters (Unicode) can be included in strings using the
+following syntax:
+
+ print("Hello, world \x{263A}\n"); /* a smiley follows the greeting */
+
+Subroutine calls
+~~~~~~~~~~~~~~~~
+
+Function and subroutine calls must enclose its arguments between
+parentheses, and separate them by commas:
+
+ print("This is ", 'a list ', "of ", 5, " arguments\n");
+
+Parentheses are needed even if a function has no arguments.
+
+An alternative to this standard way of function calls, new in MSPL 2.x, is
+what is named the 'inverse' calling syntax, in which the first argument of
+a function is specified before the function call itself; for example,
+
+ print('Hello!', "\n");
+
+can also be expressed as
+
+ 'Hello'->print("\n");
+
+Which is convenient when calling a long list of functions that process
+the output of another, like in
+
+ func3(func2(func1(func0(first_value, arg0), arg1), arg2), arg3)
+
+that can be better expressed as
+
+ first_value->func0(arg0)->func1(arg1)->func2(arg2)->func3(arg3)
+
+True and false
+~~~~~~~~~~~~~~
+
+The number 0, the strings '0' and '' and NULL are all false as boolean
+values. Any other value is considered true.
+
+Variables and data types
+------------------------
+
+Data types in MPSL match the mpdm (Minimum Profit Data Manager) single,
+array and hash values. They are very similar to Perl ones. However,
+variable names don't have a prefix indicating its type as in Perl; they
+can hold any type.
+
+Variables need not be declared (unless for local values, see below); they
+are created on assignation.
+
+Scalars
+~~~~~~~
+
+A scalar represents a single value. They can be strings, integers or
+floating point numbers, and they will be converted as required.
+
+ fruit = "pear";
+ months = 12;
+ pi = 3.1416;
+
+There are other types of scalar values, as file descriptors and executable
+values; they will be treated later.
+
+Scalar assignation is always by value; by doing
+
+ a = 100; b = a; b = 5;
+
+The a variable still holds its original value of 100.
+
+Arrays
+~~~~~~
+
+An array represents a list of values. Arrays are zero-indexed. Each
+element of an array can be of any type (scalar, array, or hash). Array
+size is dynamic and can grow or shrink at the programmer's wish.
+
+ workdays = [ 'monday', 'tuesday', 'wednesday', 'thursday', 'friday' ];
+ 
+ print(workdays[0], "\n");	/* prints monday */
+ 
+ heterogeneous_array = [ 1, "string", [ 1, 2, 3 ], NULL, function(), workdays ];
+
+Array assignation is always by reference; by doing
+
+ a = [ 10, 20, 30 ]; b = a; b[0] = 100;
+
+The value for the element a[0] is also 100; a and b both point to the same
+array. A special-purpose function, clone(), can be used if you want them
+to be different values.
+
+Arrays grow when assigned to an out-of-bounds subscript:
+
+ ary = [ 0, 1, 2, 3 ];
+ print("size: ", size(ary), "\n");	/* prints size: 4 */
+ ary[100] = 100;
+ print("size: ", size(ary), "\n");	/* prints size: 101 */
+
+The range operator can be used to populate an array with consecutive,
+integer values, as in the example:
+
+ ary = [ 1 .. 100 ];	/* ary contains 100 elements, from 1 to 100 */
+
+Hashes
+~~~~~~
+
+A hash, or associative array, represents a set of key/value pairs. Keys and
+values can be of any type (scalar, array or hash). However, keys are
+usually scalar values, in particular strings.
+
+ en2es_workdays = {
+    'monday'    =>  'lunes',
+    'tuesday'   =>  'martes',
+    'wednesday' =>  'miercoles',
+    'thursday'  =>  'jueves',
+    'friday'    =>  'viernes'
+ };
+ 
+ print(en2es_workdays['monday'], "\n"); /* prints lunes */
+ 
+ week = {
+    'workdays'  =>  workdays,
+    'weekend'   =>  [ 'saturday', 'sunday' ]
+ };
+
+Hash definitions can use the => to mark key/value pairs (what is called
+the "traditional" or Perl-like syntax), or a special, JavaScript-like
+simpler mode (supported since version 2.0.1) which is useful when the
+keys are composed only by alphanumeric characters (letters, numbers and
+the _ symbol). Like this:
+
+ en2es_workdays = {
+    monday:     'lunes',
+    tuesday:    'martes',
+    wednesday:  'miercoles',
+    thursday:   'jueves',
+    friday:     'viernes'
+ };
+
+Hash assignation is always by reference, as in arrays (in fact, hashes are
+just a special case of array).
+
+Compact access to hash members
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Hashes can, and ofter are, used as records. Given the following hash of
+hashes:
+
+ app = {};
+ app['config'] = {};
+ app['config']['save_on_exit'] = 1;
+
+The save_on_exit component can also be accessed by using:
+
+ app.config.save_on_exit = 1;
+
+Please note that variables are *not* automatically created unless the path
+to them already exist; so 'app' and 'app.config' must exist and be hashes,
+or the 'save_on_exit' component will not be created and fail silently.
+This is a common pitfall.
+
+Variable names
+~~~~~~~~~~~~~~
+
+A variable name must start with a letter or underscore and can be followed
+by any number of letters, numbers and underscores. Case is significative,
+so aaa and AAA and aAa are different symbols.
+
+Variable scope
+~~~~~~~~~~~~~~
+
+By default, non-existent assigned variables are created as global symbols.
+Though they are useful, it's not a good programming practice to have all
+variables as global, so local variables can be used. They are defined by
+using the local directive:
+
+ local a;	/* creates the local variable a, with NULL value */
+ local b = 100;	/* creates the local variable b, with a value of 100 */
+
+Local variables have its life limited to the subroutine where they are
+defined or, if defined inside a block, limited to that block. Inner
+variables obscure more global ones, as in the example:
+
+ var = 6;	/* global variable var, with a value of 6 */
+ 
+ {		/* start of block */
+	local var = 10;			/* local variable var */
+	print("var: ", var, "\n");	/* prints var: 10 */
+	var = 20;			/* local var now has 20 */
+	print("var: ", var, "\n");	/* prints var: 20 */
+ }		/* end of block */
+ 
+ print("var: ", var, "\n");		/* prints var: 6 */
+
+Subroutine arguments are treated as local variables.
+
+Conditional and looping constructs
+----------------------------------
+
+If
+~~
+
+MPSL has the usual `if' conditional construct. The condition can be any
+MPSL expression, and the conditional code must be written between braces
+if it's more than one instruction, just like in C.
+
+ /* one instruction */
+ if (a > b)
+	do_something();
+ 
+ /* more than one instruction (braces needed) */
+ if (c == d) {
+	do_this();
+	do_that();
+ }
+
+`If' conditionals can also include an else instruction or block:
+
+ if (tab_size == 8)
+	print("You are sane\n");
+ else
+	print("Weirdo!\n");
+
+While
+~~~~~
+
+`While' conditionals are exactly as you suppose they are:
+
+ while (player_is_alive) {
+	/* game loop */
+	move_player();
+	move_baddies();
+	update_counter();
+ }
+
+As in `if', the loop body needs braces if it has more than one instruction.
+
+Foreach
+~~~~~~~
+
+`Foreach' is a special statement to do something with all elements of an
+array. The usual construction is as follows:
+
+ /* week days */
+ weekdays = [ 'monday', 'tuesday', 'wednesday', 'thurday', 'friday' ];
+ 
+ foreach (w, weekdays)
+	print("I hate ", w, "s\n");
+
+Each value of the array will be assigned to the variable and the loop body
+executed. The variable is local to the loop body.
+
+Break
+~~~~~
+
+Exit from `while' and `foreach' loops can be forced by using `break', just
+as in C.
+
+For
+~~~
+
+A C-like `for' is also available from version 2.x. For example:
+
+ for (n = 0; n < 10; n++)
+     print(n, "\n");
+
+Builtin operators
+-----------------
+
+Assignment
+~~~~~~~~~~
+
+To assign a value to a variable, use the = operator. Remember that scalars
+are always assigned by value, and multiple values (arrays and hashes) are
+always assigned by reference (in case you need a copy of a multiple value,
+use the clone() function).
+
+Arithmetic
+~~~~~~~~~~
+
+The usual +, -, *, /, ** and % operators are used for addition,
+substraction, multiply, divide, power and modulo, as always. Operands
+for the modulo operator are treated as integers, and for the rest of them,
+as real numbers. Operator precedence are like in C; you can always use
+parentheses to explicitly force your desired precedence.
+
+Numeric comparison
+~~~~~~~~~~~~~~~~~~
+
+The usual == (equality), != (inequality), > (greater than), < (less than),
+>= (greater or equal than) and <= (less or equal than) operands can be
+used.
+
+Strings
+~~~~~~~
+
+The 'eq' operator is used for testing string equality, 'ne' for the
+opposite and ~ is used for concatenating strings.
+
+MPSL's scalar values are used for both string and numerical values, so (as
+in Perl) the string and numeric comparison operators must be different:
+
+ a = 0; b = 0.0;
+ if (a == b) { /* this is truth */ }
+ if (a eq b) { /* this is false */ }
+
+Boolean logic
+~~~~~~~~~~~~~
+
+As in C, && (logical and) and || (logical or) are used. They don't return
+just a boolean value, but the value that matches the condition, so that
+you can do:
+
+ a = 0; b = 100;
+ c = a || b;		/* c ends with a value of 100 */
+ c = a && b;		/* c ends with a value of 0 */
+ a = 50;
+ c = a || b;		/* c ends with a value of 50 */
+ c = a && b;		/* c ends with a value of 100 */
+
+MPSL lacks a ternary conditional operator (as the ? : one in C), but it
+can be easily simulated with && and || operators:
+
+ /* assigns to c the greatest of a and b */
+ c = a > b && a || b;
+
+There is also the ! operator, that negates a condition.
+
+Immediate operators
+~~~~~~~~~~~~~~~~~~~
+
+Immediate operators act directly over variables. The most usual examples
+are the unary ++ and --, that are used as in C.
+
+ a = 100;
+ a++;		/* a's value is now 101 */
+ a--;		/* back to 100 */
+
+Also as in C, this operators can be used as prefixes or suffixes, giving
+the following result:
+
+ a = 100;
+ b = a++;	/* b's value is 100, a's value is 101 */
+ c = ++a;	/* c's and a's value are both 102 */
+
+The well known binary +=, -=, *=, /= and %= also exist:
+
+ a += 25;	/* adds 25 to a */
+
+Subroutines
+-----------
+
+Overview
+~~~~~~~~
+
+Subroutines (also called functions) are created with the 'sub' keyword:
+
+ sub main_loop
+ {
+	while (!exit_requested) {
+		local o;
+ 
+		o = get_option();
+		process_option(o);
+		draw_screen();
+	}
+ }
+
+Subroutines can also accept arguments:
+
+ sub process_option(o)
+ {
+	if (o == -1)
+		exit_requested = 1;
+	else
+		print("Option is ", o, "\n");
+ }
+
+Subroutine arguments can be used as local variables (in fact, that is exactly
+what they are).
+
+As in assignations, when you pass a multiple value (arrays and hashes) as
+an argument to a subroutine, it's always done by reference, so modifying
+it will change the original value:
+
+ sub dequeue(queue) { local a = pop(queue); do_something_with(a); }
+ 
+ my_q = [ 10, 20, 30 ];
+ dequeue(my_q);		/* on exit, my_q will contain only [ 10, 20 ] */
+
+Return value
+~~~~~~~~~~~~
+
+As every code fragment in MPSL, subroutines always return a value. By
+default, a subroutine returns the result of the last operation:
+
+ sub avg(a, b) { a += b; a /= 2; }
+
+The value to be returned can be explicitly expressed by using the 'return'
+keyword, that can also be used to break execution flow:
+
+ sub div(a, b)
+ {
+	if (b == 0) {
+		print("Invalid value for b.\n");
+		return 0;
+	}
+ 
+	return a / b;
+ }
+
+When calling a subroutine, parentheses are always mandatory, even if it
+has no arguments. If a subroutine is referenced without its arguments,
+it's not called, but a pointer to it returned instead:
+
+ sub sum(a, b) { return a + b; }
+ 
+ a = sum(10, 20);	/* a == 30 */
+ b = sum;		/* b has a pointer to the sum subroutine */
+ 
+ c = b(20, 30);		/* c == 50, same as calling sum(20, 30) */
+
+Anonymous subroutines
+~~~~~~~~~~~~~~~~~~~~~
+
+The `sub' directive can also be used as an rvalue to define anonymous
+subroutines. So, the following can be done:
+
+ on_exit_subs = [];
+ push(on_exit_subs, sub { print("Close files\n"); } );
+ push(on_exit_subs, sub { print("Clean up memory\n"); } );
+ push(on_exit_subs, sub { print("Other stuff\n"); } );
+ 
+ /* exiting; calling all functions stored in on_exit_subs */
+ foreach (f, on_exit_subs) f();
+
+Anonymous functions can also accept arguments:
+
+ math_ops = [
+ 	sub (a, b) { print(a, " + ", b, ": ", a + b, "\n"); },
+ 	sub (a, b) { print(a, " - ", b, ": ", a - b, "\n"); },
+ 	sub (a, b) { print(a, " * ", b, ": ", a * b, "\n"); },
+ 	sub (a, b) { print(a, " / ", b, ": ", a / b, "\n"); }
+ ];
+ 
+ foreach (f, math_ops) f(10, 20);
+
+This kind of anonymous subroutines are commonly used as callbacks. The
+following examples use the two-argument version of sort() to sort arrays
+in different ways:
+
+ /* reverse-sort the array (comparing each element backwards) */
+ sorted_ary = sort(unsorted_ary, sub (a, b) { cmp(b, a); } );
+ 
+ /* numeric sort (instead of plain ASCII) */
+ sorted_ary = sort(unsorted_ary, sub (a, b) { a - b; } );
+
+Scope
+~~~~~
+
+Subroutines are defined in execution time and *not* in compilation time.
+This means that you can redefine a subroutine whenever you want, but be
+aware that you can't use it before the `sub' instruction has been
+executed. This is a common pitfall:
+
+ /* call a function before it exists: error */
+ print("Average for 2 and 3 is ", avg(2, 3), "\n");
+ 
+ sub avg(a, b) { a += b; a /= 2; }
+ 
+ /* now you can use it */
+ print("Average for 4 and 5 is ", avg(4, 5), "\n");
+
+It's easier to see subroutine definitions as an assignation of a code
+block to a variable: you would never access a variable before assigning a
+value to it.
+
+Variable number of arguments
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If a subroutine is called with more arguments that those specified in the
+definition, the list of values is stored inside the _ local list, making
+possible to implement variable argument functions. For example:
+
+ sub sum {
+     local total = 0;
+ 
+     /* loop all arguments and sum them */
+     foreach (v, _)
+         total += v;
+ 
+     return total;
+ }
+
+This function allows being called with an arbitrary number of arguments, as
+in
+
+ a = sum(1, 2, 3);
+ b = sum(10, 20, 30, 40, 50);
+
+Both traditionally named arguments and these unnamed ones can be combined.
+The _ local array will only be defined if there are 'lost' arguments.
+
+Builtin functions
+-----------------
+
+General functions
+~~~~~~~~~~~~~~~~~
+
+The cmp() function can be used to compare two values. It returns a signed
+number, negative if the first value is lesser than the second, positive
+on the contrary or zero if they are the equal. It also can be used to
+compare arrays and hashes:
+
+ cmp('a', 'b');		/* < 0 ('a' is lesser than 'b') */
+ cmp('aaa', 'aab');	/* < 0 ('aaa' is lesser than 'aab') */
+ cmp( [ 1, 2, 3 ],
+ 	[ 1, 2 ]);	/* > 0 ([1,2,3] is greater than [1,2]) */
+ cmp( [ 1, 'a', 3 ],
+ 	[ 1, "a", 3 ]);	/* 0 (both arrays are equal) */
+
+Arrays are first tested for number of elements (so bigger arrays are
+greater than arrays with fewer elements), and if both are equal, then each
+element is tested sequentially.
+
+The split() and join() functions can be used to convert strings into
+arrays and vice-versa. Examples:
+
+ /* sets a to [ 12, 'abcd', 356, '', 'xxx' ] */
+ local a = split('12:abcd:356::xxx', ':');
+ 
+ /* sets b to 12->abcd->356->->xxx */
+ local b = join(a, '->');
+
+The split() function can have a special separator, NULL, that makes it
+explode the string in characters:
+
+ /* sets c to [ 't', 'h', 'i', 's' ] */
+ local c = split("this");
+
+The splice() function can be used to delete, insert or replace a subset of
+a string with another one. It returns a two element array: one with the
+newly created string, and another with the deleted part. Examples:
+
+ local a = "This is a string";
+ 
+ /* original string, string to be inserted, position, chars to delete */
+ splice(a, 'not', 8, 0);	/* [ 'This is not a string', NULL ] */
+ splice(a, '', 5, 3);		/* [ 'This a string', 'is ' ] */
+ splice(a, 'can be', 5, 3);	/* [ 'This can be a string', 'is ' ] */
+
+The chr() and ord() functions return the character represented by a Unicode
+number and vice-versa:
+
+ ord('A');	/* returns 65 (ASCII or Unicode for A) */
+ chr(65);	/* return 'A' */
+
+The sprintf() function works like any other sprintf() implementation in
+the world: accepts a format string (with special, %-prefixed placeholders)
+and a list of arguments, and substitutes them.
+
+ sprintf("%s: %d", 'ERROR', 10);	/* returns 'ERROR: 10' */
+ sprintf("%04X", 16384);		/* return '4000' */
+
+The sscanf() function can be seen as the opposite of sprintf(): given a
+format string and a scanning string, extracts a set of strings and returns
+them as an array.
+
+ sscanf("name 100", "%s %d");		/* returns [ 'name', 100 ] */
+
+The standard %-commands can be used, as %d, %i, %u, %f and %x, for decimal,
+unsigned, floating point or hexadecimal numbers, %n, to return a matching
+offset, and %[, to match an explicit set of matching characters, than can
+be negated by adding a ^ after the bracket. As a non-standard extension, a
+special command %S is also implemented, that match a string upto the
+following substring in the format string. For example:
+
+ sscanf("key: value", "%S: %S"); 	/* returns [ 'key', 'value' ] */
+ sscanf("text words 1", "%S%d");	/* returns [ 'text words ', 1 ] */
+
+As in the standard, the format can include an optional number of maximum
+characters and a * to mark the matched string as non-interesting (so it's
+not returned).
+
+The sscanf() function also accepts an optional third argument with an
+offset to start scanning.
+
+Array functions
+~~~~~~~~~~~~~~~
+
+Arrays can be easily manipulated by using push(), pop(), shift(), adel()
+and ins():
+
+ /* an empty array */
+ ary = [];
+ 
+ /* add three values: ary will contain [ 10, 20, 30, 40 ] */
+ push(ary, 10); push(ary, 20); push(ary, 30); push(ary, 40);
+ 
+ /* delete and return last value; ary contains now [ 10, 20, 30 ]
+    and top contains 40 */
+ top = pop(ary);
+ 
+ /* shift() deletes from the beginning; ary contains now [ 20, 30 ] */
+ first = shift(ary);
+ 
+ /* ins() inserts an element in an array; ary contains now [ 20, 5, 30 ] */
+ ins(ary, 5, 1);
+ 
+ */ adel() does the opposite, delete values; ary is back [ 20, 30 ] */
+ deleted_item = adel(ary, 1);
+
+The seek() function searches sequentially for an exact value in an array,
+returning its offset if found, or -1 otherwise:
+
+ weekdays = [ 'monday', 'tuesday', 'wednesday', 'thurday', 'friday' ];
+ 
+ /* returns 2 */
+ seek(weekdays, 'wednesday');
+
+The sort() function returns a sorted copy of the array sent as argument:
+
+ sorted_weekdays = sort(weekdays);
+
+The sorting is done with the cmp() function (see above); if another kind of
+sort is wanted, the 2-argument version must be used, as mentioned
+previously in the _Subroutines_ section.
+
+Whenever a change must be done on every element of an array, the map()
+function can be useful and much faster than iterating the array using
+foreach() and storing the changes in another one.
+
+The second argument of map() can be an executable value accepting one
+argument, that will be set to each element of the array. The return
+value will be used as the new value:
+
+ /* a function to multiply by 10 its unique argument */
+ sub multiply_by_10(val)
+ {
+ 	val * 10;
+ }
+ 
+ /* an array of values */
+ a = [ 1, 5, 3, 7, 30, 20 ];
+ 
+ /* a_by_10 will contain [10, 50, 30, 70, 300, 200 ] */
+ a_by_10 = map(a, multiply_by_10);
+
+Of course, the executable value can be an anonymous subroutine:
+
+ /* Creates a zero-filled version of the numbers in a */
+ a_zero_filled = map(a, sub(e) { sprintf("%04d", e); });
+
+The second argument of map() can also be a hash to directly
+map keys to values:
+
+ /* numerals as keys, names as values */
+ english_nums = { 1 => "one", 2 => "two", 3 => "three" };
+ 
+ /* translated_nums will have [ "one", "two", "three" ] */
+ translated_nums = map([ 1, 2, 3 ], english_nums);
+
+Another powerful array function is grep(); it matches a regular
+expression on an array and returns a new one containing all
+elements that matched:
+
+ a = [ 1, 9, "mix190", 4, "foo", 9000 ];
+ 
+ /* b is [ 9, "mix190", 9000 ] */
+ b = grep(a, '/9/');
+
+The second argument of grep() can also be an executable value,
+that will accept each element of the array on each call. The
+output array will contain all elements for which the function
+call returned true:
+
+ /* return all elements greater than 10 */
+ a = [ 1, 45, 20, 4, 0, 1000 ];
+ 
+ /* b is [ 45, 20, 1000 ] */
+ b = grep(a, sub(e) { e > 10; });
+
+If no element were generated, NULL is returned (instead of
+an empty array).
+
+Other lower level array functions are expand() and collapse().
+The expand() function opens space in an array:
+
+ ary = [ 1, 2, 3, 4 ];
+ 
+ /* ary will have two more elements at offset 3,
+    containing [ 1, 2, 3, NULL, NULL, 4 ] */
+ expand(ary, 3, 2);
+
+On the opposite, collapse() deletes space:
+
+ /* deletes 3 elements at offset 1: ary is now [ 1, NULL, 4 ] */
+ collapse(ary, 1, 3);
+
+Take note that expand() and collapse() manipulate the array
+directly (i.e. they don't return a new array).
+
+Hash functions
+~~~~~~~~~~~~~~
+
+The hsize() function returns the number of pairs in a hash:
+
+ /* returns three */
+ num = hsize( { 1 => 'one', 2 => 'two', 3 => 'three' });
+
+Take note that size() cannot be used for this purpose, as it returns the
+number of buckets in the hash (which is probably of no use for you).
+
+If the existence of a pair must be tested, the exists() function is handy:
+
+ h = { 'a' => 1000, 'b' => 0, 'c' => 3000 };
+ 
+ /* this is true */
+ if (exists(h, 'b')) print("B exists\n");
+ 
+ /* this is not, as 0 does not evaluates as true */
+ if (h['b']) print("B is true\n");
+
+The keys() function returns an array with the keys of a hash:
+
+ /* will contain [ 'a', 'b', 'c' ] */
+ h_keys = keys(h);
+
+The hdel() function deletes a pair given its key. The deleted value is
+returned:
+
+ /* deletes 'c' and returns its value (3000) */
+ c_value = hdel(h, 'c');
+
+Type-checking functions
+~~~~~~~~~~~~~~~~~~~~~~~
+
+There are three functions to test a type of a value: is_exec(), is_hash()
+and is_array(). They return true if the tested value is executable, a hash
+or an array, respectively.
+
+On this implementation, executable and hash values are also arrays, so if
+you need to act differently on the type of a value, the correct order is
+is_exec(), is_hash() and is_array(), as in the following example:
+
+ if (is_exec(v)) { print("v is executable\n"); }
+ else
+ if (is_hash(v)) { print("v is a hash with ", hsize(v), " pairs\n"); }
+ else
+ if (is_array(v) { print("v is an array with ", size(v), " elements\n"); }
+ else
+ 	print("v is a scalar\n");
+
+Regular expression matching
+---------------------------
+
+Regular expression matching is done with the regex() function. In the simpler
+of its forms, it can be used to test if a string matches:
+
+ /* hours, minutes, seconds */
+ v = "07:55:35";
+ 
+ if (regex(v, "/^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$/"))
+ 	print("The v variable contains a valid time\n");
+
+The regular expression can contain flags; those are `i', for case
+insensitiveness, `l', to select the last matching instead of the first,
+`m', to treat the string as a multiline one (i.e., one containing \n
+characters), where the special ^ and $ markup match beginning and end of
+lines and not the beginning or end of the string, or `g', to do a global
+matching (return _all_ matching strings). Flags are written after the
+final slash.
+
+Regex() returns the matched string, or an array of matched strings if
+the `g' flag is used. If no match is found, NULL is returned.
+
+ v = "The value of PI is 3.1416, more or less";
+ 
+ pi = regex(v, "/[0-9]+\.[0-9]+/");
+
+If regex() is called without arguments, it returns the last match as an array
+of two elements; the first contain the offset of the matched strings, and the
+second, the size in characters of it. If last match was unsuccessful, NULL is
+returned.
+
+ /* get the match of the previous example */
+ coords = regex();
+ 
+ /* prints 19:6 */
+ print(coords[0], ":", coords[1], "\n");
+
+Regex() can include an optional third argument, the offset where the regular
+expression matching must start (instead of 0, the beginning of the string).
+This can be used to extract many values from the same string:
+
+ /* lets extract all numbers in the following string: */
+ s = "There is 10 and 35 and 42 in the number 103542!";
+ offset = 0;
+ 
+ while (n = regex(s, "/[0-9]+/", offset)) {
+ 	local c;
+ 
+ 	/* print result */
+ 	print(n, "\n");
+ 
+ 	/* get the coordinates */
+ 	c = regex();
+ 
+ 	/* start from there (previous match offset + size) */
+ 	offset += c[0] + c[1];
+ }
+
+Though, for this particular example, the `g' flag could be more suitable:
+
+ /* return all numbers in one step */
+ foreach (i, regex(s, '/[0-9]+/g'))
+ 	print(i, "\n");
+
+For more complex situations, the second argument of regex() can be an array
+of regular expressions (instead of a string). Those expressions will tried
+one after the other on the string, each one using the offset returned by
+the previous one. If all of them are matched, an array with the matched strings
+is returned.
+
+ /* match pairs of key=value commands, with many variants */
+ v1 = "key1=value1";
+ v2 = " KEY2 = value2";
+ v3 = "key3=333  ";
+ 
+ /* array regex: a regex for each part */
+ r = regex(v1, [ "/\s*/",    /* possible leading blanks (0) */
+             "/[a-z0-9]+/i", /* the key (1) */
+             "/\s*=\s*/",    /* optional blanks, the = , more blanks (2) */
+             "/[a-z0-9]+/i"  /* the value (3) */
+           ]);
+ 
+ if (r != NULL) {
+ 	/* the key is the element #1 and the value the #3 */
+ 	key = r[1];
+ 	value = r[3];
+ }
+
+Regular expression substitutions
+--------------------------------
+
+The sregex() function can be used to substitute the matching part of a
+string with another string. The simplest form:
+
+ /* substitute all characters in password with asterisks */
+ sregex(password, '/./g', '*');
+
+The substitution part can also be a hash:
+
+ /* substitute \n, \r, etc with their equivalents */
+ sregex(var, "/\\[rnt]/g", {
+	'\r'	=>	"\r",
+	'\n'	=>	"\n",
+	'\t'	=>	"\t"
+	});
+
+Or even a function:
+
+ /* zero-pad all numbers in var */
+ sregex(var, '/[0-9]+/g', sub (m) {
+	sprintf("%04d", m);
+	});
+
+The regular expression can contain flags; those are `i', for
+case-insensitive matching, and `g', for global replacements (all ocurrences
+in the string will be replaced, instead of just the first found).
+
+Input/Output operations
+-----------------------
+
+File operations are done by opening files with the open() call. It accepts
+two arguments, the file and the mode:
+
+ /* open in read mode */
+ local i = open('existingdata.dat', 'r');
+ 
+ /* open in write mode (create) */
+ local o = open('newdata.dat', 'w');
+
+The opening mode is the same as the one in the fopen() C library call, so
+other combinations exist.
+
+If the file cannot be open or created, NULL is returned.
+
+The read() function returns a line read from a file descriptor, or NULL if
+no more lines can be read (i.e. on EOF). A line is considered from the
+current file position until an end of line mark (\n or \r\n). All files
+under MPSL are considered as text ones; before the read() call returns, the
+string is converted to wide chars (the internal representation of strings
+in MPSL) by using the current locale definitions, unless a explicit
+encoding is set by calling encoding() (see below).
+
+The opposite of read() is write(); it accepts a file descriptor and a
+string to be written. As read(), the string is converted from wide chars by
+using the current locale definitions unless a different encoding() was set.
+The write() function does not write an end of line, though.
+
+Similar functions getchar() and putchar() exist to read and write
+characters instead of lines. This functions don't do any locale nor
+encoding conversions.
+
+The unlink() function can be used to delete files, chmod() to set the mode
+and chown() to set the owner.
+
+The stat() function returns an array containing information about a file,
+similar to the C library function of the same name. The returned values
+are: device number, inode, mode, number of links, uid, gid, rdev, size,
+atime, mtime and ctime. Take note that not all values has meaning depending
+on the filesystem or the architecture. The `mode' argument can be used in
+chmod() and `uid' and `gid' in chown(). If the file does not exist, stat()
+returns NULL (which is a good way to test for file existence).
+
+The glob() function accepts a file spec as the only argument and returns
+an array of filenames matching it. Directories have a / as the last
+character. The file spec and the returned files are system-dependent, but
+always usable by open().
+
+The popen() and pclose() function calls are used for piping from / to
+programs. Pipes can be open for reading ('r' mode), for writing ('w' mode),
+or bidirectional (by appending '+' to the mode, which can be used to
+communicate two-way with programs like ispell, smtp servers and such). Once
+open, the read() and write() functions can be used the same as in plain
+files.
+
+As mentioned above, the encoding() function can be used to force the
+reading or writing conversions to be done when doing IO. By default, the
+current locale is used, and it's the same as calling encoding() without
+arguments. If an encoding is forced, reading and writing is done by using
+the selected converter. Take note that support for the `iconv' library must
+be compiled in; if it's not, a special, ad-hoc converter called "utf-8"
+is always available.
+
+Each file can have a different encoding converter and is selected at open()
+time.
+
+A snippet to convert a file from current locale to iso8859-1 can be:
+
+ sub convert_to_iso8859_1(fromfile, tofile)
+ {
+ 	local i, o, l;
+ 	local ret = 0;
+ 
+ 	/* open the file first */
+ 	if ((i = open(fromfile, 'r')) == NULL)
+ 		return -1;
+ 
+ 	/* set encoding to iso8859-1 (can fail) */
+ 	if (encoding("iso8859-1") < 0) {
+ 		close(i);
+ 		return -2;
+ 	}
+ 
+ 	/* create the new file now; it will have iso8859-1
+ 	   encoding as it's the last encoding set. The input
+ 	   file keeps its original encoding */
+ 	if ((o = open(tofile, 'w')) != NULL) {
+ 		while (l = read(i))
+ 			write(o, l);
+ 
+ 		close(o);
+ 	}
+ 	else
+ 		ret = -3;
+ 
+ 	/* close input and revert to default encoding */
+ 	close(i);
+ 	encoding();
+ 
+ 	return ret;
+ }
+
+The load() function can be used to load, compile and execute an MPSL
+source file. The file will be searched for using the paths in the INC
+array.
+
+Multitasking
+------------
+
+Since version 2.x, MPSL includes native multitasking / multithreading
+support.
+
+To execute a subroutine asynchronously, prepend the function call with
+a & (ampersand).
+
+ /* saves the results in a different thread */
+ &save_data(filename, data);
+
+To ease thread synchronisation, two objects are now available: mutexes
+and semaphores. The semantics are as usual.
+
+ /* creates a new mutex */
+ local m = mutex();
+ 
+ /* locks a mutex */
+ mutex_lock(m);
+ 
+ /* unlocks it */
+ mutex_unlock(m);
+ 
+ /* creates a semaphore */
+ local s = semaphore();
+ 
+ /* waits on a semaphore */
+ semaphore_wait(s);
+ 
+ /* posts to a semaphore (waking up threads waiting on it) */
+ semaphore_post(s);
+
+Though not explictly thread-related, the sleep() function suspends
+the thread a specific number of milliseconds.
+
+ /* sleeps for a second */
+ sleep(1000);
+
+Special symbols
+---------------
+
+ARGV
+~~~~
+
+Stores the command line arguments sent to the main() function.
+
+INC
+~~~
+
+Holds an array of paths on disk where source files will be searched
+for by the load() command.
+
+ERROR
+~~~~~
+
+Stores the last severe error message (compilation errors, etc.).
+
+ERRNO
+~~~~~
+
+Stores the last error message from the system (file not found, etc.).
+
+STDIN, STDOUT, STDERR
+~~~~~~~~~~~~~~~~~~~~~
+
+The famous standard file descriptors. Can be used in read(), write()
+and related functions.
+
+HOMEDIR
+~~~~~~~
+
+The home directory for the current user. It's supposed to be a writable
+directory where users can store their configuration and documents.
+
+APPDIR
+~~~~~~
+
+The application directory.
+
+ENCODING
+~~~~~~~~
+
+The last successful charset encoding set by the encoding() function.
+
+TEMP_ENCODING
+~~~~~~~~~~~~~
+
+Similar to ENCODING, but used only when opening a file for writing and
+if ENCODING is not set. After opening, its content is destroyed.
+
+DETECTED_ENCODING
+~~~~~~~~~~~~~~~~~
+
+Filled after each file opening in read mode, if a specific charset
+encoding could be found. Can be copied onto ENCODING or TEMP_ENCODING.
+
+MPSL.VERSION
+~~~~~~~~~~~~
+
+Stores the MPSL version as a string.
+
+MPDM()
+~~~~~~
+
+This is an accessor / mutator function that allows to retrieve information
+and tune some values for the MPDM (Minimum Profit Data Manager). If called
+without arguments, the current values are returned. A hash can be sent as
+argument to change some of them. These are the keys:
+
+ * count: Total number of values being managed (read only).
+ * hash_buckets: The default number of buckets a hash will use. It must
+   be a prime number (read / write).
+
+The default values are the best for normal usage. Of course, you only must
+change any of them if you know what you are doing.
+
+Examples:
+
+ /* set a bigger value for hash buckets */
+ MPDM( { 'hash_buckets' => 127 });
+ 
+ /* dump current setup */
+ dump(MPDM());
+
+----
+ttcdt <dev@triptico.com>

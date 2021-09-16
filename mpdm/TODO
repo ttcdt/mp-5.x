@@ -1,0 +1,278 @@
+Minimum Profit Data Manager (MPDM) TODO / Bug List
+==================================================
+
+Release Critical Bugs
+---------------------
+
+None!
+
+Open Bugs
+---------
+
+ * 1056: Update the overview document.
+ * 1124: Fix win32 glob().
+ * 1125: Fix win32 chmod().
+
+Pending Enhancements
+--------------------
+
+ * 1008: bread().
+ * 1009: bwrite().
+ * 1130: Move all file operations (chmod, etc.) to MPSL.
+
+Closed
+------
+
+ * 1000: All string operations should use wchar_t instead of char
+   (Closed by: #1001; Sat, 3 Jul 2004 11:14:00 +0200).
+ * 1001: Merge mpdm-branch-wchar
+   (Closes: #1000; Sun, 4 Jul 2004 11:06:00 +0200).
+ * 1002: mpdm_aget() and mpdm_aset() should accept negative offsets
+   (Mon, 12 Jul 2004 17:44:00 +0200).
+ * 1012: mpdm_startup() and mpdm_shutdown() (Thu, 26 Aug 2004 20:10:02 +0200)
+ * 1013: Move the hardwired '16' number of minimum elements to an
+   struct _mpdm element, set from mpdm_startup()
+   (Thu, 26 Aug 2004 20:10:18 +0200).
+ * 1014: Create a new high threshold for values, to force calling
+   mpdm_sweep() from mpdm_new() if that threshold is overpassed (this
+   will allow a limit to be imposed to the number of unreferenced
+   values) (Thu, 26 Aug 2004 20:26:21 +0200).
+ * 1019: Rework mpdm_dump() to avoid using dynamic values
+   (Wed, 08 Sep 2004 21:52:39 +0200).
+ * 1020: Set errno on errors (Discarded; Thu, 07 Oct 2004 17:11:52 +0200).
+ * 1003: Beyond ties; suppress all flags (except some internal ones as IVAL
+   or EXEC). Everything should be done with ties; for example, there
+   should exist a _CMP tie function that would be executed when two
+   values being compared have the same tie (or, better, the same _CMP
+   function). Specially, MPDM_STRING and MPDM_MULTIPLE should disappear.
+   A value will be assumed multiple when having a tie function _AEXPAND
+   (or _AGET, or so). Code will become incidentally clean (no more "if
+   flags & MPDM_" scattered through the code). Risky change!
+   (Discarded; Wed, 08 Dec 2004 09:48:27 +0100).
+ * 1005: Should ties be in a special source file, mpdm_t.c ?
+   (Discarded; Wed, 08 Dec 2004 09:49:06 +0100).
+ * 1011: Will the scripting language be included here, or as a
+   separated package? it could poison the mpdm concept as a 'low
+   level utility library' (Yes; Wed, 08 Dec 2004 09:51:55 +0100).
+ * 1010: Find a name for the scripting language (Mpsl should be
+   fine; Wed, 08 Dec 2004 09:52:32 +0100).
+ * 1026: Make the _mpdm control structure public
+   (Wed, 08 Dec 2004 11:34:54 +0100).
+ * 1025: Change non-dyn values. They should be stored in a pool of
+   values, and 'allocated' from within mpdm_new(). Two macros, for
+   instance MPDM_ND_BEGIN() and MPDM_ND_END(), could save
+   / restore a static index to that pool. Instead, the allocation
+   from the pool would just wrap (Wed, 08 Dec 2004 16:52:21 +0100).
+ * 1030: non-dyn array values are completely broken; the creation
+   should include the array of values and not take it from mpdm_alloc().
+   (Wed, 08 Dec 2004 19:16:05 +0100).
+ * 1031: Size in MPDM_ND_A() is superfluous, as it can be calculated
+   (Wed, 08 Dec 2004 22:12:57 +0100).
+ * 1033: Create a new mpdm_hexists() function
+   (Thu, 09 Dec 2004 11:19:03 +0100).
+ * 1037: Add caching support in values for real numbers (like ival).
+   (Sun, 12 Dec 2004 17:54:34 +0100).
+ * 1043: Change mpdm_write() so that it doesn't use printf(), but
+   wcstombs() and an small local buffer (Mon, 20 Dec 2004 08:41:20 -0800).
+ * 1045: mpdm_dump() should not use printf() for mpdm_string(), but
+   convert by hand using wcstombs() (Mon, 20 Dec 2004 08:44:52 -0800).
+ * 1044: mpdm_write() should include a 3rd argument, a separator
+   for the end of line (Mon, 20 Dec 2004 08:54:39 -0800).
+ * 1048: mpdm_rval() breaks locales (Wed, 05 Jan 2005 16:05:52 +0100).
+ * 1047: Change _mpdm_sym() to force the creation of all intermediate
+   arrays or hashes in the way. Also, it does not make much sense to
+   be in plain mpdm; it should be part of mpsl (Discarded;
+   Sat, 08 Jan 2005 21:30:55 +0100).
+ * 1016: Add optional iconv support
+   (Closed by #1055; Thu, 10 Mar 2005 13:26:54 +0100).
+ * 1054: Add a main() function, similar to the filp one
+   (Not applicable; Fri, 18 Mar 2005 06:46:06 +0100).
+ * 1032: Nondyn arrays must be protected in mpdm_aexpand(),
+   mpdm_acollapse(), etc (Fri, 18 Mar 2005 08:00:28 +0100).
+ * 1004: Create a tie function for mpdm_dump()
+   (No; Fri, 18 Mar 2005 08:04:19 +0100).
+ * 1057: Iconv objects can't be reused for different files, so
+   current implementation is faulty. Each iconv_t variable should
+   be stored inside the file value (Fri, 25 Mar 2005 02:24:10 +0100).
+ * 1055: Iconv support works, but is nearly useless; iconverters
+   should be associated to file descriptors, which are the only
+   place where iconv will really be used (Fri, 25 Mar 2005 03:04:26 +0100).
+ * 1058: Changeset on "2005-03-25 02:26 CET" (file descriptors in their's
+   own structure) broke mpsl (SIGSEGV's on compiling from file). Last
+   working version was "cvs update -D '2005/03/25 02:26'"
+   (Bug is in mpsl; Fri, 25 Mar 2005 12:17:21 +0100).
+ * 1015: The auto-sweep introduced by _mpdm.high_threshold is
+   extremely unsafe. At least, internal parts of mpdm should be
+   autosweep-safe (high_threshold abandoned; Mon, 28 Mar 2005 16:40:38 +0200).
+ * 1059: Get rid of ties. They are flexible and sexy, but add a complexity
+   that isn't worth (Sun, 03 Apr 2005 16:38:44 +0200).
+ * 1018: Support for optional features (like gdbm) should be stored
+   in an mpdm array or hash to easily ask for capabilities (gdbm support
+   dropped, and no other optional features; Sun, 03 Apr 2005 16:39:19 +0200).
+ * 1027: Store all static _tie... values in ties in the main
+   control structure (ties no longer exist; Sun, 03 Apr 2005 16:40:12 +0200).
+ * 1029: Store the regex cache in the main control structure
+   (Sun, 03 Apr 2005 16:40:32 +0200).
+ * 1028: With the closing of bugs #1026, #1027 and #1029, it should be
+   easy to have multiple mpdm engines, just by commuting the _mpdm
+   pointer. So, there should exist an mpdm_cleanup() function,
+   that would, after destroying values by calling mpdm_shutdown(),
+   free the rest of values stored inside. This kind of cleanup should
+   not be necessary on normal shutdown, as memory will be freed by
+   the operating system anyway (Doesn't seem necessary nor useful;
+   Mon, 04 Apr 2005 18:51:48 +0200).
+ * 1062: sprintf() (Not applicable, it should be implemented on mpsl instead;
+   Mon, 11 Apr 2005 17:52:38 +0200).
+ * 1060: Some old Unix systems (for example, IRIX) and mingw32
+   don't have the mbrtowc() function (they do have mbtowc(), though)
+   (Tue, 12 Apr 2005 18:55:42 +0200).
+ * 1017: Add optional gettext support (Sat, 16 Apr 2005 11:05:31 +0200).
+ * 1064: There should exist some way to detect the lack of gettext
+   support and set a translation hash (Closed by #1065;
+   Sat, 16 Apr 2005 11:32:11 +0200).
+ * 1071: The _cache_18n hash in mpdm_s.c has be moved to the main control
+   structure (Thu, 26 May 2005 14:01:17 +0200).
+ * 1072: mpdm_v should be renamed to mpdm_t (Thu, 26 May 2005 17:34:27 +0200).
+ * 1067: Get rid of symbols prefixed with _ (Thu, 26 May 2005 17:59:17 +0200).
+ * 1068: Rewrite the circular list of values as a double-list (i.e., with
+   links to previous) (Thu, 26 May 2005 18:48:56 +0200).
+ * 1069: The mpdm_free() function should dequeue the value about to be
+   destroyed; this way, it could be called from other functions, like
+   mpdm_unref() (Thu, 26 May 2005 18:48:56 +0200).
+ * 1070: Modify mpdm_unref() to optionally destroy a value when its
+   reference count gets to 0 (needs #1068 and #1069 closed) (No. This is not
+   that a good idea, as there are many places where values are referenced to
+   zero and later used, as in mpdm_asort(), or where semantics change, for
+   example, when mpdm_aset() returns the previous value;
+   Thu, 26 May 2005 20:28:33 +0200).
+ * 1073: Add a wcwidth() implementation for systems lacking it (for
+   example, mingw32) (Mon, 11 Jul 2005 07:55:31 +0200).
+ * 1074: Add multiline regex strings (Mon, 11 Jul 2005 15:57:06 +0200).
+ * 1076: If the string to be matched cannot be converted to mbs, both
+   mpdm_regex() and mpdm_sregex() abort (Sat, 22 Oct 2005 13:59:12 +0200).
+ * 1077: mpdm_mbstowcs() should return "" instead of NULL when converting
+   an empty string (Sat, 22 Oct 2005 18:00:50 +0200).
+ * 1075: mpdm_regex() is broken in UTF-8 environments,
+   as it's assuming that the matching information returned by regexec()
+   (in byte count) can be directly used as wchar_t offsets
+   (Sat, 22 Oct 2005 18:12:20 +0200).
+ * 1078: mpdm_sregex() is broken in UTF-8 environments,
+   as it's assuming that the matching information returned by regexec()
+   (in byte count) can be directly used as wchar_t offsets
+   (Sat, 22 Oct 2005 22:50:51 +0200).
+ * 1079: Previous match information for regexes contain wrong
+   values if the string to be matched is multibyte
+   (Sun, 23 Oct 2005 21:21:43 +0200).
+ * 1080: Related to #1079, multiline regexes don't work in
+   multibyte locales, as it's also relying on rm containing
+   offsets in characters (Sun, 23 Oct 2005 21:35:08 +0200).
+ * 1081: Document all the MPDM_ macros (Tue, 22 Nov 2005 17:03:40 +0100).
+ * 1082: Add categories to mp_doccer documentation
+   (Tue, 22 Nov 2005 17:03:45 +0100).
+ * 1065: There should exist some way to detect lack of gettext support
+   in runtime to add implementation-specific workarounds as, for
+   example, filling the i18n cache manually. This is something like
+   a reopening of bug #1018 (Implemented by returning failure from
+   mpdm_gettext_domain(); Thu, 19 Jan 2006 08:15:21 +0100).
+ * 1084: As mpdm_sregex() now executes code, all values should be
+   referenced to avoid undesired sweeps (Mon, 13 Feb 2006 09:12:41 +0100).
+ * 1083: Add pipe support (Tue, 09 May 2006 18:02:19 +0200).
+ * 1087: Add pipe support for win32 (Fri, 12 May 2006 08:04:30 +0200).
+ * 1086: Add a way to get the 'library' (/usr/PREFIX/share on Unix
+   and the "Program Files" directory on Windows) and 'home' (~ and
+   "My Documents") directories (Fri, 12 May 2006 13:26:32 +0200).
+ * 1088: mpdm_sprintf() (Tue, 23 May 2006 18:07:58 +0200).
+ * 1091: Change CONFOPT_NULL_HASH to a runtime switch using an
+   environment variable (Wed, 13 Sep 2006 16:07:18 +0200).
+ * 1006: stat() (Tue, 10 Oct 2006 13:00:54 +0200).
+ * 1007: chmod() (Tue, 10 Oct 2006 13:00:54 +0200).
+ * 1089: Change mpdm_cmp() to use wcscoll() instead of wcscmp()
+   (Tue, 10 Oct 2006 13:54:36 +0200).
+ * 1092: fseek() (Thu, 12 Oct 2006 09:54:34 +0200).
+ * 1093: ftell() (Thu, 12 Oct 2006 09:54:34 +0200).
+ * 1090: Sort the array in mpdm_glob() to show directories first
+   (Fri, 10 Nov 2006 17:32:27 +0100).
+ * 1095: The %c directive in sprintf() should work with Unicode
+   (or wchar_t) characters (Mon, 11 Jun 2007 08:42:02 +0200).
+ * 1096: On mpdm_sregex(), substitute all unescaped & with the regex match
+   (Mon, 18 Jun 2007 12:23:37 +0200).
+ * 1097: Fixed a bug in offset processing in mpdm_sregex()
+   (Mon, 18 Jun 2007 13:54:24 +0200).
+ * 1098: mpdm_cmp(NULL, NULL) should return 0
+   (Wed, 12 Sep 2007 09:50:08 +0200).
+ * 1100: Allow for a component in a 'symbol' managed by mpdm_sym() to
+   be an executable (Tue, 25 Sep 2007 18:13:38 +0200).
+ * 1099: mpdm_cmp() should be optimized to return 0 if two arrays
+   are *the same* (Closed by 1102; Fri, 28 Sep 2007 13:01:55 +0200).
+ * 1102: Optimize mpdm_cmp() when comparing the same values
+   (Fri, 28 Sep 2007 13:10:44 +0200).
+ * 1107: Implement functions to set the ival and rval of a value
+   (Thu, 29 Nov 2007 09:07:33 +0100).
+ * 1106: Implement a function to get the file handle of an MPDM_FILE type
+   (Thu, 29 Nov 2007 13:12:48 +0100).
+ * 1085: Use const wherever possible (Fri, 18 Jan 2008 14:10:12 +0100).
+ * 1108: Fix the %% usage in mpdm_sprintf()
+   (Sun, 30 Mar 2008 17:41:02 +0200).
+ * 1061: On IRIX, iconv() doesn't have the "WCHAR_T" charset, so
+   iconv support doesn't seem to work there; but it has "UCS-4", which
+   is practically the same and it works, so there should be some
+   workaround to use it whenever "WCHAR_T" fails
+   (Mon, 07 Apr 2008 14:55:30 +0200).
+ * 1109: expand_ampersands() kills all backslashes
+   (Tue, 03 Feb 2009 07:25:21 +0100).
+ * 1110: Win32 file globbing fails when a leading directory is specified
+   (Wed, 25 Mar 2009 17:04:29 +0100).
+ * 1111: Document mpdm_sscanf() (Wed, 26 Aug 2009 09:07:01 +0200).
+ * 1112: Document the `DETECTED_ENCODING' variable
+   (Wed, 26 Aug 2009 09:40:03 +0200).
+ * 1113: Document the `TEMP_ENCODING' variable
+   (Wed, 26 Aug 2009 09:40:03 +0200).
+ * 1114: Fixed mpdm_sset() when the previous-to-last value to be
+   assigned is executable (Tue, 22 Dec 2009 10:05:12 +0100).
+ * 1066: Implement a minimum time-to-live for values; never referenced values
+   younger than that will never be swept. Values under explicit [un]ref()
+   control won't have this, as they (should) never be used after being
+   unreferenced, so TTL will be unset after being unreferenced to 0. Anyway,
+   as this could mask possible sweeping errors, it has not been implemented yet
+   (no longer applicable; Fri, 14 Jan 2011 12:31:28 +0100).
+ * 1094: Try an (optional) usage of pthreads to call sweep() in a low priority
+   thread, when nothing else is happening (no longer applicable;
+   Fri, 14 Jan 2011 12:31:28 +0100).
+ * 1105: Try another approach: store in the circular queue only the
+   unreferenced values; the others will be completely unqueued. This way,
+   values to be swept are immediately found. On the other side, mpdm_ref()
+   and mpdm_unref() will be much expensive, as they will en/dequeue values
+   depending of v->ref 0 or 1 (no longer applicable; Fri, 14 Jan 2011 12:31:28 +0100).
+ * 1120: Drop completely the garbage collection and convert it to a pure
+   reference-counting system (Fri, 14 Jan 2011 12:30:30 +0100).
+ * 1115: Invert mpdm_split() arguments (Thu, 03 Feb 2011 09:25:38 +0100).
+ * 1116: Invert mpdm_join() arguments (Thu, 03 Feb 2011 09:42:48 +0100).
+ * 1117: Invert mpdm_sscanf() arguments (Thu, 03 Feb 2011 10:08:28 +0100).
+ * 1119: Invert mpdm_sregex() arguments (Thu, 03 Feb 2011 13:10:49 +0100).
+ * 1118: Invert mpdm_regex() arguments (Thu, 03 Feb 2011 16:01:50 +0100).
+ * 1122: Modify MPDM_I() and MPDM_R() to move the sprintf()-ing of
+   the value to mpdm_string(). This will delay numbers' printable
+   representation until (or if) really needed
+   (Fri, 26 Aug 2011 20:28:57 +0200).
+ * 1121: Document MPDM_AA() (Wed, 31 Aug 2011 12:32:09 +0200).
+ * 1123: Add TCP/IP support (mainly to add "test for updates" for MP)
+   (Mon, 02 Apr 2012 15:18:07 +0200).
+ * 1101: Move mpdm_sym(), mpdm_sget() and mpdm_sset() to MPSL, as they
+   don't really belong here (Mon, 21 May 2012 17:09:22 +0200).
+ * 1063: Implement copy-on-write on array cloning (Discarded;
+   Fri, 21 Dec 2018 08:08:16 +0100).
+ * 1127: Do not ref/unref arrays and hashes
+   (Mon, 24 Dec 2018 15:32:54 +0100).
+ * 1126: Channels may possibly be implemented with only one set
+   of array + mutex + semaphore (instead of two) (Channels completely
+   discarded; Wed, 20 Feb 2019 11:25:00 +0100).
+ * 1128: Implement tar (file) reading (moved to MPSL;
+   Wed, 20 Feb 2019 11:25:35 +0100).
+ * 1129: Implement tar (in memory) reading (moved to MPSL;
+   Wed, 20 Feb 2019 11:25:47 +0100).
+ * 1103: mpdm_home_dir() calls strcat() insecurely
+   (Wed, 20 Feb 2019 11:42:45 +0100).
+ * 1104: mpdm_app_dir() calls strcat() insecurely
+   (Wed, 20 Feb 2019 11:45:54 +0100).
+
+Email bugs to angel@triptico.com

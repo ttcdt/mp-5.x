@@ -1,3 +1,20 @@
+sub mpsl_syn_token_list()
+{
+    local l = [];
+
+    foreach (v, t, MPSL.CORE) {
+        l->push(t);
+
+        /* if this token is an object, iterate it */
+        if (type(v) == "object") {
+            foreach (sv, st, v)
+                l->push(st);
+        }
+    }
+
+    return l;
+}
+
 {
     id:         'mpsl',
     name:       'MPSL',
@@ -7,10 +24,10 @@
             mp.syn_token_list(
                 [
                     'if', 'else', 'while', 'foreach', 'for',
-                    'sub', 'break', 'return', 'eq', 'ne'
+                    'sub', 'break', 'return'
                 ]
             ),
-            mp.syn_token_list(MPSL.CORE->map(sub (v, i) { i; }))
+            mp.syn_token_list(mpsl_syn_token_list())
         ],
         'word2', [
             "/(NULL|local|global|this)/"
@@ -47,5 +64,6 @@
     'build_targets' => [
         'check %s',
         'execute %s'
-    ]
+    ],
+    'complete_func' => sub (o, d) { d->complete(mpsl_syn_token_list()); return 1; }
 };

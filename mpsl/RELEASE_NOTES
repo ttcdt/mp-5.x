@@ -1,0 +1,425 @@
+MPSL Release Notes
+==================
+
+2.70
+----
+
+* Internal changes:
+
+The repository has been moved in mp-5.x.
+
+2.69
+----
+
+* Important changes:
+
+Function connect() has been renamed to socket.connect().
+
+Function server() has been renamed to socket.server().
+
+Function accept() has been renamed to socket.accept().
+
+* New functions:
+
+socket.timeout(sock, r_to, s_to), to set a socket's receiving and/or sending timeouts (in seconds, with optional second fractions). If any timeout is NULL, it's not touched.
+
+2.68
+----
+
+* Internal changes:
+
+Use mpdm_data() where possible.
+
+2.67
+----
+
+* New features:
+
+The / operator also works on strings, behaving like split().
+
+inc_fopen() also accept external ZIP files.
+
+2.66
+----
+
+* Internal changes:
+
+New version to match an API change in MPDM 2.76.
+
+2.65
+----
+
+* New features:
+
+New function unicode.nfd() for Unicode NFD normalization.
+
+New function unicode.nfc() for Unicode NFC normalization.
+
+* Important changes:
+
+The function base64enc() has been renamed to base64.enc().
+
+Mutex functions have been renamed to mutex.new(), mutex.lock() and mutex.unlock().
+
+Semaphore functions have been renamed to semaphore.new(), semaphore.wait() and semaphore.post().
+
+* Bug fixes:
+
+mpsl_decompile() output has meaning again.
+
+Corner cases in mpsl_set_symbol() and set_local_symbols().
+
+2.64
+----
+
+* New features:
+
+If the object created by new() has an __init__() method (populated by the class/base objects), it's executed with the newly created object as its unique argument. It MUST return the same object or NULL if the object has been destroyed due to a failed initialization.
+
+* Important changes:
+
+The (already deprecated) function keys() no longer exist. Use map(index) instead.
+
+2.63
+----
+
+* New features:
+
+New function base64enc().
+
+New function valueptr().
+
+* Changes:
+
+The classic compiler (implemented with Flex + YACC) is no longer enabled by default. If you want it back, add the argument `--enable-classic-compiler' to config.sh.
+
+2.62
+----
+
+* New features:
+
+New function md5(), that returns the MD5 of a string as an hexadecimal string.
+
+2.61
+----
+
+* New features:
+
+New function server(addr, port), that creates a socket in listen mode.
+
+New function accept(sock), that accepts a connection from a server socket created by mpdm_server().
+
+2.60
+----
+
+* Changes:
+
+Deleted mpsl_find_in_embedded_tar() (use mpdm_read_arch_mem_s()).
+
+2.59
+----
+
+* New features:
+
+New function flock(). Implements UNIX's flock(). Does nothing under win32.
+
+2.58
+----
+
+* New features:
+
+New function resource(), that returns source code or data from the INC variable.
+
+2.57
+----
+
+* Important changes:
+
+Updated maintainers.
+
+2.56
+----
+
+* New features:
+
+New function swap(). It's only meant as a special construction to be used with omap(), to create a new object swapping their values and keys. It must be used to replace the usage of omap() without arguments, that will be rendered obsolete in next MPDM version.
+
+2.55
+----
+
+* Changes:
+
+Changed mpsl_find_in_embedded_tar() to use an mpdm_t.
+
+2.54
+----
+
+* New features:
+
+The ad-hoc compiler now accepts source code with utf-8 characters without problems.
+
+New function chomp().
+
+The INC array can be NULL to use load() with direct paths.
+
+New function index(). It's only meant as a special construction to be used with map() to get the indexes of an iterator, so that constructions like `iterable->map(sub (v, i) { i; } );' can be written as `iterable->map(index)' to get the same results.
+
+* Important changes:
+
+The hmap() function has been renamed to omap().
+
+2.53
+----
+
+* New features:
+
+New function feof().
+
+The ad-hoc compiler now takes into account files starting with #!.
+
+2.52
+----
+
+* New features:
+
+Constant folding can be disabled by setting the variable `MPSL.constant_fold' to 0.
+
+* Dropped features:
+
+support for the `~', `~=', `++', `--' and range operators have been deleted from the classic compiler.
+
+* Bug fixes:
+
+Some memory leaks.
+
+2.51
+----
+
+* New features:
+
+This release has the ad-hoc compiler (a-mpsl) as the default.
+
+The `*' operator now allows multiplication for number * number, string * number and array * number.
+
+The `-' operator now allows substraction for number - number, array - array, array - object, object - array and object - object.
+
+Division and module opcodes generate a "Division by zero" MPSL error instead of just crashing the program.
+
+2.30
+----
+
+* New features:
+
+New functions bitand(), bitor() and bitxor(). The associated operators no longer work.
+
+New functions bitshl() and bitshr(), replacing the `<<' and `>>' operators.
+
+New function pow() (power), replacing the `**' operator.
+
+New API function mpsl_constant_fold().
+
+The time() function now also contains fractional time.
+
+New operator `$', like an inverse call to fmt() (for example, `255 $ "%x"' returns "ff").
+
+New function escape(), to escape a range of characters in a string.
+
+* Changes:
+
+The `||=' operator has been changed to `|='.
+
+* Internal changes:
+
+Next major version will include an ad-hoc compiler, that will replace the current flex+yacc one. They will coexist and be switchable during some versions. Some internal changes has been necessary, but should not be noticeable.
+
+Some executor opcodes has been changed (again, should not be noticeable).
+
+* Dropped features:
+
+The `**' operator is no longer supported.
+
+The `&', `|', `^', `&=', `|=' and `^=' are no longer supported.
+
+The `>>', `<<', `>>=' and `<<=' operators are no longer supported.
+
+The strftime() function no longer exists, as it can done with fmt() and sprintf().
+
+The hsize() function no longer exists, use count().
+
+The hdel() function no longer exists, use del().
+
+The adel() function no longer exists, use del().
+
+* Bug fixes:
+
+Fixed return value for unlink() and rename() (-1 on errors).
+
+2.27
+----
+
+* Important changes:
+
+License change: released into the public domain.
+
+* New features:
+
+The `+' operator can be used for concatenating strings, arrays and objects. This makes the `~' operator redundant.
+
+The comparison operators `==', `!=', `<', `>', `<=' and `>=' can now be used to compare all types, not only numbers.
+
+The random() function now accepts arrays as arguments and NULL, to return a number from 0.0 to 1.0 (not included).
+
+New function regcomp(), to compile regexes.
+
+New function count(), to return the number of elements of any type.
+
+New conversion functions integer(), real() and string().
+
+The print() function now prints a space between arguments and always print an end of line.
+
+New function set(), to be used with applicable every type.
+
+New function del(), to be used with applicable every type.
+
+* Other changes:
+
+The old "scalar" type is now "string".
+
+The file_eol() function has been renamed to eol().
+
+* Dropped features:
+
+The functions is_array() and is_hash() no longer exist. Use type().
+
+2.25
+----
+
+* New features:
+
+A new foreach (v, i, a) construction, that iterates `a' setting `v' and `i' with each value and index.
+
+New function type(), that returns the type of a value as a string.
+
+New function get(), that returns an element of a set (like using []).
+
+New function file_eol(), that returns the EOL sequence detected in previous call to read().
+
+New function bool().
+
+Now map() can iterate scalars (i.e. integers), arrays, hashes or files. The filter can be undefined, so the values are returned untouched.
+
+In map(), filters that are strings are assumed to be regexps.
+
+The write() function now returns the fd instead of a byte count.
+
+New API function mpsl_find_in_embedded_tar().
+
+* Other changes:
+
+The version numbering has changed from X.X.X to X.XXX (real number).
+
+2.2.4
+-----
+
+* New features:
+
+Each component of the INC variable (where the path to programs is stored) can be executable.
+
+2.2.3
+-----
+
+* New features:
+
+New function getcwd().
+
+New function reverse().
+
+2.2.2
+-----
+
+* New features:
+
+The ~ operator is no longer limited to concatenating strings, but can be used to join all kinds of data values (like the one from MPSL 3.x).
+
+New operator ||= (so that `a ||= 2' is equivalent to `a = a || 2'.
+
+New operator ~= (so `a ~= b' is the same as `a = a ~ b').
+
+New function slice().
+
+2.2.1
+-----
+
+* New features:
+
+New function rename().
+
+* Bugfixes:
+
+Error in random().
+
+2.2.0
+-----
+
+* New features:
+
+By the new() operator and the usage of the -> operator as a method call, it helps implementing simple object-oriented programming.
+
+join() can also join arrays.
+
+New keyword `global', to define global variables.
+
+The map() and grep() functions also accept a hash as their first argument.
+
+New function hmap(), to map an array or hash to another hash.
+
+2.1.0
+-----
+
+* New features:
+
+New TCP/IP socket client support via the connect() function.
+
+The push() functions accepts a variable number of elements to be pushed into the array (not only one).
+
+New function tr(), to transliterate strings.
+
+New function strftime() (like C library's one).
+
+2.0.1
+-----
+
+* New features:
+
+An abbreviated way of defining hashes (ala JavaScript).
+
+* Bugfixes:
+
+Several fixes to for() construction: fixed incorrect calling order and for (;;) is accepted for infinite loops.
+
+2.0.0
+-----
+
+* New features:
+
+A new C-like for() control flow construction.
+
+Updated to match MPDM refactoring (no more sweeping / garbage collection).
+
+* New multithreading support:
+
+A function can be prefixed with & (ampersand) to execute it in a new thread; the new thread handler is returned.
+
+Support for mutex values.
+
+Support for semaphore values.
+
+* Changes:
+
+Any function argument not explicitly declared and sent as argument in the function call is stored in the local array _ (underscore).
+
+The adel() function no longer returns the deleted element.
+
+mpsl_compile_file() now has an additional argument holding the source file search path.
+
+The following functions had had their arguments swapped: split(), join(), sscanf(), map(), grep(), regex(), sregex().

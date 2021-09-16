@@ -1,0 +1,174 @@
+MPDM overview
+=============
+
+MPDM (Minimum Profit Data Manager) is a lightweight library that provides C
+programs with a rich set of useful data types as scalars, dynamic arrays
+or hashes, similar to those of the Perl language. Also, it contains a
+rudimentary garbage collector that alleviates the need to keep track of
+data no longer useful, as well as help for operating system abstraction
+and portability, regular expressions, string manipulation, character set
+conversions, localization and file I/O access.
+
+Values
+------
+
+The basic unit of information under MPDM is the _value_. It's declared
+inside the C code as a variable of mpdm_t type:
+
+ /* a MPDM value, initialized as NULL */
+ mpdm_t v = NULL;
+
+MPDM values can be single or multiple ones. A single value is a scalar and
+contains meaning by itself; a multiple one contains one or more MPDM
+values, that can be accessed by different means, depending on its nature.
+
+A value also has an internal reference count; when it's 0, the value is
+suitable for being swept by the garbage collector. The reference count of
+a value can be manipulated by calling mpdm_ref() and mpdm_unref() on it.
+Also, whenever a value is stored inside a multiple one, its reference count
+is automatically incremented, and decremented when deleted from it. All
+newly created values are unreferenced.
+
+Scalars
+-------
+
+The simplest scalar is a string one:
+
+ /* a scalar string MPDM value */
+ mpdm_t v = MPDM_S(L"I'm a happy scalar");
+
+The MPDM_S() macro creates an MPDM value from a dinamically allocated
+copy of a wide-character string. MPDM works internally with wide-character
+strings; though this can seem awkward, it's the only way to do character
+set manipulation (i.e. Unicode) correctly.
+
+A more memory-efficient way of creating a string scalar from a literal
+string is using the MPDM_LS() macro:
+
+ /* another scalar string, this time storing the string directly */
+ mpdm_t w = MPDM_LS(L"I'm also a happy scalar");
+
+Both are semantically the same. Many string manipulation functions,
+however, return values of the first kind.
+
+Creating values from integers and real numbers (doubles) is also easy:
+
+ /* a scalar value, from an integer */
+ mpdm_t i = MPDM_I(16384);
+ 
+ /* another scalar, this time from a double */
+ mpdm_t pi = MPDM_R(3.1416);
+
+Again, those new values are stored as dinamically allocated wide-char
+strings, so they are no different from the first one.
+
+Backwards, an MPDM value can always be converted to integer or real:
+
+ /* converts i to integer */
+ int n = mpdm_ival(i);
+ 
+ /* converts pi to real */
+ double d = mpdm_rval(pi);
+
+Sometimes you don't have a wide-char string available, but a multibyte
+one. The handy macro MPDM_MBS() does the conversion for you:
+
+ /* create a value with the value of the HOME environment variable
+    (no error condition checked) */
+ mpdm_t home = MPDM_MBS(getenv("HOME"));
+
+Take note that MPDM_MBS() relies on a correctly working locale subsystem
+for character set conversion.
+
+There are many more value creation macros for scalars; see the reference
+documentation for further details.
+
+Value sizes
+-----------
+
+An MPDM value always have a size. For scalar values, the size is usually
+the length of its string representation. It's returned by the mpdm_size()
+function:
+
+ /* prints 6 */
+ printf("%d\n", mpdm_size(pi));
+
+The mpdm_size() function, when applied to arrays, returns the number of
+elements instead:
+
+ /* A new array */
+ mpdm_t ary = MPDM_A(0);
+ 
+ /* two new values pushed */
+ mpdm_push(ary, MPDM_LS(L"Hey!");
+ mpdm_push(ary, MPDM_LS(L"You!");
+ 
+ /* prints 2 */
+ printf("%d\n", mpdm_size(ary));
+
+On hashes it's a little different, as mpdm_size() returns the number of
+_buckets_ in it, which is probably not very useful; this is a side effect
+of hashes being implemented as arrays. To avoid this, the mpdm_hsize()
+special function returns the number of key/value pairs stored in the hash:
+
+ /* a new hash */
+ mpdm_t en2es = MPDM_H(0);
+ 
+ /* three new pairs added */
+ mpdm_hset(en2es, MPDM_LS(L"monday"), MPDM_LS(L"lunes"));
+ mpdm_hset(en2es, MPDM_LS(L"tuesday"), MPDM_LS(L"martes"));
+ mpdm_hset(en2es, MPDM_LS(L"friday"), MPDM_LS(L"viernes"));
+ 
+ /* prints 3 */
+ printf("%d\n", mpdm_hsize(en2es));
+ 
+ /* prints the number of buckets (probably 31) */
+ printf("%d\n", mpdm_size(en2es));
+
+Arrays
+------
+
+To be written.
+
+Hashes
+------
+
+To be written.
+
+The 'garbage collector'
+-----------------------
+
+To be written.
+
+Executable values
+-----------------
+
+To be written.
+
+Regular expressions
+-------------------
+
+To be written.
+
+File I/O
+--------
+
+To be written.
+
+Charset conversions
+-------------------
+
+To be written.
+
+Localization
+------------
+
+To be written.
+
+Environment variables
+---------------------
+
+To be written.
+
+----
+ttcdt <dev@triptico.com>

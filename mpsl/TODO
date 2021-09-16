@@ -1,0 +1,228 @@
+Minimum Profit Scripting Language (mpsl) TODO / Bug List
+========================================================
+
+Release Critical Bugs
+---------------------
+
+None!
+
+Open Bugs
+---------
+
+ * 1108: Document the 'executable component in compact symbols'
+   feature.
+ * 1112: Document the difference regarding local variable access in
+   named and anonymous subroutines.
+ * 1132: Fix for() to allow an instruction (and not just an expression)
+   in the 'init' part.
+ * 1136: Document the `METHOD' opcode.
+ * 1137: Document the `GLOBAL' opcode.
+
+Pending Enhancements
+--------------------
+
+ * 1024: Implement the `continue' directive.
+ * 1083: Implement a split() that uses regular expressions.
+ * 1095: Accept "local var" everywhere a symbol name is accepted.
+ * 1109: There must be possible to have executable components with
+   arguments in compact symbols (as in 'h.code(a1,a2).other').
+ * 1115: Add C++ style comments.
+ * 1139: Rewrite the compiler as pure C, without using lex and yacc.
+
+Closed
+------
+
+ * 1011: Will the scripting language be included here, or as a
+   separated package? it could poison the mpdm concept as a 'low
+   level utility library' (Yes; Wed, 08 Dec 2004 09:51:55 +0100).
+ * 1010: Find a name for the scripting language (Mpsl should be
+   fine; Wed, 08 Dec 2004 09:52:32 +0100).
+ * 1021: Merge mpsl (the scripting language) lex and yacc files from
+   CVS project filp2 (Thu, 09 Dec 2004 11:55:42 +0100).
+ * 1034: Implement ++ and -- (Tue, 14 Dec 2004 12:15:25 +0100).
+ * 1035: Implement +=, -=, *=, /= (Tue, 14 Dec 2004 12:15:28 +0100).
+ * 1036: Implement the 'local' variable creation in mpsl.
+   (Tue, 14 Dec 2004 13:06:53 +0100).
+ * 1038: Implement the '&&' and '||' boolean operands
+   (Wed, 15 Dec 2004 17:02:12 +0100).
+ * 1039: SUB_PREFIX and SUB_POSTFIX should be only one instruction,
+   that create the prefix / execute things / destroy the prefix,
+   instead of two (Thu, 16 Dec 2004 09:08:38 +0100).
+ * 1040: MPSL_OP_SYMNAM (SYMBOL) should not exist; it should just
+   be a MPSL_OP_LIST (Fri, 17 Dec 2004 07:49:10 +0100).
+ * 1041: MPSL_OP_SYMLIST (SYMLIST) should not exist, and be just
+   a MPSL_OP_LIST. Also, it should have only one argument
+   with the list of symbols, and not an undefined number or arguments.
+   (Fri, 24 Dec 2004 18:26:26 +0100).
+ * 1042: The local t = v instruction is very buggy; it should be
+   implemented as a ';' instruction with the local and the assignation
+   part and the arguments to LOCAL and to '=' should be instructions and
+   not values (Fri, 24 Dec 2004 18:49:29 +0100).
+ * 1046: Subroutine definitions are using MPSL_OP_SUB that is
+   really the substract opcode (Sun, 26 Dec 2004 19:26:32 +0100).
+ * 1022: Implement return values for mpsl functions (Closed by #1052;
+   Sat, 08 Jan 2005 21:30:37 +0100).
+ * 1049: Multiple instructions are buggy; they should always have
+   two arguments (Though the parser now spits 18 shift/reduce conflicts,
+   everything seems to be fine; Sat, 08 Jan 2005 21:32:57 +0100).
+ * 1055: Implement the 'FOREACH' opcode (Sun, 06 Feb 2005 17:31:55 +0100).
+ * 1053: Implement the 'RANGE' opcode (Sun, 06 Feb 2005 17:55:04 +0100).
+ * 1056: Add c-style strings (\n, \t, etc) (Mon, 07 Feb 2005 19:22:50 +0100).
+ * 1057: Add a mpsl_compile_file() function (Mon, 21 Feb 2005 18:31:13 +0100).
+ * 1060: Though local symbol names must be single to the
+   parser, they need to be accesible / assignable as
+   complex values with mpdm_sget() / mpdm_sset()
+   (Wed, 23 Feb 2005 08:20:51 +0100).
+ * 1061: Implement the %= operator (Mon, 07 Mar 2005 07:45:05 +0100).
+ * 1062: Add line info to syntax errors (Mon, 07 Mar 2005 08:15:17 +0100).
+ * 1059: Add support for anonymous subroutines (for doing,
+   for example, a = sub { code; }) (Mon, 07 Mar 2005 16:30:16 +0100).
+ * 1023: Implement the 'break' directive in mpsl
+   (Mon, 07 Mar 2005 16:32:19 +0100).
+ * 1052: Implement the 'return' directive in mpsl
+   (Mon, 07 Mar 2005 16:32:34 +0100).
+ * 1050: Document the virtual machine (Mon, 07 Mar 2005 16:32:49 +0100).
+ * 1060: The compiler should use a cache for literal string
+   values (Mon, 14 Mar 2005 08:16:24 +0100).
+ * 1066: Rename all symbols starting with _ (Thu, 26 May 2005 20:41:46 +0200).
+ * 1067: Allow assignations in while() condition
+   (Tue, 12 Jul 2005 07:54:49 +0200).
+ * 1065: Add the filename to compilation errors
+   (Mon, 31 Oct 2005 16:15:04 +0100).
+ * 1054: Add a main() function, similar to the filp one
+   (Wed, 02 Nov 2005 16:59:36 +0100).
+ * 1070: Add an INC array to be used as a search path when
+   loading mpsl code (Tue, 08 Nov 2005 15:57:02 +0100).
+ * 1064: Compilation errors should be stored somewhere
+   (not just printed on stdout) (Tue, 08 Nov 2005 18:21:41 +0100).
+ * 1058: Function execution should bang when the
+   function is not found, or at least exist a default
+   handler function for it (Closed by #1071;
+   Thu, 10 Nov 2005 08:28:27 +0100).
+ * 1072: Add parsing of hexadecimal numbers
+   (Sat, 12 Nov 2005 12:32:52 +0100).
+ * 1073: Add parsing of octal numbers
+   (Sat, 12 Nov 2005 12:33:00 +0100).
+ * 1076: Add a mpsl_died global variable to abort further execution
+   (Changed to mpsl_abort; Wed, 05 Apr 2006 13:11:33 +0200).
+ * 1079: Add a unified way (a function) to set MPSL errors
+   (Wed, 05 Apr 2006 13:33:51 +0200).
+ * 1078: Add an eval() function (Wed, 05 Apr 2006 17:19:15 +0200).
+ * 1077: Add a die() function (renamed to error();
+   Wed, 05 Apr 2006 17:26:21 +0200)
+ * 1080: The INC array must be get using mpsl_get_symbol() instead
+   of mpdm_hget_s() (Tue, 11 Apr 2006 17:24:55 +0200).
+ * 1071: Undefined functions should get better support
+   (Wed, 03 May 2006 08:22:43 +0200).
+ * 1074: The mpsl command line tool should also search code in
+   the current directory (Wed, 03 May 2006 13:28:31 +0200).
+ * 1085: The mpsl interpreter program should accept a program from stdin
+   (Wed, 03 May 2006 13:28:41 +0200).
+ * 1086: Using return() with a value from inside a while() loop
+   fails (Sat, 13 May 2006 13:58:42 +0200).
+ * 1087: Using return() with a value from inside a foreach() loop
+   fails (Sat, 13 May 2006 14:00:19 +0200).
+ * 1063: Create a sprintf()-like library function
+   (Implemented in mpsl; Tue, 23 May 2006 18:17:05 +0200).
+ * 1089: Change the load() function from a function library to an opcode.
+   (Not necessary; Sun, 18 Jun 2006 21:17:41 +0200).
+ * 1090: Change mpsl_compile_file() to accept the INC as argument instead
+   of using mpsl_get_symbol() (needs #1089 closed)
+   (Not done; Sun, 18 Jun 2006 21:18:24 +0200).
+ * 1091: Change mpsl_get_symbol() and mpsl_set_symbol() to be static, so
+   only opcodes can manipulate it (needs #1090 closed)
+   (Not done; Sun, 18 Jun 2006 21:18:56 +0200).
+ * 1088: Change the virtual machine to propagate the local symbol table
+   in an argument instead of being a global list
+   (Sun, 18 Jun 2006 21:19:13 +0200).
+ * 1082: Implement a Perl-like map() function (Mon, 21 Aug 2006 18:15:26 +0200).
+ * 1075: Finish the quick reference guide (Tue, 22 Aug 2006 00:45:38 +0200).
+ * 1081: Implement a Perl-like grep() function (Tue, 22 Aug 2006 16:49:53 +0200).
+ * 1084: Implement the foreach(local var, list) construction
+   (Closed by #1095; Tue, 03 Oct 2006 13:05:07 +0200).
+ * 1096: Implement an optimizer that 'executes' all MPSL core instructions
+   and converts to LITERAL all the LIST and HASH instructions that have only
+   LITERAL instructions as arguments (Sat, 07 Oct 2006 12:45:03 +0200).
+ * 1100: Fix yy_input_for_flex() to not fail if wctomb() returns > 1
+   (Tue, 10 Oct 2006 13:49:46 +0200).
+ * 1097: Investigate why flatten() makes the 'symval 2' stress test fails
+   and fix it (mpsl_exec_i() was sweeping values still in use;
+   Tue, 10 Oct 2006 17:25:41 +0200).
+ * 1099: Enable flatten() (needs #1097 fixed)
+   (renamed to constant_fold(); Tue, 10 Oct 2006 17:26:05 +0200).
+ * 1093: Change the parser to directly create wide char strings
+   (Tue, 10 Oct 2006 18:44:00 +0200).
+ * 1094: Implement chars (\x1b) and wide chars (\x{1234}) in strings
+   (needs #1093 closed) (Tue, 10 Oct 2006 18:56:16 +0200).
+ * 1098: Change the 'LIST' and 'HASH' parser so that the opcode is inserted
+   when it's completed (all list elements pushed) and not at the beginning,
+   as both opcodes are the best to benefit from constant_fold()
+   (Wed, 11 Oct 2006 18:03:12 +0200).
+ * 1104: Implement strings separated by backslash plus newline
+   (Wed, 18 Apr 2007 14:20:19 +0200).
+ * 1103: Document the 'l' flag in regex()
+   (Mon, 18 Jun 2007 14:25:52 +0200).
+ * 1102: Document the changes to the LIST and HASH opcodes in the
+   internals document (Fri, 24 Aug 2007 08:50:57 +0200).
+ * 1092: The local symbol table description in the internals document
+   is outdated (Fri, 24 Aug 2007 09:00:12 +0200).
+ * 1107: Anonymous code in functions (as in map()) should have the
+   same local symbol context as the subroutine/block that calls it.
+   Currently doesn't work because anonymous subs have its own
+   subroutine frame instead of the caller's (they are subroutines,
+   after all) (Sat, 06 Oct 2007 10:51:20 +0200).
+ * 1114: getenv() crashes if the environment variable does not
+   exit (Mon, 08 Oct 2007 14:10:07 +0200).
+ * 1113: Anonymous subroutines still can't access the local subroutine
+   frame, even when created as block frames
+   (Tue, 30 Oct 2007 08:28:13 +0100).
+ * 1105: Document the backslash + newline separation of strings
+   (Tue, 27 Nov 2007 13:36:59 +0100).
+ * 1101: Document the \x{HHHH} syntax for strings
+   (Tue, 27 Nov 2007 13:40:59 +0100).
+ * 1051: Finish documentation for the scripting language
+   (Wed, 28 Nov 2007 09:49:00 +0100).
+ * 1116: Changed foreach() to _always_ create the iterator variable
+   as local (Wed, 02 Jan 2008 10:10:48 +0100).
+ * 1117: Double backslashes in strings fail
+   (Fri, 04 Apr 2008 09:46:15 +0200).
+ * 1111: Change write() to include a variable argument length
+   (Mon, 02 Feb 2009 16:20:03 +0100).
+ * 1068: Implement a dumper function to dump an mpdm_t as mpsl source code
+   (Mon, 06 Apr 2009 14:13:28 +0200).
+ * 1106: Implement the sscanf() function (similar to the one in filp)
+   (Sat, 25 Apr 2009 09:51:54 +0200).
+ * 1118: Document the sscanf() function
+   (Wed, 26 Aug 2009 17:41:01 +0200).
+ * 1110: Change the trace system to an executable mpdm_t value
+   (Thu, 25 Mar 2010 16:58:46 +0100).
+ * 1120: Invert split() arguments (Thu, 03 Feb 2011 09:31:25 +0100).
+ * 1121: Invert join() arguments (Thu, 03 Feb 2011 09:44:18 +0100).
+ * 1122: Invert sscanf() arguments (Thu, 03 Feb 2011 10:09:22 +0100).
+ * 1125: Invert map() arguments (Thu, 03 Feb 2011 10:51:53 +0100).
+ * 1126: Invert grep() arguments (Thu, 03 Feb 2011 12:23:20 +0100).
+ * 1124: Invert sregex() arguments (Thu, 03 Feb 2011 13:09:17 +0100).
+ * 1123: Invert regex() arguments (Thu, 03 Feb 2011 15:59:47 +0100).
+ * 1069: Implement a C-like for() instruction
+   (Tue, 22 Feb 2011 13:57:01 +0100).
+ * 1131: Do not create the subroutine _ argument if there is nothing
+   to store into (Tue, 05 Apr 2011 09:33:23 +0200).
+ * 1128: Document the _ array in functions
+   (Tue, 05 Apr 2011 09:48:37 +0200)
+ * 1130: Document the for() instruction
+   (Tue, 05 Apr 2011 13:07:58 +0200).
+ * 1127: Document the new inverse calling syntax
+   (Tue, 05 Apr 2011 13:18:26 +0200).
+ * 1129: Document the new multithreading support
+   (Tue, 19 Apr 2011 09:49:07 +0200).
+ * 1133: Fix for() (Wed, 20 Apr 2011 06:35:17 +0200).
+ * 1134: Document the JavaScript style of defining hashes
+   (Mon, 17 Oct 2011 20:13:21 +0200).
+ * 1119: Fix bincall() in 64 bit systems (Fri, 25 May 2012 12:10:57 +0200).
+ * 1138: Add a clean solution that getpid() for randomizing
+   (Wed, 20 Feb 2019 11:28:04 +0100).
+ * 1135: Rewrite hashes as an in-memory version of the Borodin Indexes
+   (balanced binary trees) (really an MPDM issue;
+   Wed, 20 Feb 2019 11:32:21 +0100).
+
+Email bugs to angel@triptico.com

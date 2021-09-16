@@ -1,0 +1,37 @@
+#!/bin/sh
+
+echo "mpslc - Minimum Profit Scripting Language Compiler"
+
+if [ -z "$1" ] ; then
+    echo "Usage: $0 {program.mpsl}"
+    exit 1
+fi
+
+PRG=$(basename $1 .mpsl)
+
+ld -r -b binary $1 -o ${PRG}.o
+
+cat <<EOF  > .mpslc_bootstrap.c
+int mpsl_bootstrap(int argc, char *argv[], const char *code, int size);
+
+#ifdef WIN32
+extern const char binary_${PRG}_mpsl_start;
+extern const char binary_${PRG}_mpsl_end;
+#define CODE &binary_${PRG}_mpsl_start
+#define SIZE &binary_${PRG}_mpsl_end - CODE
+#else
+extern const char _binary_${PRG}_mpsl_start;
+extern const char _binary_${PRG}_mpsl_end;
+#define CODE &_binary_${PRG}_mpsl_start
+#define SIZE &_binary_${PRG}_mpsl_end - CODE
+#endif
+
+int main(int argc, char *argv[])
+{
+    return mpsl_bootstrap(argc, argv, CODE, SIZE);
+}
+EOF
+
+gcc -g .mpslc_bootstrap.c ${PRG}.o -L. -lmpsl @LDFLAGS@ -o ${PRG} && echo Done.
+
+rm -f .mpslc_bootstrap.c

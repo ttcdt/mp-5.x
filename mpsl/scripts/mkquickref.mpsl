@@ -1,0 +1,103 @@
+/* mkquickref.mpsl */
+/* builds a PostScript file from mpsl_quickref.txt */
+
+STDOUT("%!PS-Adobe-1.0\n",
+    "%%BoundingBox: 0 0 594 841\n",
+    "%%Orientation: Landscape\n",
+    "%%Pages: (atend)\n",
+    "%%EndComments\n",
+    "\n",
+    "%%BeginProlog\n",
+    "%%EndProlog\n",
+    "\n",
+    "%%BeginSetup\n",
+    "\n",
+    "/qr_colw { 280 } def\n",
+    "/qr_tabsep { 130 } def\n",
+    "/qr_rmarg { 12 } def\n",
+    "/qr_tmarg { -20 } def\n",
+    "/qr_maxy { -580 } def\n",
+    "/qr_maxx { 600 } def\n",
+    "/qr_fsize { 10 } def\n",
+    "\n",
+    "/qr_prop { /Courier findfont qr_fsize 1 sub scalefont setfont } def\n",
+    "/qr_noprop { /Times-Roman findfont qr_fsize scalefont setfont } def\n",
+    "/qr_bold { /Times-Bold findfont qr_fsize scalefont setfont } def\n",
+    "/qr_page { 90 rotate /qr_xpos qr_rmarg def /qr_ypos qr_tmarg def } def\n",
+    "\n",
+    "/qr_newline {\n",
+    "   /qr_ypos qr_ypos qr_fsize sub def\n",
+    "   qr_ypos qr_maxy lt { /qr_ypos qr_tmarg def\n",
+    "       /qr_xpos qr_xpos qr_colw add def\n",
+    "       qr_xpos qr_maxx gt { /qr_xpos qr_rmarg def } if\n",
+    "   } if\n",
+    "} def\n",
+    "\n",
+    "/qr_2cols {\n",
+    "   exch qr_xpos qr_ypos moveto qr_prop show\n",
+    "   qr_xpos qr_tabsep add qr_ypos moveto qr_noprop show\n",
+    "   qr_newline\n",
+    "} def\n",
+    "\n",
+    "/qr_title {\n",
+    "   qr_xpos qr_ypos moveto qr_bold show\n",
+    "   qr_newline\n",
+    "} def\n",
+    "\n",
+    "%%EndSetup\n"
+);
+
+STDOUT("%%Page: 1 1\n",
+    "%%BeginPageSetup\n",
+    "%%EndPageSetup\n",
+    "\n",
+    "qr_page\n"
+);
+
+n_lines = 0;
+n_pag = 1;
+
+while (line = read(STDIN)) {
+    local l;
+
+    /* strip \n and escape parens */
+    line = line->sregex("/\n$/")->
+                 sregex("/\\\\/g", '\\')->
+                 sregex("/\(/g", '\(')->
+                 sregex("/\)/g", '\)');
+
+    /* leading asterisk? it's a title */
+    if ((l = regex(line, [ "/^\*/", "/.*$/" ])) && size(l) == 2)
+        STDOUT("(", l[1], ") qr_title\n");
+    else
+    /* text-tabs-text: two columns */
+    if ((l = regex(line, [ "/^[^\t]*/", "/\t+/", "/.*$/" ])) && size(l) == 3)
+        STDOUT("(", l[0], ") (", l[2], ") qr_2cols\n");
+    else
+    /* other: two columns, with empty second one */
+        STDOUT("(", line, ") () qr_2cols\n");
+
+    n_lines += 1;
+
+    if (n_lines > 170) { /* 64 * 3 */
+        n_pag += 1;
+        n_lines = 0;
+
+        STDOUT("showpage\n",
+            "%%Page: ", n_pag, " ", n_pag, "\n",
+            "%%BeginPageSetup\n",
+            "%%EndPageSetup\n",
+            "\n",
+            "qr_page\n"
+        );
+    }
+}
+
+STDOUT("showpage\n",
+    "\n",
+    "%%PageTrailer\n",
+    "\n",
+    "%%Trailer\n",
+    "%%Pages: ", n_pag, "\n",
+    "%%EOF\n"
+);

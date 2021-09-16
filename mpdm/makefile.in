@@ -1,0 +1,96 @@
+TARGET=libmpdm.a
+LIB=$(TARGET)
+
+all: Makefile $(TARGET) mpdm-stress docs
+
+build:
+	@./build.sh
+
+clean:
+	rm -f $(TARGET) $(LIB) $(OBJS) *.o tags *.tar.gz mpdm-stress test.txt thread.txt
+
+PROJ=mpdm
+
+ADD_DOCS=RELEASE_NOTES
+GRUTATXT_DOCS=doc/mpdm_overview.html
+MP_DOCCER_DOCS=doc/mpdm_api.txt
+G_AND_MP_DOCS=doc/mpdm_api.html
+
+OBJS=mpdm_v.o mpdm_a.o mpdm_o.o mpdm_d.o mpdm_s.o mpdm_f.o \
+	mpdm_r.o mpdm_t.o mpdm_x.o mpdm_dd.o gnu_regex.o puff.o md5.o
+
+DIST_TARGET=/tmp/$(PROJ)-$(VERSION)
+
+##################################################################
+
+version:
+	@echo $(VERSION)
+
+.c.o:
+	$(CC) $(CFLAGS) `cat config.cflags` -c $<
+
+dep:
+	gcc -MM *.c > makefile.depend
+
+$(LIB): $(OBJS)
+	$(AR) rv $(LIB) $(OBJS)
+
+stress-test: mpdm-stress
+	./mpdm-stress
+
+stress-test-v: mpdm-stress
+	./mpdm-stress -v
+
+mpdm-stress: mpdm-stress.c $(LIB)
+	$(CC) $(CFLAGS) mpdm-stress.c -L. -lmpdm `cat config.ldflags` -o $@
+
+.SUFFIXES: .txt .html
+
+.txt.html:
+	grutatxt < $< > $@
+
+doc/mpdm_api.txt: mpdm_*.c
+	mp_doccer mpdm_*.c -o doc/mpdm_api -f grutatxt \
+	-t "MPDM C API" \
+	-b "This reference documents version $(VERSION) of the C API." \
+	-a 'ttcdt - dev@triptico.com'
+
+docs: $(DOCS)
+
+docsclean:
+	rm -f doc/mpdm_api.txt doc/*.html
+
+distclean: clean
+	rm -f config.h config.cflags config.ldflags makefile.opts .config.log Makefile .build.sh
+
+realclean: distclean docsclean
+
+realdistclean: realclean
+
+distcopy: distclean
+	mkdir -p $(DIST_TARGET) ; \
+	tar cf - * | (cd $(DIST_TARGET) ; tar xf -)
+
+dist: distcopy
+	(cd /tmp ; tar czf - $(PROJ)-$(VERSION)/* ) > $(PROJ).tar.gz ; \
+	rm -rf $(DIST_TARGET)
+
+.po.mo:
+	msgfmt -o $@ $<
+
+build-mo:
+	for a in po/*.po ; do \
+		B=`basename $$a .po` ; \
+		mkdir -p po/$$B/LC_MESSAGES ; \
+		msgfmt -o po/$$B/LC_MESSAGES/stress.mo $$a ; \
+	done
+
+installdoc:
+	install -d $(DOCDIR)
+	install -m 644 doc/* $(DOCDIR)/
+	for f in README AUTHORS COPYING TODO RELEASE_NOTES ; do \
+		[ -f $$f ] && install -m 644 $$f $(DOCDIR)/$$f.$(PROJ) ; \
+	done
+
+Makefile: makefile.in
+	./config.sh $(CONF_ARGS)

@@ -1,6 +1,23 @@
 Minimum Profit Release Notes
 ============================
 
+5.55
+----
+
+* Important notice:
+
+The source code repositories of submodules MPDM and MPSL have merged into main Minimum Profit (mp-5.x). If you build MP from Git sources, you must execute `make distclean' and reconfigure.
+
+* Bug fixes:
+
+[ANSI] Bold / bright color confusion (contributed by X-Ryl669).
+
+[Curses] Bold / bright color confusion (contributed by X-Ryl669).
+
+Some tokens were not shown in MPSL syntax highlight (Claire).
+
+Completion works in MPSL syntax highlight (Claire).
+
 5.54
 ----
 

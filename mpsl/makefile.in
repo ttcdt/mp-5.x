@@ -1,0 +1,121 @@
+LIB=libmpsl.a
+
+all: Makefile LIBS $(TARGET) mpsl-stress
+
+build:
+	@./build.sh
+
+clean:
+	rm -f $(TARGET) $(LIB) $(OBJS) mpslc *.o tags *.tar.gz *-stress *.a
+
+LIBS:
+	$(MAKE) -C $(MPDMi) libmpdm.a
+
+PROJ=mpsl
+
+ADD_DOCS=doc/mpsl_quickref.ps
+GRUTATXT_DOCS=doc/mpsl_index.html doc/mpsl_overview.html doc/mpsl_internals.html
+MP_DOCCER_DOCS=doc/mpsl_api.txt doc/mpsl_reference.txt
+G_AND_MP_DOCS=doc/mpsl_api.html doc/mpsl_reference.html
+
+OBJS=mpsl_c.o mpsl_m.o mpsl_f.o mpsl_d.o mpsl_a.o $(C_MPSL_OBJS)
+
+DIST_TARGET=/tmp/$(PROJ)-$(VERSION)
+
+version:
+	@echo $(VERSION)
+
+.c.o:
+	$(CC) $(CFLAGS) `cat config.cflags` -c $<
+
+y.tab.h: $(MPDMi)/mpdm.h mpsl.y
+	$(YACC) -d mpsl.y
+
+y.tab.c: $(MPDMi)/mpdm.h mpsl.y
+	$(YACC) -d mpsl.y
+
+lex.yy.c: $(MPDMi)/mpdm.h mpsl.l
+	flex mpsl.l
+
+mpsl_l.o: lex.yy.c y.tab.h
+	$(CC) $(CFLAGS) `cat config.cflags` -c lex.yy.c -o mpsl_l.o
+
+mpsl_y.o: y.tab.c
+	$(CC) $(CFLAGS) `cat config.cflags` -c y.tab.c -o mpsl_y.o
+
+dep:
+	gcc `cat config.cflags` -MM *.c | \
+		sed -e 's;$(MPDMi)/;$$(MPDMi)/;g' > makefile.depend
+
+$(LIB): $(OBJS)
+	$(AR) rv $(LIB) $(OBJS)
+
+$(TARGET): $(LIB) $(MPDMi)/libmpdm.a
+	$(CC) $(CFLAGS) -L. -lmpsl `cat config.ldflags` -o $@
+
+mpslc: mpslc.in
+	sed -e "s!@LDFLAGS@!`paste -sd ' ' config.ldflags`!" -e "s!@CFLAGS@!`paste -sd ' ' config.cflags`!" < $< > $@ && chmod 755 $@
+
+stress-test: mpsl-stress
+	./mpsl-stress
+
+mpsl-stress: mpsl-stress.c $(LIB) $(MPDMi)/libmpdm.a
+	$(CC) $(CFLAGS) `cat config.cflags` mpsl-stress.c \
+		-L. -lmpsl `cat config.ldflags` -o $@
+
+realclean: clean
+	rm -f y.tab.c y.tab.h lex.yy.c
+
+distclean: clean $(C_MPSL_SRCS)
+	rm -f config.h config.cflags config.ldflags makefile.opts .config.log Makefile .build.sh
+
+realclean: distclean docsclean
+
+realdistclean: realclean
+
+.SUFFIXES: .txt .html
+
+.txt.html:
+	grutatxt < $< > $@
+
+doc/mpsl_quickref.ps: doc/mpsl_quickref.txt
+	-./mpsl scripts/mkquickref.mpsl < doc/mpsl_quickref.txt > $@
+
+doc/mpsl_api.txt: mpsl_c.c mpsl.y
+	mp_doccer mpsl_c.c mpsl.y -o doc/mpsl_api -f grutatxt \
+	-t "MPSL C API" \
+	-b "This reference documents version $(VERSION) of the C API." \
+	-a 'ttcdt - dev@triptico.com'
+
+doc/mpsl_reference.txt: mpsl_f.c
+	mp_doccer mpsl_f.c -o doc/mpsl_reference -f grutatxt \
+	-t "MPSL Function Library Reference" \
+	-b "This reference documents version $(VERSION) of the MPSL Function Library." \
+	-a 'ttcdt - dev@triptico.com'
+
+docs: $(DOCS)
+
+docsclean:
+	rm -f $(MP_DOCCER_DOCS) doc/*.html
+
+distcopy: distclean
+	mkdir -p $(DIST_TARGET) ; \
+	tar cf - * | (cd $(DIST_TARGET) ; tar xf -)
+
+dist: distcopy
+	(cd /tmp ; tar czf - $(PROJ)-$(VERSION)/* ) > $(PROJ).tar.gz ; \
+	rm -rf $(DIST_TARGET)
+
+install: installdoc
+	rm -f $(PREFIX)/bin/mpsl
+	install $(TARGET) $(PREFIX)/bin
+
+installdoc:
+	install -d $(DOCDIR)
+	install -m 644 doc/* $(DOCDIR)/
+	for f in README AUTHORS COPYING TODO RELEASE_NOTES ; do \
+		[ -f $$f ] && install -m 644 $$f $(DOCDIR)/$$f.$(PROJ) ; \
+	done
+
+Makefile: makefile.in
+	./config.sh $(CONF_ARGS)

@@ -1,0 +1,9 @@
+lex.yy.o: lex.yy.c ../mpdm/mpdm.h y.tab.h
+mpsl-stress.o: mpsl-stress.c ../mpdm/mpdm.h mpsl.h
+mpsl.tab.o: mpsl.tab.c ../mpdm/mpdm.h mpsl.h
+mpsl_a.o: mpsl_a.c config.h VERSION ../mpdm/mpdm.h mpsl.h
+mpsl_c.o: mpsl_c.c config.h VERSION ../mpdm/mpdm.h mpsl.h
+mpsl_d.o: mpsl_d.c config.h VERSION ../mpdm/mpdm.h mpsl.h
+mpsl_f.o: mpsl_f.c config.h VERSION ../mpdm/mpdm.h mpsl.h
+mpsl_m.o: mpsl_m.c config.h VERSION ../mpdm/mpdm.h mpsl.h
+y.tab.o: y.tab.c ../mpdm/mpdm.h mpsl.h

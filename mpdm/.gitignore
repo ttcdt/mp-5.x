@@ -1,0 +1,14 @@
+.config.log
+Makefile
+config.cflags
+config.h
+config.ldflags
+doc/*.html
+makefile.opts
+*.[oa]
+mpdm-stress
+.build-info.c
+test.txt
+thread.txt
+.build.sh
+.clang_complete_error.log

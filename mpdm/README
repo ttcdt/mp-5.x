@@ -1,0 +1,27 @@
+MPDM (Minimum Profit Data Manager)
+==================================
+
+MPDM (Minimum Profit Data Manager) is a lightweight library that provides C
+programs with a rich set of useful data types as scalars, dynamic arrays
+(i.e. indexed by number) and associative arrays (i.e. indexed by a string
+key). Also, it contains a rudimentary garbage collector that alleviates the
+need to keep track of data no longer useful, as well as help for operating
+system abstraction and portability, regular expressions, string manipulation,
+character set conversions, localization, file I/O access, pipes and
+multithreading (threads, semaphores and mutexes).
+
+This software is released into the public domain. See LICENSE file for details.
+
+Additionally, the following files not authored by the ttcdt are included
+in this repository:
+
+ * wcwidth.c: author Markus Kuhn, public domain (or so it seems),
+ * puff.c: author Mark Adler, public domain (or so it seems),
+ * md5.h and md5.c: author Alexander Peslyak, public domain,
+ * gnu_regex.h and gnu_regex.c: author FSF, license GPL.
+
+I think the GNU regex can be included here, but IANAL. It's used only on those
+platforms without native regex support in its libc (i.e. windows), so it
+should count as a library linkage exception or something like that.
+
+ttcdt <dev@triptico.com>

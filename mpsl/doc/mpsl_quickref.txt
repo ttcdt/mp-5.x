@@ -1,0 +1,279 @@
+*MPSL Quick Reference Sheet
+
+*Scalars
+
+v = 10000;		Integer assignation
+v = 3.1416;		Real numbers
+v = 'string1';		Verbatim strings
+w = "string2\n";	Strings with escape codes
+l = size(v);		Size of v (7)
+
+*Arrays
+
+a = [];			Empty array
+a = [ 100, "hi!",	Array assignation (showing
+    3.1416, "yo!" ];	elements with assorted types)
+w = [ 1, [], a ];	Array elements can also be
+			arrays,	hashes or anything
+			(as non-scalar values are
+			always passed by reference)
+v = a[0];		First element of a (100)
+a[0] = 200;		Assignment of first element of a
+l = size(a);		Number of elements in a (4)
+x = a;			x holds the same array as a
+x[0] = 6;		a[0] is also 6
+y = clone(a);		y holds a clone of a
+y[0] = 9;		a[0] is NOT 9
+v = a[-1];		Last element of a ("yo!")
+w = [1 .. 100];		Range (array of 100 elements)
+push(a, 6543);		Add element to the end of a
+l = size(a);		It's now 5
+v = pop(a);		Deletes last element
+			(and returns it)
+l = size(a);		Back to 4
+ins(a, 'heh', 1);	Inserts 'heh' at offset 1, all
+			existing elements moved up
+l = size(a);		It's again 5
+adel(a, 1);		Deletes element at offset 1,
+			all existing elements
+            are moved down
+l = size(a);		It's again 4
+
+*Hashes
+
+h = {};			Empty hash
+h = {			Hash assignation (showing
+  'key1' => "val1",	elements with assorted types).
+  'k2' => 1000,		Hash elements can be anything
+  'KEY3' => [ 1, 2 ]
+};
+v = h['key1'];		Value for 'key1' ('val1')
+h['k4'] = 3000;		Assignment of key 'k4'
+			with value 3000
+p = hsize(h);		Number of pairs in h (5)
+i = h;			i holds the same hash as h
+i['key1'] = 4321;	h['key1'] is also 4321
+j = clone(h);		j holds a clone of h
+j['key1'] = 8765;	h['key1'] is NOT 8765
+v = h.KEY3.1;		Abridged mode
+			(same as v = h['KEY3'][1])
+h.KEY3.1 = 10;		Abridged mode assignation
+a = keys(h);		Keys of h
+			(['key1','k2','KEY3','k4'])
+
+*Subroutines
+
+sub greeting {		Subroutine definition
+   print("Hello!\n");
+}
+greeting();		Subroutine call
+			(prints Hello!)
+sub sum(a, b) {		Subroutine definition, with
+   return(a + b);	arguments
+}
+v = sub(10, 20);	Subroutine call with
+			arguments (sets v to 30)
+s = sub {		Anonymous subroutine
+   return(3); };	(assigned to s)
+s = sub(a) {		Anonymous subroutine,
+   print(a); };		with arguments
+s = greeting;		Without parenthesis,
+			assigns	a pointer to
+			the subroutine
+s();			Prints Hello!
+
+*Control operators
+
+if (expr) {		If expr is true, execute
+   statement list 1;	list 1 (braces can be omitted
+}			if list 1 is one statement);
+else {			otherwise, execute list 2
+   statement list 2;
+}
+
+while (expr) {		While expr is true, execute
+   statement list;	list (braces can be omitted
+}			if list is one statement)
+
+foreach (v, a) {	Iterate the array a, assigning
+   statement list;	each element to v and
+}			executing list
+
+for (init; cond; after) {	C-like loop
+   statement list;
+}
+
+break;			Exits loop in while, foreach and for
+
+*String functions
+
+i = cmp(str1, str2);	Compares two strings, returns
+			-1, 0 or 1
+del = splice(str1,	Inserts str2 inside str1 at
+   str2, offset, del);	offset, deleting del characters
+			(returns the deleted string)
+ary = split(str, sep);	Splits str using sep as
+			separator
+ary = split(str);	Splits str in characters
+str = join(ary, sep);	Joins ary into str, using
+			sep as separator (inverse of
+			split())
+str = sprintf(fmtstr,	Formats a string
+   val1, val2...);
+char = chr(number);	Returns the character
+			represented by number
+number = ord(str);	Returns the numeric value of
+			the first character in str
+ary = sscanf(str, fmt);	Extracts values from a
+			string using a format
+
+*Array functions
+
+push(ary, val);		Adds val to the end of ary,
+			incrementing its size
+v = pop(ary);		Deletes the last element of ary
+			and returns it
+v = shift(ary);		Deletes the first element of
+			ary and returns it
+ins(ary, val, offset);	Inserts val into ary at offset
+			incrementing its size
+adel(ary, offset);	Deletes the element
+			at offset from ary, shrinking
+i = seek(ary, str);	Seeks ary for an exact match of
+			str and returns its offset, or
+			-1 if not found
+s = sort(ary);		Sorts ary alphabetically
+s = sort(ary, func);	Sorts ary using a special
+sub func(a,b) { ... }	sorting function, that accepts
+			two arguments to compare
+ary2 = map(ary, func);	Executes func on each element
+sub func(a) { ... }	of ary and returns an array
+			with the return values
+ary2 = map(ary, hash);	Uses the elements of ary as
+			keys of hash and returns an
+			array with the values
+ary2 = grep(ary, rx);	Matches the regex on all
+			elements in ary and returns
+			all the matching ones
+ary2 = grep(ary, func);	Executes func on all elements
+sub func(a) { ... }	of ary and returns a new array
+			with all elements on which
+			func returned true
+expand(ary, offs, n);	Opens room in ary of n
+			elements at offset
+collapse(ary, offs, n);	Deletes n elements from ary
+			at offset
+
+*Hash functions
+
+n = hsize(hash);	Returns the number of pairs
+			in a hash
+b = exists(hash, key);	True if key exists in hash
+k = keys(hash);		Returns the keys of hash as
+			an array
+v = hdel(hash, key);	Deletes key from hash,
+			returning the old value
+
+*Input/Output functions
+
+fd = open(fname, mode);	Opens fname (mode is "r",
+			"w","r+","w+"...), returns
+			a file descriptor
+close(fd);		Closes a file
+l = read(fd);		Reads a line from a file
+write(fd, l);		Writes a string on a file
+c = getchar(fd);	Reads a char from a file
+putchar(fd, c);		Puts a char on a file
+unlink(fname);		Deletes a file
+s = stat(fname);	Returns information from file
+			(dev, inode, mode, nlink,
+			uid, gid, rdev, size, atime,
+			mtime, ctime)
+chmod(fname, mode);	Changes the mode of a file
+chown(fname, owner);	Changes the owner of a file
+ary = glob(pattern);	File globbing (returns an
+			array of filenames)
+encoding(charset);	Sets the charset encoding
+			for reading and writing files
+fd = popen(cmd, mode);	Opens a pipe (mode is "r","w",
+			"r+"...), can be read/write
+pclose(fd);		Closes a pipe
+load(mpslfile);		Loads and executes MPSL code
+chdir(dir);		Change current directory
+
+*Regular expression functions
+
+s = regex(str, reg);	Matches the reg regexp into
+			str, returns the matching
+			substring
+s = regex(str, r, off);	The same, but starting at off
+			offset into str
+ary = regex();		Returns the last matching
+			offset and size as a
+			two element array
+ary2 = regex(str, ary);	Matches an array of regular
+			expressions, returns as many
+			matches as elements in ary
+res = sregex(str, reg,	Matches the reg regexp into
+   str2);		str and changes it with str2
+res = sregex(str, reg,	Matches the reg regexp into
+   hash);		str and changes it with its
+			value in hash
+res = sregex(str, reg,	Matches the reg regexp into
+   func);		str and changes with the
+sub func(m) { ... };	return value of func using
+			the matched string as argument
+
+*Multitasking
+
+&func(args);		Executes func() in a new thread
+m = mutex();		Creates a mutex
+mutex_lock(m);		Locks a mutex
+mutex_unlock(m);	Unlocks a mutex
+s = semaphore();	Creates a semaphore
+semaphore_wait(s);	Waits on a semaphore
+semaphore_post(s);	Posts on a semaphore
+
+*Miscellaneous functions
+
+s = size(str);		Returns the length of str
+s = size(array);	Returns the number of elements
+s = size(hash);		Returns the number of buckets
+val2 = clone(val1);	Clones val1
+dump(val);		Dumps val visually on stdout
+b = is_array(val);	Tests if val is an array
+b = is_hash(val);	Tests if val is a hash
+b = is_exec(val);	Tests if val is executable
+error(str);		Generates an error
+r = eval(str);		Compiles and executes str
+			as MPSL code
+r = eval(code);		Executes code
+print(str, str...);	Prints values to stdout
+tstr = gettext(str);	Translates str
+gettext_domain(dom,	Sets the gettext domain
+    directory);		and directory
+getenv(envvar);		Returns the value of
+			an environment variable
+uc(str);		Returns str to uppercase
+lc(str);		Returns str to lowercase
+time();			Returns the time in seconds
+x = compile(str);	Compiles a str of MPSL code
+sleep(msecs);	Sleeps a number of milliseconds
+
+*String escapes for double quotes
+
+\\n			Newline
+\\t			Tab
+\\r			Carriage return
+\\e			Escape
+\\"			Double quotes
+\\\\			Backslash
+\\x{NNNN}		Unicode character (N: hex)
+
+*Regular expression flags
+
+i			Ignore case
+m			Value is multiline
+g			Global match or change
+l			Match last occurrence
+			instead of first
