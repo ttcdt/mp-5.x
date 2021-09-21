@@ -733,6 +733,13 @@ static void nc_build_colors(void)
                 cp |= A_REVERSE;
             if (mpdm_seek_wcs(w, L"underline", 1) != -1)
                 cp |= A_UNDERLINE;
+
+#ifndef A_ITALIC
+
+/* For very old ncurses version ( < 2013/08 ) */ 
+#define A_ITALIC 0
+
+#endif
             if (mpdm_seek_wcs(w, L"italic", 1) != -1)
                 cp |= A_ITALIC;
     
