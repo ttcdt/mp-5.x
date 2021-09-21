@@ -33,11 +33,51 @@
 char ansi_attrs[MAX_COLORS][64];
 int ansi_attrs_i = 0;
 int normal_attr = 0;
+int bright_attr_supported = 0;
 
 static int idle_msecs = 0;
 
 
 /** code **/
+
+static int is_bright_color_supported()
+/* detect if the terminal supports bright colors */
+{
+    fd_set readset;
+    int success = 0;
+    struct timeval time;
+    struct termios term, initial_term;
+
+    /* remove echo to avoid polluting the terminal when it answers */
+    tcgetattr(STDIN_FILENO, &initial_term);
+    term = initial_term;
+    term.c_lflag &=~ICANON;
+    term.c_lflag &=~ECHO;
+    tcsetattr(STDIN_FILENO, TCSANOW, &term);
+
+    /* request description of the color component for a bright color */
+    puts("\e]4;90;?\a");
+    fflush(stdout);
+
+    /* wait 200ms for the terminal to answer */
+    FD_ZERO(&readset);
+    FD_SET(STDIN_FILENO, &readset);
+    time.tv_sec = 0;
+    time.tv_usec = 200000;
+
+    if (select(STDIN_FILENO + 1, &readset, NULL, NULL, &time) == 1) {
+        char buffer[64]; size_t n = 0;
+        n = read(STDIN_FILENO, buffer, sizeof(buffer)); /* answer is like this: \e]4;90;rgb:8787/0000/8787 */
+       
+        if (n > 10 && buffer[7]=='r' && buffer[8] == 'g' && buffer[9] == 'b')
+            success = 1;
+    }
+    /* reset the terminal to its previous state */
+    tcsetattr(STDIN_FILENO, TCSANOW, &initial_term);
+
+    return success;
+}
+
 
 static void ansi_raw_tty(int start)
 /* sets/unsets stdin in raw mode */
@@ -285,13 +325,22 @@ static void ansi_build_colors(void)
             if ((--c0) == -1) c0 = 9;
             if ((--c1) == -1) c1 = 9;
 
-            sprintf(ansi_attrs[n], "\033[0;%s%s%s%d;%dm",
-                cf & 0x1 ? "7;" : "",
-                cf & 0x4 ? "4;" : "",
-                cf & 0x8 ? "3;" : "",
-                cf & 0x2 ? (c0 + 90) : (c0 + 30),
-                c1 + 40
-            );
+            if (bright_attr_supported)
+                sprintf(ansi_attrs[n], "\033[0;%s%s%s%d;%dm",
+                    cf & 0x1 ? "7;" : "",
+                    cf & 0x4 ? "4;" : "",
+                    cf & 0x8 ? "3;" : "",
+                    cf & 0x2 ? (c0 + 90) : (c0 + 30),
+                    c1 + 40
+                );
+            else 
+                sprintf(ansi_attrs[n], "\033[0;%s%s%s%d;%dm",
+                    cf & 0x1 ? "7;" : "",
+                    cf & 0x4 ? "4;" : "",
+                    cf & 0xA ? "1;" : "",
+                    c0 + 30,
+                    c1 + 40
+                );
         }
 
         /* store the attr */
@@ -885,6 +934,8 @@ static mpdm_t ansi_drv_startup(mpdm_t a)
     ansi_sigwinch(0);
 
     ansi_build_colors();
+
+    bright_attr_supported = is_bright_color_supported();    
 
     /* enter alternate screen */
     printf("\033[?1049h");
