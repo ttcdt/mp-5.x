@@ -140,6 +140,36 @@ static void ansi_get_tty_size(void)
 }
 
 
+static int ansi_detect_color_support(int rgbcolor)
+/* ask the tty for color request information */
+{
+    mpdm_t v, w;
+
+    v = mpdm_get_wcs(MP, L"config");
+    w = mpdm_get_wcs(v, L"ansi_rgbcolor");
+
+    if (w != NULL)
+        rgbcolor = mpdm_ival(w);
+
+    if (rgbcolor == 1) {
+        printf("\033]4;30;?\a");
+        fflush(stdout);
+
+        rgbcolor = -1;
+        if (ansi_something_waiting(0, 10)) {
+            char *buffer = ansi_read_string(0);
+
+            if (buffer[0] != '\0')
+                rgbcolor = 1;
+        }
+
+        mpdm_set_wcs(v, MPDM_I(rgbcolor), L"ansi_rgbcolor");
+    }
+
+    return rgbcolor;
+}
+
+
 static void ansi_sigwinch(int s)
 /* SIGWINCH signal handler */
 {
@@ -231,10 +261,9 @@ static void ansi_build_colors(void)
     mpdm_t color_names;
     mpdm_t v, i;
     int n, c;
-    int rgbcolor = 0;
+    int rgbcolor = 1; /* default setting */
 
-    v = mpdm_get_wcs(MP, L"config");
-    rgbcolor = mpdm_ival(mpdm_get_wcs(v, L"ansi_rgbcolor"));
+    rgbcolor = ansi_detect_color_support(rgbcolor);
 
     /* gets the color definitions and attribute names */
     colors      = mpdm_get_wcs(MP, L"colors");
@@ -261,7 +290,7 @@ static void ansi_build_colors(void)
         if (mpdm_seek_wcs(w, L"italic", 1) != -1)
             cf |= 0x08;
 
-        if (rgbcolor) {
+        if (rgbcolor > 0) {
             w = mpdm_get_wcs(v, L"gui");
             c0 = mpdm_ival(mpdm_get_i(w, 0));
             c1 = mpdm_ival(mpdm_get_i(w, 1));

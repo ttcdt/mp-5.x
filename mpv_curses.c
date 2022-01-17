@@ -582,7 +582,7 @@ static mpdm_t nc_tui_getkey(mpdm_t args, mpdm_t ctxt)
                         f = L"mouse-wheel-down";
                     else
                         f = NULL;
-        
+
                     previous.x = m.x; previous.y = m.y;
                 }
 #endif
@@ -693,19 +693,19 @@ static void nc_build_colors(void)
 
             mpdm_t color_name = mpdm_hget_s(v, L"text");
             int cp, c0, c1;
-    
+
             /* get color indexes */
             if ((c0 = mpdm_seek(color_names, mpdm_aget(color_name, 0), 1)) == -1 ||
                 (c1 = mpdm_seek(color_names, mpdm_aget(color_name, 1), 1)) == -1)
                 continue;
-    
+
             /* store the 'normal' attribute */
             if (wcscmp(mpdm_string(i), L"normal") == 0)
                 normal_attr = n;
-    
+
             /* store the attr */
             mpdm_hset_s(v, L"attr", MPDM_I(n));
-    
+
             /* extract the actual RGB color value */
             int blue  = (ink & 0x000000ff);
             int green = (ink & 0x0000ff00) >> 8;
@@ -726,38 +726,39 @@ static void nc_build_colors(void)
             /* finally create the (custom) color pair */
             init_pair(n + 1, fg, bg);
             cp = COLOR_PAIR(n + 1);
-    
+
             /* flags */
             w = mpdm_hget_s(v, L"flags");
             if (mpdm_seek_wcs(w, L"reverse", 1) != -1)
                 cp |= A_REVERSE;
             if (mpdm_seek_wcs(w, L"underline", 1) != -1)
                 cp |= A_UNDERLINE;
+#ifdef A_ITALIC
             if (mpdm_seek_wcs(w, L"italic", 1) != -1)
                 cp |= A_ITALIC;
-    
+#endif
             nc_attrs[n++] = cp;
         }
     } else {
         while (mpdm_iterator(colors, &c, &v, &i)) {
             mpdm_t w = mpdm_hget_s(v, L"text");
             int cp, c0, c1;
-    
+
             /* get color indexes */
             if ((c0 = mpdm_seek(color_names, mpdm_aget(w, 0), 1)) == -1 ||
                 (c1 = mpdm_seek(color_names, mpdm_aget(w, 1), 1)) == -1)
                 continue;
-    
+
             /* store the 'normal' attribute */
             if (wcscmp(mpdm_string(i), L"normal") == 0)
                 normal_attr = n;
-    
+
             /* store the attr */
             mpdm_hset_s(v, L"attr", MPDM_I(n));
-    
+
             init_pair(n + 1, c0 - 1, c1 - 1);
             cp = COLOR_PAIR(n + 1);
-    
+
             /* flags */
             w = mpdm_hget_s(v, L"flags");
             if (mpdm_seek_wcs(w, L"bright", 1) != -1)
@@ -767,9 +768,11 @@ static void nc_build_colors(void)
                 cp |= A_REVERSE;
             if (mpdm_seek_wcs(w, L"underline", 1) != -1)
                 cp |= A_UNDERLINE;
+#ifdef A_ITALIC
             if (mpdm_seek_wcs(w, L"italic", 1) != -1)
                 cp |= A_ITALIC;
-    
+#endif
+
             nc_attrs[n++] = cp; 
         }
     }
@@ -815,7 +818,7 @@ static mpdm_t ncursesw_drv_suspend(mpdm_t a, mpdm_t ctxt)
 
     /* Ok, we're back, let's refresh the screen */
     wrefresh(stdscr);
-    
+
     return NULL;
 }
 

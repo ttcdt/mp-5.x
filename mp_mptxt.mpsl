@@ -52,6 +52,13 @@ global mp_mptxt = {
                 mode = "right";
             }
             else
+            /* < ended lines are left-aligned */
+            if (l->regex("/<$/")) {
+                l = l->slice(0, -2);
+
+                mode = "left";
+            }
+            else
             /* page break */
             if (l == "\x{000c}") {
                 mode = 'page';
@@ -193,6 +200,9 @@ global mp_mptxt = {
                 else
                 if (mode == "right")
                     ret->push("<p class='right'>\n" + str->split("\n")->join("<br/>\n") + "\n</p>\n");
+                else
+                if (mode == "left")
+                    ret->push("<p class='left'>\n" + str->split("\n")->join("<br/>\n") + "\n</p>\n");
             }
 
             ret->push("</body>\n</html>\n");
@@ -279,6 +289,10 @@ global mp_mptxt = {
                 if (mode == "right")
                     ret->push(mp.config.rtf_style_right + tfont + "\r\n" +
                         str->split("\n")->join("\\line\r\n"));
+                else
+                if (mode == "left")
+                    ret->push(mp.config.rtf_style_left + tfont + "\r\n" +
+                        str->split("\n")->join("\\line\r\n"));
             }
 
             if (rem)
@@ -346,6 +360,9 @@ global mp_mptxt = {
                 if (mode == "right")
                     ret->push(".ad r\n" +
                         str->split("\n")->map(sub (e) {e + "\n.br\n"; })->join() + ".ad b\n\n");
+                else
+                if (mode == "left")
+                    ret->push(".nf\n" + str + "\n.fi\n\n");
             }
 
             return ret;

@@ -1,4 +1,4 @@
-all: Makefile LIBS $(TARGET) $(MORE_TARGETS) $(BUILDMO)
+all: Makefile $(TARGET) $(MORE_TARGETS) $(BUILDMO)
 
 build:
 	./build.sh
@@ -7,10 +7,6 @@ clean:
 	rm -f $(TARGET) $(OBJS) mp*.tar *.o *.moc tags *.tar.gz *.exe *.zip .installer.c *.1 *.asc lex.yy.c y.tab.c y.tab.h *.a *-stress *.sig
 	$(MAKE) -C $(MPDM) clean
 	$(MAKE) -C $(MPSL) clean
-
-LIBS:
-	$(MAKE) -C $(MPDM) libmpdm.a
-	$(MAKE) -C $(MPSL) libmpsl.a
 
 PROJ=mp
 
@@ -52,6 +48,12 @@ mp.zip: $(ARCHFILES)
 
 mp.zip.o: mp.zip
 	$(LD) -r -b binary mp.zip -o $@
+
+$(MPDM)/libmpdm.a:
+	$(MAKE) -C $(MPDM) libmpdm.a
+
+$(MPSL)/libmpsl.a:
+	$(MAKE) -C $(MPSL) libmpsl.a
 
 $(APPNAME): $(OBJS) $(DRV_OBJS) $(MPDM)/libmpdm.a $(MPSL)/libmpsl.a
 	$(CCLINK) $(CFLAGS) $(OBJS) $(DRV_OBJS) `cat config.ldflags` -o $@

@@ -20,13 +20,7 @@ All configuration variables are inside the `mp.config' object.
 
 ## mp.config.ansi_rgbcolor
 
-If set to non-zero, the ANSI driver shall use the GUI colors instead of the text ones. Obviously, it should only be used in terminals that support RGB color mode; almost all modern terminal emulators do (default: 0, use standard text colors).
-
-This snippet activates ANSI RGB color only if the TERM environment variable contains the string "256color":
-
-```
-mp.config.ansi_rgbcolor = ENV.TERM->regex("/256color/") && 1 || 0;
-```
+Controls the use of RGB GUI colors instead of the traditional 16 text colors. It can be set to: 2, force RGB color; 1, autodetect; or 0: disable completely. Autodetection is done by asking the terminal for color information and disabling RGB use if there is no valid response. Please take into account that some terminal emulators and multiplexers (e.g. `tmux' or `st') do not report color information even though they totally support it (default: 1, autodetect).
 
 This setting can only be set on startup (from the configuration file or the command line).
 

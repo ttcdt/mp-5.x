@@ -1,6 +1,17 @@
 Minimum Profit Release Notes
 ============================
 
+5.56
+----
+
+* New features:
+
+[ANSI] The `mp.config.ansi_rgbcolor' configuration variable can now be set to: 2, force the use of RGB color; 1, autodetect; or 0: disable completely and use traditional 16 colors. Autodetection is done by asking the terminal for color information and disabling RGB use if there is no valid response. Please take into account that some terminal emulators and multiplexers (e.g. `tmux' or `st') do not report color information even though they totally support it (contributed by Susan Bompensiero).
+
+* Other changes:
+
+[mptxt] Lines ending with < are left-aligned (contributed by aov).
+
 5.55
 ----
 
