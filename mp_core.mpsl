@@ -722,7 +722,7 @@ sub mp.process_cmdline()
     mp.binary_name = shift(ARGV);
 
     /* files requested to be opened */
-    mp.active_pending = glob(HOMEDIR + ".mp-*.recov");
+    mp.active_pending = glob(CONFDIR + ".mp-*.recov");
 
     while (o = shift(ARGV)) {
         if (o == '-h' || o == '--help') {
@@ -804,7 +804,7 @@ sub mp.process_cmdline()
 sub mp.load_profile()
 /* loads the configuration file(s) */
 {
-    local cfdir, cf;
+    local org_cfdir, cfdir, cf;
 
     /* if /etc/mp.mpsl exists, execute it */
     if (stat('/etc/mp.mpsl') != NULL) {
@@ -814,31 +814,63 @@ sub mp.load_profile()
         });
     }
 
-    /* find where the config file is */
-    cfdir = HOMEDIR;
-    cf    = ".mp.mpsl";
+    /* ensure CONFDIR exists */
+    mkdir(CONFDIR);
+    ERRNO = NULL;
 
-    if (stat(cfdir + cf) == NULL) {
-        local ncf = ENV["XDG_CONFIG_HOME"] || (HOMEDIR + ".config");
+    /* create the mp directory */
+    cfdir = CONFDIR + "mp" + CONFDIR[-1];
+    mkdir(cfdir);
+    ERRNO = NULL;
 
-        /* if ~/.config is a directory, use ~/.config/mp.mpsl */
-        if (stat(ncf)->get(2)->bitand(0x4000)) {
-            cfdir = ncf;
-            cf    = "mp.mpsl";
+    org_cfdir = CONFDIR;
+
+    /* if it could be created, set it */
+    if (stat(cfdir) != NULL)
+        CONFDIR = cfdir;
+
+    mp.config_file = CONFDIR + "mp.mpsl";
+    mp.state_file  = CONFDIR + "mp_state.json";
+
+    /* move (possible) previous files */
+
+    /* main config file */
+    if (stat(mp.config_file) == NULL) {
+        /* no file here; move from other locations? */
+        local of1, of2;
+
+        of1 = org_cfdir + "mp.mpsl";
+        of2 = HOMEDIR + ".mp.mpsl";
+
+        if (stat(of1) != NULL) {
+            rename(of1, mp.config_file);
+            unlink(of2);
+        }
+        else {
+            rename(of2, mp.config_file);
         }
     }
 
-    /* ensure the configuration directory ends with a / */
-    if (cfdir[-1] != "/")
-        cfdir += "/";
+    /* state file */
+    if (stat(mp.state_file) == NULL) {
+        rename(HOMEDIR + ".mp_state.json", mp.state_file);
+    }
 
-    mp.config_file = cfdir + cf;
+    /* templates file */
+    if (stat(CONFDIR + "mp_templates") == NULL) {
+        rename(HOMEDIR + ".mp_templates", CONFDIR + "mp_templates");
+    }
+
+    /* session file */
+    if (stat(CONFDIR + "mp_session") == NULL) {
+        rename(HOMEDIR + ".mp_session", CONFDIR + "mp_session");
+    }
 
     /* if the config file exists, execute it */
     if (ERROR == NULL && stat(mp.config_file) != NULL) {
         eval( sub {
-            local INC = [ cfdir ];
-            load(cf);
+            local INC = [ CONFDIR ];
+            load("mp.mpsl");
         });
     }
 
@@ -878,14 +910,14 @@ sub mp.assert_version(found, minimal, package)
 sub mp.test_versions()
 /* tests component versions */
 {
-    mp.assert_version(MPDM.version, "2.81", "MPDM");
-    mp.assert_version(MPSL.VERSION, "2.70", "MPSL");
+    mp.assert_version(MPDM.version, "2.82", "MPDM");
+    mp.assert_version(MPSL.VERSION, "2.71", "MPSL");
 }
 
 
 sub mp.load_state()
 {
-    local f = open(HOMEDIR + ".mp_state.json", "r");
+    local f = open(mp.state_file, "r");
     f->flock(1);
 
     /* read state file */
@@ -913,7 +945,7 @@ sub mp.save_state()
     del(mp.history, "[NULL]");
     mp.state.history = mp.history;
 
-    local f = open(HOMEDIR + ".mp_state.json", "w");
+    local f = open(mp.state_file, "w");
     f->flock(2);
 
     f->write(fmt("%j", mp.state))->close();

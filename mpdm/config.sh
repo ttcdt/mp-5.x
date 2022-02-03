@@ -393,6 +393,20 @@ else
     echo "No"
 fi
 
+# mkdir() with 2 arguments detection
+echo -n "Testing for number of arguments for mkdir()... "
+echo "#include <unistd.h>" > .tmp.c
+echo "int main(void) { mkdir(\"dummy\", 0755); }" >> .tmp.c
+
+$CC $CFLAGS .tmp.c -o .tmp.o 2>> .config.log
+
+if [ $? = 0 ] ; then
+    echo "#define CONFOPT_MKDIR_MODE 1" >> config.h
+    echo "2"
+else
+    echo "1"
+fi
+
 # gettext support
 echo -n "Testing for gettext... "
 

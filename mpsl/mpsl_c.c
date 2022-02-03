@@ -1069,6 +1069,7 @@ int mpsl_startup(void)
     /* home and application directories */
     mpdm_set_wcs(r, mpdm_home_dir(), L"HOMEDIR");
     mpdm_set_wcs(r, mpdm_app_dir(),  L"APPDIR");
+    mpdm_set_wcs(r, mpdm_conf_dir(),  L"CONFDIR");
 
     /* fill now the MPSL object */
     m = mpdm_set_wcs(r, MPDM_O(), L"MPSL");

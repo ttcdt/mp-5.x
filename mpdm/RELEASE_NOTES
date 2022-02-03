@@ -1,6 +1,15 @@
 MPDM Release Notes
 ==================
 
+2.82
+----
+
+* New functions:
+
+mpdm_mkdir(), to create directories.
+
+mpdm_conf_dir(), that returns a directory valid for storing configuration files.
+
 2.81
 ----
 

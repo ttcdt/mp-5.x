@@ -1,6 +1,17 @@
 Minimum Profit Release Notes
 ============================
 
+5.57
+----
+
+* Important changes:
+
+All configuration files have been moved to the `mp' subfolder inside a system-dependent configuration folder. This folder is under the `~/.config' path (or the content of the XDG_CONFIG_HOME environment variable) in UNIX-like systems or under the user application data path in MS Windows (the system value for CSIDL_LOCAL_APPDATA). Currently existing files are automatically moved to this new location (Theo).
+
+* Bug fixes:
+
+[ANSI] Increased color detection waiting time for slow terminal emulators like `mate-terminal' (Theo).
+
 5.56
 ----
 

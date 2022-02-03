@@ -156,7 +156,7 @@ static int ansi_detect_color_support(int rgbcolor)
         fflush(stdout);
 
         rgbcolor = -1;
-        if (ansi_something_waiting(0, 10)) {
+        if (ansi_something_waiting(0, 50)) {
             char *buffer = ansi_read_string(0);
 
             if (buffer[0] != '\0')

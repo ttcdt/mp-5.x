@@ -35,7 +35,11 @@ If a line is prepended with a > symbol, it's rendered right-aligned, like in the
 >"My name is Ozymandias, king of kings:
 >Look on my works, ye Mighty, and despair!"
 
-Left-aligned text can be entered by appending the < character at the end of each line.
+Left-aligned text can be entered by appending the < character at the end of each line, like this:
+
+And on the pedestal these words appear:<
+"My name is Ozymandias, king of kings:<
+Look on my works, ye Mighty, and despair!"<
 
 If the output format supports it somehow, URLs shall be made clickable, as when writing one like https://triptico.com or similar.
 

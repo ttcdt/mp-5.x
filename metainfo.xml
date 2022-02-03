@@ -32,18 +32,15 @@
 
   <releases>
 
-    <release version="5.55" type="stable" date="2021-09-16">
+    <release version="5.57" type="stable" date="2022-02-03">
       <description>
-        <p>Important notice:</p>
+        <p>Important changes:</p>
         <ul>
-        <li>The source code repositories of submodules MPDM and MPSL have merged into main Minimum Profit (mp-5.x). If you build MP from Git sources, you must execute `make distclean' and reconfigure.</li>
+            <li>All configuration files have been moved to the `mp' subfolder inside a system-dependent configuration folder. This folder is under the `~/.config' path (or the content of the XDG_CONFIG_HOME environment variable) in UNIX-like systems or under the user application data path in MS Windows (the system value for CSIDL_LOCAL_APPDATA). Currently existing files are automatically moved to this new location (Theo).</li>
         </ul>
         <p>Bug fixes:</p>
         <ul>
-        <li>[ANSI] Bold / bright color confusion (contributed by X-Ryl669).</li>
-        <li>[Curses] Bold / bright color confusion (contributed by X-Ryl669).</li>
-        <li>Some tokens were not shown in MPSL syntax highlight (Claire).</li>
-        <li>Completion works in MPSL syntax highlight (Claire).</li>
+            <li>[ANSI] Increased color detection waiting time for slow terminal emulators like `mate-terminal' (Theo).</li>
         </ul>
       </description>
       <artifacts>

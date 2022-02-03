@@ -53,10 +53,10 @@ mp_doc.actions['insert_template'] = sub(d) {
 };
 
 mp.actions['open_templates_file'] = sub {
-    local templates = glob(HOMEDIR + "/.mp_templates/*"); /* Treat as a dir */
+    local templates = glob(CONFDIR + "/mp_templates/*"); /* Treat as a dir */
 
     if (size(templates) == 0) {
-        mp.open(HOMEDIR + ".mp_templates");
+        mp.open(CONFDIR + "mp_templates");
     }
     else {
         if ((t = mp.form(
@@ -88,7 +88,7 @@ mp.templates = {};
 /** code **/
 
 sub mp_doc.read_templates_file(d)
-/* reads the $HOME/.mp_templates or $HOME/.mp_templates/{global,syntax.name} file into mp.templates */
+/* reads the CONFDIR/mp_templates or CONFDIR/mp_templates/{global,syntax.name} file into mp.templates */
 {
     local tmpl_lst = [];
 
@@ -126,11 +126,11 @@ sub mp_doc.read_templates_file(d)
     /* reset */
     mp.templates = {};
 
-    read_template(HOMEDIR + "/.mp_templates");
-    read_template(HOMEDIR + "/.mp_templates/global");
+    read_template(CONFDIR + "/mp_templates");
+    read_template(CONFDIR + "/mp_templates/global");
 
     if (d.syntax != NULL)
-        read_template(HOMEDIR + "/.mp_templates/" + d.syntax.id);
+        read_template(CONFDIR + "/mp_templates/" + d.syntax.id);
 
     /* returns keys(mp.templates), but in its original order */
     return tmpl_lst;

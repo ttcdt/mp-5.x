@@ -928,7 +928,7 @@ static mpdm_t F_time(F_ARGS)
  * chdir - Changes the working directory
  * @dir: the new path
  *
- * Changes the working directory
+ * Changes the working directory.
  * [Input-Output]
  */
 /** integer = chdir(dir); */
@@ -938,9 +938,23 @@ static mpdm_t F_chdir(F_ARGS)
 }
 
 /**
+ * mkdir - Creates a directory
+ * @dir: the new path
+ * @mode: permissions (number)
+ *
+ * Creates a directory.
+ * [Input-Output]
+ */
+/** integer = mkdir(dir, mode); */
+static mpdm_t F_mkdir(F_ARGS)
+{
+    return MPDM_I(mpdm_mkdir(A0, A1));
+}
+
+/**
  * getcwd - Returns the current working directory
  *
- * Returns the current working directory
+ * Returns the current working directory.
  * [Input-Output]
  */
 /** path = getcwd(); */
@@ -1727,6 +1741,7 @@ static struct {
     { L"lc",             F_lc },
     { L"time",           F_time },
     { L"chdir",          F_chdir },
+    { L"mkdir",          F_mkdir },
     { L"getcwd",         F_getcwd },
     { L"sscanf",         F_sscanf },
     { L"bincall",        F_bincall },

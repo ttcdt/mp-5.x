@@ -1670,6 +1670,42 @@ int mpdm_chdir(const mpdm_t dir)
 
 
 /**
+ * mpdm_mkdir - Creates a directory
+ * @dir: the new path
+ * @mode: permissions
+ *
+ * Creates a directory.
+ * [File Management]
+ */
+int mpdm_mkdir(const mpdm_t dir, const mpdm_t mode)
+{
+    int r = -1;
+    mode_t m;
+
+    mpdm_ref(dir);
+    mpdm_t fn = mpdm_ref(MPDM_2MBS(mpdm_data(dir)));
+
+    m = (mode_t) mpdm_ival(mode);
+
+    /* default permissions */
+    if (m == 0)
+        m = 0755;
+
+#ifdef CONFOPT_MKDIR_MODE
+    if ((r = mkdir((char *) mpdm_data(fn), m)) == -1)
+#else
+    if ((r = mkdir((char *) mpdm_data(fn))) == -1)
+#endif
+        store_syserr();
+
+    mpdm_unref(fn);
+    mpdm_unref(dir);
+
+    return r;
+}
+
+
+/**
  * mpdm_getcwd - Get current working directory
  *
  * Returns the current working directory.
@@ -2146,6 +2182,63 @@ mpdm_t mpdm_popen2(const mpdm_t prg)
 int mpdm_pclose(mpdm_t fd)
 {
     return mpdm_close(fd);
+}
+
+
+/**
+ * mpdm_conf_dir - Returns a directory where configuration can be stored.
+ *
+ * Returns a system-dependent directory where the user can write
+ * configuration files and create subdirectories.
+ * [File Management]
+ */
+mpdm_t mpdm_conf_dir(void)
+{
+    mpdm_t r = NULL;
+    char *ptr = "";
+    char tmp[512] = "";
+
+    memset(tmp, '\0', sizeof(tmp));
+
+#ifdef CONFOPT_WIN32
+
+    LPITEMIDLIST pidl;
+
+    /* get the 'My Documents' folder */
+    SHGetSpecialFolderLocation(NULL, CSIDL_LOCAL_APPDATA, &pidl);
+    SHGetPathFromIDList(pidl, tmp);
+    strcat(tmp, "\\");
+
+#endif
+
+    /* XDG_CONFIG_HOME defined? */
+    if (tmp[0] == '\0' && (ptr = getenv("XDG_CONFIG_HOME")) != NULL) {
+        strncpy(tmp, ptr, sizeof(tmp) - 1);
+        strcat(tmp, "/");
+    }
+
+#ifdef CONFOPT_PWD_H
+
+    struct passwd *p;
+
+    /* get home dir from /etc/passwd entry */
+    if (tmp[0] == '\0' && (p = getpwuid(getpid())) != NULL) {
+        strncpy(tmp, p->pw_dir, sizeof(tmp) - 1);
+        strcat(tmp, "/.config/");
+    }
+
+#endif
+
+    /* still none? try the ENV variable $HOME */
+    if (tmp[0] == '\0' && (ptr = getenv("HOME")) != NULL) {
+        strncpy(tmp, ptr, sizeof(tmp) - 1);
+        strcat(tmp, "/.config/");
+    }
+
+    if (tmp[0] != '\0')
+        r = MPDM_MBS(tmp);
+
+    return r;
 }
 
 

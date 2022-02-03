@@ -33,7 +33,7 @@ mp.actdesc['save_session'] = LL("Save session");
 sub mp.session_file()
 /* returns the appropriate session saving file */
 {
-    return (mp.config.local_sessions && './' || HOMEDIR) + '.mp_session';
+    return (mp.config.local_sessions && './.mp_session' || CONFDIR + "mp_session");
 }
 
 

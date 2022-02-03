@@ -1,6 +1,17 @@
 MPSL Release Notes
 ==================
 
+2.71
+----
+
+* New functions:
+
+mkdir(), to create a new directory.
+
+* New variables:
+
+CONFDIR, that contains a directory that can be used to store configuration files.
+
 2.70
 ----
 

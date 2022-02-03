@@ -227,12 +227,14 @@ int mpdm_rename(const mpdm_t o, const mpdm_t n);
 mpdm_t mpdm_stat(const mpdm_t filename);
 int mpdm_chmod(const mpdm_t filename, mpdm_t perms);
 int mpdm_chdir(const mpdm_t dir);
+int mpdm_mkdir(const mpdm_t dir, const mpdm_t mode);
 mpdm_t mpdm_getcwd(void);
 int mpdm_chown(const mpdm_t filename, mpdm_t uid, mpdm_t gid);
 mpdm_t mpdm_glob(mpdm_t spec, mpdm_t base);
 mpdm_t mpdm_popen(const mpdm_t prg, const mpdm_t mode);
 mpdm_t mpdm_popen2(const mpdm_t prg);
 int mpdm_pclose(mpdm_t fd);
+mpdm_t mpdm_conf_dir(void);
 mpdm_t mpdm_home_dir(void);
 mpdm_t mpdm_app_dir(void);
 
