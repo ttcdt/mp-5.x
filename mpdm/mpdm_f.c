@@ -1240,7 +1240,7 @@ int mpdm_write(const mpdm_t fd, const mpdm_t v)
 
     if (mpdm_type(fd) == MPDM_TYPE_FILE) {
         if (mpdm_type(v) == MPDM_TYPE_ARRAY || mpdm_type(v) == MPDM_TYPE_FILE) {
-            int n = 0;
+            int64_t n = 0;
             mpdm_t w;
 
             while (mpdm_iterator(v, &n, &w, NULL))
@@ -2222,7 +2222,7 @@ mpdm_t mpdm_conf_dir(void)
     struct passwd *p;
 
     /* get home dir from /etc/passwd entry */
-    if (tmp[0] == '\0' && (p = getpwuid(getpid())) != NULL) {
+    if (tmp[0] == '\0' && (p = getpwuid(getuid())) != NULL) {
         strncpy(tmp, p->pw_dir, sizeof(tmp) - 1);
         strcat(tmp, "/.config/");
     }
@@ -2274,7 +2274,7 @@ mpdm_t mpdm_home_dir(void)
     struct passwd *p;
 
     /* get home dir from /etc/passwd entry */
-    if (tmp[0] == '\0' && (p = getpwuid(getpid())) != NULL) {
+    if (tmp[0] == '\0' && (p = getpwuid(getuid())) != NULL) {
         strncpy(tmp, p->pw_dir, sizeof(tmp) - 1);
         wptr = L"/";
     }
@@ -2848,7 +2848,7 @@ static mpdm_t vc_file_exec(mpdm_t c, mpdm_t args, mpdm_t ctxt)
 }
 
 
-static int vc_file_iterator(mpdm_t set, int *context, mpdm_t *v, mpdm_t *i)
+static int vc_file_iterator(mpdm_t set, int64_t *context, mpdm_t *v, mpdm_t *i)
 {
     mpdm_t w = mpdm_read(set);
     int ret  = 0;
@@ -2861,7 +2861,7 @@ static int vc_file_iterator(mpdm_t set, int *context, mpdm_t *v, mpdm_t *i)
 
         if (i) *i = MPDM_I(*context);
 
-        (*context) = (int) mpdm_ftell(set);
+        (*context) = (int64_t) mpdm_ftell(set);
         ret = 1;
     }
 
@@ -2884,5 +2884,6 @@ struct mpdm_type_vc mpdm_vc_file = { /* VC */
     vc_file_exec,           /* exec */
     vc_file_iterator,       /* iterator */
     vc_default_map,         /* map */
-    vc_default_can_exec     /* can_exec */
+    vc_default_can_exec,    /* can_exec */
+    vc_default_clone        /* clone */
 };

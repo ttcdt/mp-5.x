@@ -245,7 +245,7 @@ sub mp.clang_complete(o, d) {
             "/\<(true|false|NULL)\>/"                   /* symbolic constant names */
         ],
         'word3', [
-            '/%[0-9]*[l]?[dxfsoic]/'
+            '/%[0-9]*[l]?[dxfsoicp]/'
         ],
         'comments', [
             [ '|/\*|', '|\*/|' ],                       /* C-like */

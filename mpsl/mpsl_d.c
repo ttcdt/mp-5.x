@@ -84,7 +84,8 @@ wchar_t *mpsl_dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size)
     int n;
     char tmp[256];
     mpdm_t w, i;
-    int c, f;
+    int64_t c;
+    int f;
 
     switch (mpdm_type(v)) {
     case MPDM_TYPE_NULL:
@@ -234,7 +235,7 @@ mpdm_t mpsl_decompile(mpdm_t prg)
 
     if (mpdm_type(prg) == MPDM_TYPE_PROGRAM) {
         mpdm_t op = MPDM_A(0), v, i;
-        int n = 0;
+        int64_t n = 0;
 
         /* reverse the opcodes as an array */
         while (mpdm_iterator(mpsl_opcodes, &n, &v, &i))

@@ -367,7 +367,7 @@ sub mp_doc.break_line(doc, col)
     l2 = slice(c, col, -1);
 
     /* set first part as current line */
-    txt.lines[txt.y] = l1 || '';
+    txt.lines[txt.y] = l1;
 
     /* move to next line */
     txt.y += 1;

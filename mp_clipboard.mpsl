@@ -311,7 +311,7 @@ sub mp_doc.paste(doc)
         doc->delete_mark();
     }
 
-    if (mp.clipboard_vertical == 0) {
+    if (!mp.clipboard_vertical) {
         /* normal selection in clipboard */
         doc->insert(mp.clipboard);
     }

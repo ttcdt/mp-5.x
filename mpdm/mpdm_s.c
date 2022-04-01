@@ -829,7 +829,8 @@ static wchar_t *json_f(wchar_t *o, int *z, mpdm_t v, int l)
 /* fills a %j JSON format */
 {
     mpdm_t w, i;
-    int n = 0, c = 0;
+    int64_t n = 0;
+    int c = 0;
 
     /* special test: upper level can only be array or object */
     if (!l && mpdm_type(v) != MPDM_TYPE_ARRAY && mpdm_type(v) != MPDM_TYPE_OBJECT)
@@ -2246,9 +2247,9 @@ static wchar_t *vc_real_string(mpdm_t v)
 }
 
 
-static int vc_string_iterator(mpdm_t set, int *context, mpdm_t *v, mpdm_t *i)
+static int vc_string_iterator(mpdm_t set, int64_t *context, mpdm_t *v, mpdm_t *i)
 {
-    int ret = *context;
+    int64_t ret = *context;
     wchar_t *ptr = (wchar_t *)mpdm_data(set);
 
     if (ret < wcslen(ptr)) {
@@ -2265,9 +2266,9 @@ static int vc_string_iterator(mpdm_t set, int *context, mpdm_t *v, mpdm_t *i)
 }
 
 
-static int vc_number_iterator(mpdm_t set, int *context, mpdm_t *v, mpdm_t *i)
+static int vc_number_iterator(mpdm_t set, int64_t *context, mpdm_t *v, mpdm_t *i)
 {
-    int ret = *context;
+    int64_t ret = *context;
 
     if (ret < mpdm_ival(set)) {
         if (v) *v = MPDM_I(ret);
@@ -2322,7 +2323,8 @@ struct mpdm_type_vc mpdm_vc_string = { /* VC */
     vc_default_exec,        /* exec */
     vc_string_iterator,     /* iterator */
     vc_string_map,          /* map */
-    vc_default_cannot_exec  /* can_exec */
+    vc_default_cannot_exec, /* can_exec */
+    vc_default_clone        /* clone */
 };
 
 struct mpdm_type_vc mpdm_vc_mbs = { /* VC */
@@ -2340,7 +2342,8 @@ struct mpdm_type_vc mpdm_vc_mbs = { /* VC */
     vc_default_exec,        /* exec */
     vc_default_iterator,    /* iterator */
     vc_default_map,         /* map */
-    vc_default_cannot_exec  /* can_exec */
+    vc_default_cannot_exec, /* can_exec */
+    vc_default_clone        /* clone */
 };
 
 struct mpdm_type_vc mpdm_vc_integer = { /* VC */
@@ -2358,7 +2361,8 @@ struct mpdm_type_vc mpdm_vc_integer = { /* VC */
     vc_default_exec,        /* exec */
     vc_number_iterator,     /* iterator */
     vc_default_map,         /* map */
-    vc_default_cannot_exec  /* can_exec */
+    vc_default_cannot_exec, /* can_exec */
+    vc_default_clone        /* clone */
 };
 
 struct mpdm_type_vc mpdm_vc_real = { /* VC */
@@ -2376,5 +2380,6 @@ struct mpdm_type_vc mpdm_vc_real = { /* VC */
     vc_default_exec,        /* exec */
     vc_number_iterator,     /* iterator */
     vc_default_map,         /* map */
-    vc_default_cannot_exec  /* can_exec */
+    vc_default_cannot_exec, /* can_exec */
+    vc_default_clone        /* clone */
 };

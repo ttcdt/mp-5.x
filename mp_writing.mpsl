@@ -14,9 +14,10 @@
 
 mp_doc.actions['word_count'] = sub (d) {
     local c = d->long_op(d.word_count);
+    local a = d->get_active_area()->clone()->mp_c.vw_unwrap();
 
-    mp.alert(sprintf(L("Lines: %d\nWords: %d\nPages: %d"),
-        size(d->get_active_area()), c, c * 4 / 1000));
+    mp.alert(sprintf(L("Lines: %d\nWords: %d\nCharacters: %d\nPages: %d"),
+        size(a), c, a->join("\n")->size(), c * 4 / 1000));
 };
 
 

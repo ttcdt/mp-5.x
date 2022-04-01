@@ -4,7 +4,7 @@ build:
 	./build.sh
 
 clean:
-	rm -f $(TARGET) $(OBJS) mp*.tar *.o *.moc tags *.tar.gz *.exe *.zip .installer.c *.1 *.asc lex.yy.c y.tab.c y.tab.h *.a *-stress *.sig
+	rm -f $(TARGET) $(OBJS) mp*.tar *.o *.moc tags *.tar.gz *.exe *.zip .installer.c *.1 *.asc lex.yy.c y.tab.c y.tab.h *.a *-stress *.sig mp_arch.c
 	$(MAKE) -C $(MPDM) clean
 	$(MAKE) -C $(MPSL) clean
 
@@ -48,6 +48,10 @@ mp.zip: $(ARCHFILES)
 
 mp.zip.o: mp.zip
 	$(LD) -r -b binary mp.zip -o $@
+
+mp_arch.o: $(ARCH_FILE)
+	./bin2c.sh binary_mp_arch < $(ARCH_FILE) > mp_arch.c
+	$(CC) mp_arch.c -c -o $@
 
 $(MPDM)/libmpdm.a: $(MPDM)/VERSION $(MPDM)/config.h
 	$(MAKE) -C $(MPDM) libmpdm.a

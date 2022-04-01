@@ -656,7 +656,7 @@ if [ "$WITH_EXTERNAL_ARCH" = "1" ] ; then
     echo "Disabled"
 else
     echo "test" > tmp.bin
-    $LD -r -b binary tmp.bin -o tmp.bin.o
+    $LD -r -b binary tmp.bin -o tmp.bin.o 2> /dev/null
 
     echo "extern const char _binary_tmp_bin_start;" > .tmp.c
     echo "extern const char _binary_tmp_bin_end;" >> .tmp.c
@@ -691,9 +691,12 @@ else
             echo "#define ARCH_START &binary_${ARCH_SYM}_start" >> config.h
             echo "#define ARCH_END &binary_${ARCH_SYM}_end" >> config.h
         else
-            echo "No"
-            WITH_EXTERNAL_ARCH=1
-            LD=""
+            echo "No; using workaround"
+            MORE_OBJS="mp_arch.o"
+            echo "extern const char binary_mp_arch[];" >> config.h
+            echo "extern int binary_mp_arch_size;" >> config.h
+            echo "#define ARCH_START binary_mp_arch" >> config.h
+            echo "#define ARCH_END binary_mp_arch + binary_mp_arch_size" >> config.h
         fi
     fi
 

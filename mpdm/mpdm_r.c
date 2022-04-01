@@ -416,5 +416,6 @@ struct mpdm_type_vc mpdm_vc_regex = { /* VC */
     vc_default_exec,        /* exec */
     vc_default_iterator,    /* iterator */
     vc_default_map,         /* map */
-    vc_default_cannot_exec  /* can_exec */
+    vc_default_cannot_exec, /* can_exec */
+    vc_default_clone        /* clone */
 };

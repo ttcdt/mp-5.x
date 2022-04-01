@@ -177,6 +177,9 @@ global mp_mptxt = {
                     if (style == "url")
                         str += "<a href=\"" + text + "\">" + text + "</a>";
                     else
+                    if (style == "img")
+                        str += "<img src=\"" + text + "\"/>";
+                    else
                         str += text;
                 }
 
@@ -253,6 +256,40 @@ global mp_mptxt = {
                         str += '{\field{\*\fldinst HYPERLINK "' + text + '" }' +
                             '{\fldrslt {\ul1 ' + text + '}{}}}';
                     else
+                    if (style == "img") {
+                        local f, t = NULL;
+
+                        if (text->regex("/\.png$/i"))
+                            t = '\pngblip';
+                        else
+                        if (text->regex("/\.jpe?g$/i"))
+                            t = '\jpegblip';
+
+                        if (t == NULL)
+                            str += "Error: unsupported image format for '%s'"->fmt(text);
+                        else {
+                            local f;
+
+                            if ((f = open(text, "rb")) != NULL) {
+                                local c;
+
+                                str += '{\pict';
+                                str += '\picscalex%d\picscaley%d'
+                                    ->fmt(mp.config.rtf_image_scale)
+                                    ->fmt(mp.config.rtf_image_scale);
+                                str += t + " ";
+
+                                while ((c = getchar(f)) != NULL)
+                                    str += "%02x"->fmt(ord(c));
+
+                                close(f);
+                                str += "}";
+                            }
+                            else
+                                str += "Error: cannot open image file '%s'"->fmt(text);
+                        }
+                    }
+                    else
                         str += text;
                 }
 
@@ -310,7 +347,7 @@ global mp_mptxt = {
                 ".de fo\n.tl ''%'\n..\n.wh -0.2i fo\n",
                 ".pl " + mp.config.troff_page_height + "i\n",
                 ".ps " + mp.config.troff_font_size + "\n",
-                ".vs " + mp.config.troff_font_size * 2 + "\n",
+                ".vs " + integer(mp.config.troff_font_size * 2) + "\n",
                 ".\\\"generator Minimum Profit " + mp.VERSION + "\n"
             ];
 
@@ -325,6 +362,7 @@ global mp_mptxt = {
 
                     /* convert special characters */
                     text = text->sregex("/\x{2014}/g", '\(em');
+                    text = text->sregex("/\x{2022}/g", '\[bu]');
 
                     if (style == "strong")
                         str += '\fB' + text + "\fP";
@@ -334,6 +372,9 @@ global mp_mptxt = {
                     else
                     if (style == "url")
                         str += text;
+                    else
+                    if (style == "img")
+                        str += "image: " + text;
                     else
                         str += text;
                 }
@@ -392,11 +433,19 @@ sub mp_mptxt.styles(str, styles)
         mp_mptxt.styles(t[1], styles);
     }
     else
-    if ((sep = str->regex("/(http|ftp)s?:\/\/[^ ,\t]+/"))) {
+    if ((sep = str->regex("/(http|ftp)s?:\/\/[^ ,\t<]+/"))) {
         local t = str->split(sep);
 
         mp_mptxt.styles(t[0], styles);
         styles->push(["url", sep]);
+        mp_mptxt.styles(t[1], styles);
+    }
+    else
+    if ((sep = str->regex("/img:\/\/[^ ,\t<]+/"))) {
+        local t = str->split(sep);
+
+        mp_mptxt.styles(t[0], styles);
+        styles->push(["img", sep->slice(6, -1)]);
         mp_mptxt.styles(t[1], styles);
     }
     else {

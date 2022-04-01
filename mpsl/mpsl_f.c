@@ -1514,7 +1514,7 @@ static mpdm_t F_new(F_ARGS)
 
     for (n = 0; n < mpdm_size(a); n++) {
         mpdm_t w, v, i;
-        int m = 0;
+        int64_t m = 0;
 
         w = mpdm_ref(A(n));
 

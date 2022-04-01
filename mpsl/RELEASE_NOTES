@@ -1,6 +1,13 @@
 MPSL Release Notes
 ==================
 
+2.72
+----
+
+* Internal changes:
+
+Adapted to mpdm_iterator() prototype change.
+
 2.71
 ----
 

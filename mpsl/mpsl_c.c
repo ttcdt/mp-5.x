@@ -540,7 +540,7 @@ O_TYPE O_foreach(O_ARGS)
     mpdm_t o  = RF(M2);
     mpdm_t si = RF(M4);
     mpdm_t r = NULL;
-    int n = 0;
+    int64_t n = 0;
     mpdm_t v, i;
     mpdm_t *ip = NULL;
 

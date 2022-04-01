@@ -19,3 +19,4 @@ mpsl-stress
 lex.yy.c
 y.tab.c
 y.tab.h
+mp_arch.c

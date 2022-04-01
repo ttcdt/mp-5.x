@@ -70,7 +70,8 @@ static void build_colors(void)
     mpdm_t colors;
     mpdm_t color_names;
     mpdm_t v, i;
-    int n, c;
+    int n;
+    int64_t c;
 
     /* gets the color definitions and attribute names */
     colors      = mpdm_get_wcs(MP, L"colors");

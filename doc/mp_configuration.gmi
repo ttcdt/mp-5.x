@@ -136,6 +136,10 @@ Font face to be used in RTF exporting as normal text. Default is "Times New Roma
 
 Font size to be used in RTF exporting for normal text. Default is 12.
 
+## mp.config.rtf_image_scale
+
+Percent scale of inserted images. Default is 100 (unchanged size).
+
 ## mp.config.rtf_mono_font_face
 
 Font face to be used in RTF exporting as verbatim text. Default is "Courier New".
@@ -155,6 +159,10 @@ RTF export code for default paragraphs.
 ## mp.config.rtf_style_first
 
 RTF export code for first paragraphs.
+
+## mp.config.rtf_style_left
+
+RTF export code for left-aligned paragraphs.
 
 ## mp.config.rtf_style_para
 

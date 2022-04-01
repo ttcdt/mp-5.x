@@ -642,10 +642,10 @@ mpdm_t vc_default_del(mpdm_t v, mpdm_t i)            { return NULL; }
 mpdm_t vc_default_set_i(mpdm_t v, mpdm_t e, int i)   { return NULL; }
 mpdm_t vc_default_set(mpdm_t v, mpdm_t e, mpdm_t i)  { return NULL; }
 mpdm_t vc_default_exec(mpdm_t v, mpdm_t a, mpdm_t c) { return NULL; }
-int vc_default_iterator(mpdm_t s, int *c, mpdm_t *v, mpdm_t *i) { return 0; }
+int vc_default_iterator(mpdm_t s, int64_t *c, mpdm_t *v, mpdm_t *i) { return 0; }
 int vc_default_can_exec(mpdm_t v)                    { return 1; }
 int vc_default_cannot_exec(mpdm_t v)                 { return 0; }
-
+mpdm_t vc_default_clone(mpdm_t v)                    { return v; }
 
 static int vc_null_is_true(mpdm_t v)
 {
@@ -700,7 +700,8 @@ struct mpdm_type_vc mpdm_vc_null = { /* VC */
     vc_default_exec,        /* exec */
     vc_default_iterator,    /* iterator */
     vc_default_map,         /* map */
-    vc_default_cannot_exec  /* can_exec */
+    vc_default_cannot_exec, /* can_exec */
+    vc_default_clone        /* clone */
 };
 
 struct mpdm_type_vc mpdm_vc_function = { /* VC */
@@ -718,5 +719,6 @@ struct mpdm_type_vc mpdm_vc_function = { /* VC */
     vc_function_exec,       /* exec */
     vc_default_iterator,    /* iterator */
     vc_default_map,         /* map */
-    vc_default_can_exec     /* can_exec */
+    vc_default_can_exec,    /* can_exec */
+    vc_default_clone        /* clone */
 };

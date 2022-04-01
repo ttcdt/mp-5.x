@@ -707,7 +707,7 @@ static wchar_t drw_char(wchar_t c, wchar_t pc, int n)
 /* does possible conversions to the char about to be printed */
 {
     /* real tab */
-    if (n == 0 && c == L'\t')
+    if (c == L'\t')
         c = drw_1.wc_tab;
 
     /* soft hyphen */
@@ -719,9 +719,6 @@ static wchar_t drw_char(wchar_t c, wchar_t pc, int n)
         c = drw_1.wc_m_dash;
 
     if (drw_1.mark_eol) {
-        if (c == L'\t')
-            c = L'\xb7';    /* middledot */
-        else
         if (c == L'\n' || c == L'\0') {
             if (pc != L'\xad')
                 c = L'\xb6';    /* pilcrow */

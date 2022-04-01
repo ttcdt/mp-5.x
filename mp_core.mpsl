@@ -436,7 +436,7 @@ mp.unicode_tbl = [
         "wcorner":   "\x{251c}",
         "ecorner":   "\x{2524}",
         "ccorner":   "\x{253c}",
-        "tab":       "\x{2192}",
+        "tab":       "\x{2025}",
         "formfeed":  "\x{21a1}",
         "m_dash":    "\x{2014}",
         "unknown":   "\x{fffd}"
@@ -910,8 +910,8 @@ sub mp.assert_version(found, minimal, package)
 sub mp.test_versions()
 /* tests component versions */
 {
-    mp.assert_version(MPDM.version, "2.82", "MPDM");
-    mp.assert_version(MPSL.VERSION, "2.71", "MPSL");
+    mp.assert_version(MPDM.version, "2.83", "MPDM");
+    mp.assert_version(MPSL.VERSION, "2.72", "MPSL");
 }
 
 

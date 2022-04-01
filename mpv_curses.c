@@ -313,7 +313,10 @@ static mpdm_t nc_tui_getkey(mpdm_t args, mpdm_t ctxt)
             f = L"alt-,";
             break;
         case L'-':
-            f = L"alt--";
+            f = L"alt-minus";
+            break;
+        case L'+':
+            f = L"alt-plus";
             break;
         case L'.':
             f = L"alt-.";
@@ -661,7 +664,8 @@ static void nc_build_colors(void)
     mpdm_t colors;
     mpdm_t color_names;
     mpdm_t v, i;
-    int n, c;
+    int n;
+    int64_t c;
 
 #ifdef CONFOPT_TRANSPARENCY
     use_default_colors();

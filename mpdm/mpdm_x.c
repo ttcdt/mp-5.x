@@ -248,7 +248,7 @@ mpdm_t mpdm_exec_3(mpdm_t c, mpdm_t a1, mpdm_t a2, mpdm_t a3, mpdm_t ctxt)
  * [Hashes]
  * [Arrays]
  */
-int mpdm_iterator(mpdm_t set, int *context, mpdm_t *v, mpdm_t *i)
+int mpdm_iterator(mpdm_t set, int64_t *context, mpdm_t *v, mpdm_t *i)
 {
     int ret = 0;
 
@@ -260,10 +260,26 @@ int mpdm_iterator(mpdm_t set, int *context, mpdm_t *v, mpdm_t *i)
 }
 
 
+/**
+ * mpdm_clone - Creates a clone of a value.
+ * @v: the value
+ *
+ * Creates a clone of a value. If the value is multiple, a new value will
+ * be created containing clones of all its elements; otherwise,
+ * the same unchanged value is returned.
+ * [Value Management]
+ */
+mpdm_t mpdm_clone(mpdm_t v)
+{
+    return mpdm_type_vc(v)->clone(v);
+}
+
+
+
 mpdm_t vc_default_map(mpdm_t set, mpdm_t filter, mpdm_t ctxt)
 {
     mpdm_t r = MPDM_A(0);
-    int n = 0;
+    int64_t n = 0;
     mpdm_t v, i;
 
     while (mpdm_iterator(set, &n, &v, &i)) {
@@ -327,7 +343,7 @@ mpdm_t mpdm_omap(mpdm_t set, mpdm_t filter, mpdm_t ctxt)
 {
     mpdm_t v, i;
     mpdm_t out = MPDM_O();
-    int n = 0;
+    int64_t n = 0;
 
     mpdm_ref(set);
     mpdm_ref(filter);
@@ -410,7 +426,7 @@ mpdm_t mpdm_grep(mpdm_t set, mpdm_t filter, mpdm_t ctxt)
 
     if (set != NULL) {
         mpdm_t v, i;
-        int n = 0;
+        int64_t n = 0;
 
         out = mpdm_type(set) == MPDM_TYPE_OBJECT ? MPDM_O() : MPDM_A(0);
 
@@ -476,7 +492,8 @@ mpdm_t mpdm_grep(mpdm_t set, mpdm_t filter, mpdm_t ctxt)
  */
 mpdm_t mpdm_join(const mpdm_t a, const mpdm_t b)
 {
-    int n, c = 0;
+    int64_t n;
+    int c = 0;
     mpdm_t r, v, i;
 
     mpdm_ref(a);
@@ -661,7 +678,7 @@ int mpdm_cmp(const mpdm_t v1, const mpdm_t v2)
             if (mpdm_type(v2) == mpdm_type(v1)) {
                 /* if they are the same size, compare elements one by one */
                 if ((r = mpdm_size(v1) - mpdm_size(v2)) == 0) {
-                    int n = 0;
+                    int64_t n = 0;
                     mpdm_t v, i;
 
                     while (mpdm_iterator(v1, &n, &v, &i)) {
@@ -743,7 +760,7 @@ mpdm_t mpdm_multiply(mpdm_t v, mpdm_t i)
 
 mpdm_t mpdm_substract(mpdm_t m, mpdm_t s)
 {
-    int n;
+    int64_t n = 0;
     mpdm_t v, i;
     mpdm_t r = NULL;
 

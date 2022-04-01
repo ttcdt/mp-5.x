@@ -1,6 +1,13 @@
 MPDM Release Notes
 ==================
 
+2.83
+----
+
+* Important changes:
+
+mpdm_iterator() argument context has been changed from int to int64_t.
+
 2.82
 ----
 

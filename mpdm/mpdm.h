@@ -16,6 +16,8 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
+
 typedef enum {
     MPDM_TYPE_NULL,
     MPDM_TYPE_STRING,
@@ -95,9 +97,10 @@ struct mpdm_type_vc {
     mpdm_t (*set_i)(mpdm_t, mpdm_t, int);
     mpdm_t (*set)(mpdm_t, mpdm_t, mpdm_t);
     mpdm_t (*exec)(mpdm_t, mpdm_t, mpdm_t);
-    int (*iterator)(mpdm_t, int *, mpdm_t *, mpdm_t *);
+    int (*iterator)(mpdm_t, int64_t *, mpdm_t *, mpdm_t *);
     mpdm_t (*map)(mpdm_t, mpdm_t, mpdm_t);
     int (*can_exec)(mpdm_t);
+    mpdm_t (*clone)(mpdm_t);
 };
 
 mpdm_t vc_default_destroy(mpdm_t v);
@@ -112,10 +115,11 @@ mpdm_t vc_default_del(mpdm_t v, mpdm_t i);
 mpdm_t vc_default_set_i(mpdm_t v, mpdm_t e, int i);
 mpdm_t vc_default_set(mpdm_t v, mpdm_t e, mpdm_t i);
 mpdm_t vc_default_exec(mpdm_t c, mpdm_t args, mpdm_t ctxt);
-int vc_default_iterator(mpdm_t set, int *context, mpdm_t *v, mpdm_t *i);
+int vc_default_iterator(mpdm_t set, int64_t *context, mpdm_t *v, mpdm_t *i);
 mpdm_t vc_default_map(mpdm_t set, mpdm_t filter, mpdm_t ctxt);
 int vc_default_can_exec(mpdm_t v);
 int vc_default_cannot_exec(mpdm_t v);
+mpdm_t vc_default_clone(mpdm_t v);
 
 struct mpdm_type_vc *mpdm_type_vc_by_t(mpdm_type_t t);
 struct mpdm_type_vc *mpdm_type_vc(mpdm_t);
@@ -291,7 +295,7 @@ mpdm_t mpdm_exec(mpdm_t c, mpdm_t args, mpdm_t ctxt);
 mpdm_t mpdm_exec_1(mpdm_t c, mpdm_t a1, mpdm_t ctxt);
 mpdm_t mpdm_exec_2(mpdm_t c, mpdm_t a1, mpdm_t a2, mpdm_t ctxt);
 mpdm_t mpdm_exec_3(mpdm_t c, mpdm_t a1, mpdm_t a2, mpdm_t a3, mpdm_t ctxt);
-int mpdm_iterator(mpdm_t set, int *context, mpdm_t *v, mpdm_t *i);
+int mpdm_iterator(mpdm_t set, int64_t *context, mpdm_t *v, mpdm_t *i);
 mpdm_t mpdm_map(mpdm_t set, mpdm_t filter, mpdm_t ctxt);
 mpdm_t mpdm_omap(mpdm_t set, mpdm_t filter, mpdm_t ctxt);
 mpdm_t mpdm_grep(mpdm_t set, mpdm_t filter, mpdm_t ctxt);
@@ -301,8 +305,6 @@ int mpdm_cmp(const mpdm_t v1, const mpdm_t v2);
 mpdm_t mpdm_multiply(mpdm_t v, mpdm_t i);
 mpdm_t mpdm_substract(mpdm_t m, mpdm_t s);
 mpdm_t mpdm_divide(mpdm_t num, mpdm_t den);
-
-mpdm_t mpdm_delayed_destroy(mpdm_t v);
 
 
 #ifdef MPDM_OLD_COMPAT

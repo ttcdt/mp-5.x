@@ -1,6 +1,31 @@
 Minimum Profit Release Notes
 ============================
 
+5.58
+----
+
+* Bug fixes:
+
+Hangups in GTK pasting (it seems it also fixes similar cases in Qt) (contributed by mrnav79).
+
+Data loss when breaking a line in very special circumstancies (contributed by Andrew F. Atwood).
+
+[ANSI] Added a timeout for terminal size detection (Claire).
+
+[Curses] Keycodes alt-minus and alt-plus (Claire).
+
+Very minor issues in some syntax highlight definitions.
+
+* Other changes:
+
+The `word_count' action also shows the number of characters in the file or the selection (Theo).
+
+Changed real tab visualization (Theo).
+
+[mptxt] Added support for bullets in troff (contributed by aov).
+
+[mptxt] Added support for images using the img:// pseudo-url (contributed by aov).
+
 5.57
 ----
 

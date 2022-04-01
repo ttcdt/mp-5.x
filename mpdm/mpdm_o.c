@@ -271,7 +271,7 @@ mpdm_t mpdm_hdel(mpdm_t h, const mpdm_t k)
  */
 mpdm_t mpdm_keys(const mpdm_t h)
 {
-    int c;
+    int64_t c;
     mpdm_t a, i;
 
     printf("Warning: deprecated function mpdm_keys()\n");
@@ -406,7 +406,7 @@ static mpdm_t vc_object_set(mpdm_t o, mpdm_t v, mpdm_t index)
 }
 
 
-static int vc_object_iterator(mpdm_t set, int *context, mpdm_t *v, mpdm_t *i)
+static int vc_object_iterator(mpdm_t set, int64_t *context, mpdm_t *v, mpdm_t *i)
 {
     int ret = 0;
 
@@ -444,6 +444,24 @@ static int vc_object_iterator(mpdm_t set, int *context, mpdm_t *v, mpdm_t *i)
 }
 
 
+static mpdm_t vc_object_clone(mpdm_t o)
+{
+    mpdm_t w, v, i;
+    int64_t c = 0;
+
+    w = MPDM_O();
+
+    mpdm_ref(o);
+
+    while (mpdm_iterator(o, &c, &v, &i))
+        mpdm_set(w, mpdm_clone(v), i);
+
+    mpdm_unref(o);
+
+    return w;
+}
+
+
 struct mpdm_type_vc mpdm_vc_object = { /* VC */
     L"object",              /* name */
     vc_object_destroy,      /* destroy */
@@ -459,5 +477,6 @@ struct mpdm_type_vc mpdm_vc_object = { /* VC */
     vc_default_exec,        /* exec */
     vc_object_iterator,     /* iterator */
     vc_default_map,         /* map */
-    vc_default_cannot_exec  /* can_exec */
+    vc_default_cannot_exec, /* can_exec */
+    vc_object_clone         /* clone */
 };

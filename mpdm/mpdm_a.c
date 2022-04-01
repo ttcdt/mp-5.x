@@ -260,44 +260,6 @@ mpdm_t mpdm_queue(mpdm_t a, mpdm_t e, int size)
 
 
 /**
- * mpdm_clone - Creates a clone of a value.
- * @v: the value
- *
- * Creates a clone of a value. If the value is multiple, a new value will
- * be created containing clones of all its elements; otherwise,
- * the same unchanged value is returned.
- * [Value Management]
- */
-mpdm_t mpdm_clone(const mpdm_t v)
-{
-    int n;
-    mpdm_t w = NULL;
-
-    switch (mpdm_type(v)) {
-    case MPDM_TYPE_ARRAY:
-    case MPDM_TYPE_OBJECT:
-        mpdm_ref(v);
-
-        /* creates a similar value */
-        w = mpdm_type(v) == MPDM_TYPE_OBJECT ? MPDM_O() : MPDM_A(0);
-
-        /* fills each element with duplicates of the original */
-        for (n = 0; n < v->size; n++)
-            mpdm_set_i(w, mpdm_clone(mpdm_get_i(v, n)), n);
-
-        mpdm_unref(v);
-        break;
-
-    default:
-        w = v;
-        break;
-    }
-
-    return w;
-}
-
-
-/**
  * mpdm_seek_wcs - Seeks a value in an array (sequential, string version).
  * @a: the array
  * @v: the value
@@ -597,7 +559,8 @@ mpdm_t mpdm_split(const mpdm_t v, const mpdm_t s)
  */
 mpdm_t mpdm_join_wcs(const mpdm_t a, const wchar_t *s)
 {
-    int n, c;
+    int64_t n;
+    int c;
     wchar_t *ptr = NULL;
     int l = 0;
     int ss;
@@ -801,7 +764,7 @@ static mpdm_t vc_program_exec(mpdm_t c, mpdm_t args, mpdm_t ctxt)
 }
 
 
-static int vc_array_iterator(mpdm_t set, int *context, mpdm_t *v, mpdm_t *i)
+static int vc_array_iterator(mpdm_t set, int64_t *context, mpdm_t *v, mpdm_t *i)
 {
     int ret = 0;
 
@@ -814,6 +777,22 @@ static int vc_array_iterator(mpdm_t set, int *context, mpdm_t *v, mpdm_t *i)
     }
 
     return ret;
+}
+
+
+static mpdm_t vc_array_clone(mpdm_t v)
+{
+    int n;
+    mpdm_t w = MPDM_A(mpdm_size(v));
+
+    mpdm_ref(v);
+
+    for (n = 0; n < mpdm_size(v); n++)
+        mpdm_set_i(w, mpdm_clone(mpdm_get_i(v, n)), n);
+
+    mpdm_unref(v);
+
+    return w;
 }
 
 
@@ -832,7 +811,8 @@ struct mpdm_type_vc mpdm_vc_array = { /* VC */
     vc_default_exec,        /* exec */
     vc_array_iterator,      /* iterator */
     vc_default_map,         /* map */
-    vc_default_cannot_exec  /* can_exec */
+    vc_default_cannot_exec, /* can_exec */
+    vc_array_clone          /* clone */
 };
 
 struct mpdm_type_vc mpdm_vc_program = { /* VC */
@@ -850,5 +830,6 @@ struct mpdm_type_vc mpdm_vc_program = { /* VC */
     vc_program_exec,        /* exec */
     vc_array_iterator,      /* iterator */
     vc_default_map,         /* map */
-    vc_default_can_exec     /* can_exec */
+    vc_default_can_exec,    /* can_exec */
+    vc_default_clone        /* clone */
 };

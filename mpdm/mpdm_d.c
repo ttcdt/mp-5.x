@@ -41,7 +41,7 @@ static wchar_t *dump_1(const mpdm_t v, int l, wchar_t *ptr, int *size)
     if (v != NULL) {
         char tmp[256];
         int s;
-        int c = 0;
+        int64_t c = 0;
         mpdm_t w, i;
 
         /* add data type */

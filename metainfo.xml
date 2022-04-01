@@ -32,15 +32,22 @@
 
   <releases>
 
-    <release version="5.57" type="stable" date="2022-02-03">
+    <release version="5.58" type="stable" date="2022-04-01">
       <description>
-        <p>Important changes:</p>
-        <ul>
-            <li>All configuration files have been moved to the `mp' subfolder inside a system-dependent configuration folder. This folder is under the `~/.config' path (or the content of the XDG_CONFIG_HOME environment variable) in UNIX-like systems or under the user application data path in MS Windows (the system value for CSIDL_LOCAL_APPDATA). Currently existing files are automatically moved to this new location (Theo).</li>
-        </ul>
         <p>Bug fixes:</p>
         <ul>
-            <li>[ANSI] Increased color detection waiting time for slow terminal emulators like `mate-terminal' (Theo).</li>
+            <li>Hangups in GTK pasting (it seems it also fixes similar cases in Qt) (contributed by mrnav79).</li>
+            <li>Data loss when breaking a line in very special circumstancies (contributed by Andrew F. Atwood).</li>
+            <li>[ANSI] Added a timeout for terminal size detection (Claire).</li>
+            <li>[Curses] Keycodes alt-minus and alt-plus (Claire).</li>
+            <li>Very minor issues in some syntax highlight definitions.</li>
+        </ul>
+        <p>Other changes:</p>
+        <ul>
+            <li>The `word_count' action also shows the number of characters in the file or the selection (Theo).</li>
+            <li>Changed real tab visualization (Theo).</li>
+            <li>[mptxt] Added support for bullets in troff (contributed by aov).</li>
+            <li>[mptxt] Added support for images using the img:// pseudo-url (contributed by aov).</li>
         </ul>
       </description>
       <artifacts>
@@ -49,6 +56,9 @@
         </artifact>
         <artifact type="binary" platform="x86_64-windows-msvc">
           <location>https://triptico.com/download/mp-5-portable-64.exe</location>
+        </artifact>
+        <artifact type="binary" platform="i386-windows-msvc">
+          <location>https://triptico.com/download/mp-5-portable-32.exe</location>
         </artifact>
       </artifacts>
     </release>

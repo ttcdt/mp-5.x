@@ -339,7 +339,7 @@ Executes the "Maze" game.
 
 ## menu
 
-Menu [alt-a, ctrl-a, mouse-menu, shift-f10, alt-space]
+Menu [alt-a, alt-space, ctrl-a, mouse-menu, shift-f10]
 
 Calls the menu.
 

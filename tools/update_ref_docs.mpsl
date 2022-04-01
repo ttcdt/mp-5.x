@@ -260,7 +260,7 @@ foreach (axn, axns.data->map(index)) {
 
     /* if there is any keycode, add to first line */
     if (size(kcs))
-        fl += " [" + kcs->join(", ") + "]";
+        fl += " [" + kcs->sort()->join(", ") + "]";
 
     /* substitute first line and replace */
     c[0] = fl;

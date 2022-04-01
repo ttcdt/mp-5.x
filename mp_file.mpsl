@@ -23,6 +23,7 @@ mp.config.rtf_style_center   = '\qc\fi0';
 mp.config.rtf_style_verbatim = '\ql\fi0\sl0';
 mp.config.rtf_style_right    = '\qr\fi0\sl0\i1';
 mp.config.rtf_style_left     = '\ql\fi0\sl0\i1';
+mp.config.rtf_image_scale    = 100;
 mp.config.troff_font_size    = 12;
 mp.config.troff_page_height  = 10;
 mp.config.html_title         = '';
@@ -516,7 +517,7 @@ sub mp_doc.recov_file_name(doc)
 
     /* if it's not a recovery file itself, calculate it */
     if (!regex(fn, "/\.recov$"))
-        fn = HOMEDIR + ".mp-" + md5(fn) + ".recov";
+        fn = CONFDIR + ".mp-" + md5(fn) + ".recov";
 
     return fn;
 }

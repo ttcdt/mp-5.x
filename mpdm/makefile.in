@@ -17,7 +17,7 @@ MP_DOCCER_DOCS=doc/mpdm_api.txt
 G_AND_MP_DOCS=doc/mpdm_api.html
 
 OBJS=mpdm_v.o mpdm_a.o mpdm_o.o mpdm_d.o mpdm_s.o mpdm_f.o \
-	mpdm_r.o mpdm_t.o mpdm_x.o mpdm_dd.o gnu_regex.o puff.o md5.o
+	mpdm_r.o mpdm_t.o mpdm_x.o gnu_regex.o puff.o md5.o
 
 DIST_TARGET=/tmp/$(PROJ)-$(VERSION)
 

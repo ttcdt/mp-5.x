@@ -18,6 +18,7 @@
                     "object", "ol", "optgroup", "option",
                     "p", "param", "pre", "q", "samp",
                     "script", "select", "small", "span",
+                    "section", "details", "summary",
                     "strong", "style", "sub", "sup", "table",
                     "tbody", "td", "textarea", "tfoot", "th",
                     "thead", "title", "tr", "tt", "ul",
@@ -27,7 +28,7 @@
         ],
         'word2',    [
             mp.syn_token_list( [
-                "class", "type",
+                "class", "type", "style",
                 "cellspacing", "cellpadding",
                 "href", "align", "valign", "name", "lang",
                 "value", "action", "width", "height",

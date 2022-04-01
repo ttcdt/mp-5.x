@@ -128,9 +128,16 @@ static void ansi_get_tty_size(void)
     printf("\0337\033[r\033[999;999H\033[6n\0338");
     fflush(stdout);
 
-    buffer = ansi_read_string(0);
+    if (ansi_something_waiting(0, 50)) {
+        buffer = ansi_read_string(0);
 
-    sscanf(buffer, "\033[%d;%dR", &h, &w);
+        sscanf(buffer, "\033[%d;%dR", &h, &w);
+    }
+    else {
+        /* terminal didn't report; let's hope it's the default */
+        w = 80;
+        h = 25;
+    }
 
     v = mpdm_get_wcs(MP, L"window");
     mpdm_set_wcs(v, MPDM_I(w),     L"tx");
@@ -260,7 +267,8 @@ static void ansi_build_colors(void)
     mpdm_t colors;
     mpdm_t color_names;
     mpdm_t v, i;
-    int n, c;
+    int n;
+    int64_t c;
     int rgbcolor = 1; /* default setting */
 
     rgbcolor = ansi_detect_color_support(rgbcolor);
