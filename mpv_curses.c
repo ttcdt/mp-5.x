@@ -658,13 +658,36 @@ static mpdm_t nc_tui_doc_draw(mpdm_t args, mpdm_t ctxt)
 }
 
 
+static int ncurses_detect_color_support(int rgbcolor)
+/* ask the tty for color request information */
+{
+    mpdm_t v, w;
+
+    v = mpdm_get_wcs(MP, L"config");
+    w = mpdm_get_wcs(v, L"ansi_rgbcolor");
+
+    if (w != NULL)
+        rgbcolor = mpdm_ival(w);
+
+    if (rgbcolor == 1) {
+        rgbcolor = -1;
+        if (has_colors() != FALSE && can_change_color() != FALSE) 
+            rgbcolor = 1;
+
+        mpdm_set_wcs(v, MPDM_I(rgbcolor), L"ansi_rgbcolor");
+    }
+
+    return rgbcolor;
+}
+
+
 static void nc_build_colors(void)
 /* builds the colors */
 {
     mpdm_t colors;
     mpdm_t color_names;
     mpdm_t v, i;
-    int n;
+    int n, rgb;
     int64_t c;
 
 #ifdef CONFOPT_TRANSPARENCY
@@ -683,10 +706,11 @@ static void nc_build_colors(void)
     /* gets the color definitions and attribute names */
     colors      = mpdm_hget_s(MP, L"colors");
     color_names = mpdm_hget_s(MP, L"color_names");
+    rgb = ncurses_detect_color_support(0);
 
     /* loop the colors */
     n = c = 0;
-    if (has_colors() != FALSE && can_change_color() != FALSE) {
+    if (rgb > 0) {
         /* The first index that's not a default color */
         int colors_used = 8; 
         while (mpdm_iterator(colors, &c, &v, &i)) {
@@ -697,6 +721,7 @@ static void nc_build_colors(void)
 
             mpdm_t color_name = mpdm_hget_s(v, L"text");
             int cp, c0, c1;
+
 
             /* get color indexes */
             if ((c0 = mpdm_seek(color_names, mpdm_aget(color_name, 0), 1)) == -1 ||
@@ -723,10 +748,11 @@ static void nc_build_colors(void)
                 blue  = (paper & 0x000000ff);
                 green = (paper & 0x0000ff00) >> 8;
                 red   = (paper & 0x00ff0000) >> 16;
-                bg = ++colors_used;
+                bg = colors_used++;
 
                 init_color(bg, (short)((red * 999) / 255), (short)((green * 999) / 255), (short)((blue * 999) / 255));
             }
+
             /* finally create the (custom) color pair */
             init_pair(n + 1, fg, bg);
             cp = COLOR_PAIR(n + 1);
