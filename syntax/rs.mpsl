@@ -1,0 +1,32 @@
+{
+    'id'        =>  'rust',
+    'name'      =>  'Rust',
+    'filenames' =>  [ '/\.rs$/i' ],
+    'defs'      =>  [
+        'word1',    [
+            mp.syn_token_list( [
+                "abstract","alignof","as","become","box","break","const","continue","crate",
+                "do","else","enum","extern","false","final","fn","for","if","impl","in","let",
+                "loop","macro","match","mod","move","mut","offsetof","override","priv","pub",
+                "pure","ref","return","sizeof","static","self","struct","super","true","trait",
+                "type","typeof","unsafe","unsized","use","virtual","where","while","yield" ]
+            )
+        ],
+        'word3',    [ '/fn [a-z_0-9]+/', '/[A-Z][A-Z_0-9]+/', '/[A-Z][A-Za-z0-9]+' ],
+        'word2',    [ '/[\/-=<>:\?\+\*\!\%&\|{}\^]+/', /* operators */
+                      '/#\[[^\]]+\]/m',                /* attributes */
+                      '/[a-z_]+!/' ],                  /* macro */
+        'quotes',   [
+            "/\"([^\"\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^\"\\\\\n]*)*)\"/",
+            "/'([^'\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^'\\\\\n]*)*)'/",
+            "/\<-?[0-9]+\>/",                           /* numbers */
+            "/\<0x[0-9a-f]+\>/i",                       /* hex numbers */
+            "/\<[0-9[:upper:]_]+\>/",                   /* all-caps words */
+            [ "/`/", "/`/" ]                            /* backticks */
+        ],
+        'comments', [
+            [ '|/\*|', '|\*/|' ],                       /* C-like */
+            "/\/\/[^\n\x{ad}]*(\x{ad}\n[^\n]*)*/"       /* C++-like */
+        ]
+    ]
+};
