@@ -1,0 +1,26 @@
+{
+    id:         'md',
+    name:       'Markdown',
+    filenames:  [ '/\.md?$/i' ],
+    defs:       [
+        'word1', [
+            "/^#[^\n\x{ad}]*(\x{ad}\n[^\n]*)*$/m"
+        ],
+        'word3', [
+            "/^-[^\n\x{ad}]*(\x{ad}\n[^\n]*)*$/m"
+        ],
+        'word2', [
+            "/^\*\*[^\n\x{ad}]*(\x{ad}\n[^\n]*)*\*\*/m"
+        ],
+        'documentation', [
+            "/^\*[^\*].[^\n\x{ad}]*(\x{ad}\n[^\n]*)*\*/m"
+        ],
+        'quotes', [
+            "/`[^\n`]+`/"
+        ],
+        'comments', [
+            "/```/"
+        ]
+    ],
+    'section'   =>  [ '/^#/' ]
+};

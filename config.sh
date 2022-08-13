@@ -782,11 +782,11 @@ echo "Type 'make' to build Minimum Profit."
 
 # insert driver detection code into config.h
 
-TRY_DRIVERS="#define TRY_DRIVERS() ("
+TRY_DRIVERS="#define TRY_DRIVERS(argv) ("
 echo >> config.h
 for drv in $DRIVERS ; do
-    echo "int ${drv}_drv_detect(int * argc, char *** argv);" >> config.h
-    TRY_DRIVERS="$TRY_DRIVERS ${drv}_drv_detect(&argc, &argv) || "
+    echo "int ${drv}_drv_detect(void *p);" >> config.h
+    TRY_DRIVERS="$TRY_DRIVERS ${drv}_drv_detect(argv) || "
 done
 
 echo >> config.h

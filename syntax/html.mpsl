@@ -22,13 +22,14 @@
                     "strong", "style", "sub", "sup", "table",
                     "tbody", "td", "textarea", "tfoot", "th",
                     "thead", "title", "tr", "tt", "ul",
+                    "time", "nav",
                     "var" ], "|") +
             ")[^<>]*>/i",
             "/<!doctype html>/i"
         ],
         'word2',    [
             mp.syn_token_list( [
-                "class", "type", "style",
+                "class", "type", "style", "datetime",
                 "cellspacing", "cellpadding",
                 "href", "align", "valign", "name", "lang",
                 "value", "action", "width", "height",
@@ -44,5 +45,7 @@
             [ '/<!--/', '/-->/' ]
         ]
     ],
-    'section'   =>  [ '/<\s*h[0-9]\s*>/' ]
+    'section'   =>  [ '/<\s*h[0-9]\s*>/' ],
+    'matching_open' => mp.matching_open + "<",
+    'matching_close' => mp.matching_close + ">"
 };

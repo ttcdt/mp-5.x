@@ -623,10 +623,18 @@ static void drw_matching_paren(void)
     int i = 0;
     wchar_t c;
     wchar_t *ptr, *m_open, *m_close;
+    mpdm_t v;
 
     /* get definitions */
-    m_open  = mpdm_string(mpdm_get_wcs(MP, L"matching_open"));
-    m_close = mpdm_string(mpdm_get_wcs(MP, L"matching_close"));
+    if ((v = mpdm_get_wcs(drw_1.syntax, L"matching_open")) == NULL)
+         v = mpdm_get_wcs(MP, L"matching_open");
+
+    m_open = mpdm_string(v);
+
+    if ((v = mpdm_get_wcs(drw_1.syntax, L"matching_close")) == NULL)
+         v = mpdm_get_wcs(MP, L"matching_close");
+
+    m_close = mpdm_string(v);
 
     /* by default, no offset has been found */
     drw_2.matchparen_offset = -1;
@@ -1470,13 +1478,15 @@ mpdm_t ni_drv_startup(mpdm_t v)
 }
 
 
-int ni_drv_detect(int *argc, char ***argv)
+int ni_drv_detect(mpdm_t argv)
 {
-    int n, ret = 0;
+    int64_t c = 0, ret = 0;
+    mpdm_t v;
 
-    for (n = 0; n < *argc; n++) {
-        if (strcmp(argv[0][n], "-ni") == 0 || strcmp(argv[0][n], "-F") == 0)
-            ret = 1;
+    while (mpdm_iterator(argv, &c, &v, NULL)) {
+        if (mpdm_cmp_wcs(v, L"-ni") == 0 ||
+            mpdm_cmp_wcs(v, L"-F") == 0)
+        ret = 1;
     }
 
     if (ret) {
@@ -1493,7 +1503,7 @@ int ni_drv_detect(int *argc, char ***argv)
 
 void mp_startup(int argc, char *argv[])
 {
-    mpdm_t INC;
+    mpdm_t INC, ARGV;
     char *ptr;
     mpdm_t mp_c;
 
@@ -1548,12 +1558,12 @@ void mp_startup(int argc, char *argv[])
     mpdm_push(INC, mpdm_strcat_wcs(
         mpdm_get_wcs(mpdm_root(), L"APPDIR"), L"/mp.tar"));
 
-    if (!ni_drv_detect(&argc, &argv) && !TRY_DRIVERS()) {
+    ARGV = mpsl_argv(argc, argv);
+
+    if (!ni_drv_detect(ARGV) && !TRY_DRIVERS(ARGV)) {
         printf("No usable driver found; exiting.\n");
         exit(1);
     }
-
-    mpsl_argv(argc, argv);
 }
 
 

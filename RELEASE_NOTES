@@ -1,6 +1,17 @@
 Minimum Profit Release Notes
 ============================
 
+5.59
+----
+
+* New features:
+
+New syntax highlight for Rust (contributed by X-Ryl669).
+
+New syntax highlight for Markdown (contributed by Susan Bompensiero).
+
+Syntax-highlight definitions can include their own `matching_open' and `matching_close' strings that override the global ones (Tiny).
+
 5.58
 ----
 

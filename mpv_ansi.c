@@ -128,7 +128,7 @@ static void ansi_get_tty_size(void)
     printf("\0337\033[r\033[999;999H\033[6n\0338");
     fflush(stdout);
 
-    if (ansi_something_waiting(0, 50)) {
+    if (ansi_something_waiting(0, 100)) {
         buffer = ansi_read_string(0);
 
         sscanf(buffer, "\033[%d;%dR", &h, &w);
@@ -163,7 +163,7 @@ static int ansi_detect_color_support(int rgbcolor)
         fflush(stdout);
 
         rgbcolor = -1;
-        if (ansi_something_waiting(0, 50)) {
+        if (ansi_something_waiting(0, 100)) {
             char *buffer = ansi_read_string(0);
 
             if (buffer[0] != '\0')
@@ -930,7 +930,7 @@ static mpdm_t ansi_drv_startup(mpdm_t a)
 }
 
 
-int ansi_drv_detect(int *argc, char ***argv)
+int ansi_drv_detect(void *p)
 {
     mpdm_t drv;
 

@@ -11,8 +11,8 @@
 */
 
 /* override auto-generated definition in config.h */
-extern "C" int qt4_drv_detect(int *argc, char ***argv);
-extern "C" int qt5_drv_detect(int *argc, char ***argv);
+extern "C" int qt4_drv_detect(void *p);
+extern "C" int qt5_drv_detect(void *p);
 
 #include "config.h"
 
@@ -563,12 +563,14 @@ static mpdm_t qt4_drv_startup(mpdm_t a, mpdm_t ctxt)
 #ifdef CONFOPT_QT4
 extern "C" Display *XOpenDisplay(char *);
 
-extern "C" int qt4_drv_detect(int *argc, char ***argv)
+extern "C" int qt4_drv_detect(void *p)
 {
-    int n, ret = 1;
+    int ret = 1;
+    int64_t c = 0;
+    mpdm_t v, argv = (mpdm_t) p;
 
-    for (n = 0; n < *argc; n++) {
-        if (strcmp(argv[0][n], "-txt") == 0)
+    while (mpdm_iterator(argv, &c, &v, NULL)) {
+        if (mpdm_cmp_wcs(v, L"-txt") == 0)
             ret = 0;
     }
 
@@ -596,12 +598,14 @@ extern "C" int qt4_drv_detect(int *argc, char ***argv)
 #endif
 
 
-extern "C" int qt5_drv_detect(int *argc, char ***argv)
+extern "C" int qt5_drv_detect(void *p)
 {
-    int n, ret = 1;
+    int ret = 1;
+    int64_t c = 0;
+    mpdm_t v, argv = (mpdm_t) p;
 
-    for (n = 0; n < *argc; n++) {
-        if (strcmp(argv[0][n], "-txt") == 0)
+    while (mpdm_iterator(argv, &c, &v, NULL)) {
+        if (mpdm_cmp_wcs(v, L"-txt") == 0)
             ret = 0;
     }
 

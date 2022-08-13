@@ -569,12 +569,14 @@ static mpdm_t win32c_drv_startup(mpdm_t a, mpdm_t ctxt)
 }
 
 
-int win32_drv_detect(int *argc, char ***argv)
+int win32_drv_detect(void *p)
 {
-    int n, ret = 0;
+    int ret = 0;
+    int64_t c = 0;
+    mpdm_t v, argv = (mpdm_t) p;
 
-    for (n = 0; n < *argc; n++) {
-        if (strcmp(argv[0][n], "-h") == 0)
+    while (mpdm_iterator(argv, &c, &v, NULL)) {
+        if (mpdm_cmp_wcs(v, L"-h") == 0)
             return 0;
     }
 

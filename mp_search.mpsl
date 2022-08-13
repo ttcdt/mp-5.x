@@ -285,8 +285,8 @@ sub mp_doc.search_set_y(doc, y)
 sub mp_doc.seek_matching(doc)
 /* move the cursor to the matching brace / quote */
 {
-    local matching_open  = mp.matching_open->split();
-    local matching_close = mp.matching_close->split();
+    local matching_open  = (doc.syntax.matching_open || mp.matching_open)->split();
+    local matching_close = (doc.syntax.matching_close || mp.matching_close)->split();
     local txt = doc.txt;
     local dir = 0, idx, c, oc, cnt;
     local s_txt = clone(txt);
@@ -308,8 +308,19 @@ sub mp_doc.seek_matching(doc)
     }
 
     if (dir != 0) {
-        local str = "(\\" + c + "|" + "\\" + oc + ")";
+        local str;
         local ls = mp.last_search;
+
+        /* escape problematic chars */
+        if ("{}()[]?"->seek(c) != -1)
+            str = "(\\" + c + "|";
+        else
+            str = "(" + c + "|";
+
+        if ("{}()[]?"->seek(oc) != -1)
+            str += "\\" + oc + ")";
+        else
+            str += oc + ")";
 
         /* search the char or the opposite, counting pairs */
         while (doc->search_dir(str, dir)) {

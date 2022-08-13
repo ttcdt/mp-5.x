@@ -13,6 +13,8 @@
             [ '/<!--/', '/-->/' ]
         ]
     ],
+    'matching_open' => mp.matching_open + "<",
+    'matching_close' => mp.matching_close + ">",
     'detect'    =>  sub (d) {
         /* take the first line */
         local f = d.txt.lines[0];

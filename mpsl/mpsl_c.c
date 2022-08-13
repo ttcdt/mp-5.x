@@ -1022,7 +1022,7 @@ mpdm_t mpsl_trap(mpdm_t trap_func)
  * Fills the ARGV global MPSL array with an array of arguments. These
  * are usually the ones sent to main().
  */
-void mpsl_argv(int argc, char *argv[])
+mpdm_t mpsl_argv(int argc, char *argv[])
 {
     int n;
     mpdm_t ARGV;
@@ -1032,6 +1032,8 @@ void mpsl_argv(int argc, char *argv[])
 
     for (n = 0; n < argc; n++)
         mpdm_push(ARGV, MPDM_MBS(argv[n]));
+
+    return ARGV;
 }
 
 

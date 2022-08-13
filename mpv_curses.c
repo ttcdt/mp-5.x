@@ -973,7 +973,7 @@ static mpdm_t ncursesw_drv_startup(mpdm_t a)
 }
 
 
-int ncursesw_drv_detect(int *argc, char ***argv)
+int ncursesw_drv_detect(void *p)
 {
     mpdm_t drv;
 

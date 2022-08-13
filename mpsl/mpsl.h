@@ -39,7 +39,7 @@ mpdm_t mpsl_eval(mpdm_t code, mpdm_t args, mpdm_t ctxt);
 
 mpdm_t mpsl_trap(mpdm_t trap_func);
 
-void mpsl_argv(int argc, char * argv[]);
+mpdm_t mpsl_argv(int argc, char * argv[]);
 int mpsl_bootstrap(int argc, char *argv[], const char *code, int size);
 
 int mpsl_startup(void);

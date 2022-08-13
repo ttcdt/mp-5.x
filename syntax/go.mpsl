@@ -39,6 +39,7 @@
         'quotes', [
             "/\"([^\"\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^\"\\\\\n]*)*)\"/", /* double quoted strings */
             "/'([^'\\\\\n]*(\\\\.[^'\\\\\n]*)*)'/",     /* single-quoted strings */
+            "/`[^`]*`/",                                /* quotes */
             "/\<-?[0-9]+\>/",                           /* numbers */
             "/\<[0-9]+e[0-9]+\>/",                      /* numbers in exp format */
             "/\<0[0-7]+\>/",                            /* octal numbers */

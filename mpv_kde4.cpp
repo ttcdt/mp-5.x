@@ -11,7 +11,7 @@
 */
 
 /* override auto-generated definition in config.h */
-extern "C" int kde4_drv_detect(int *argc, char ***argv);
+extern "C" int kde4_drv_detect(void *p);
 
 #include "config.h"
 
@@ -423,13 +423,15 @@ static mpdm_t kde4_drv_startup(mpdm_t a, mpdm_t ctxt)
 
 extern "C" Display *XOpenDisplay(char *);
 
-extern "C" int kde4_drv_detect(int *argc, char ***argv)
+extern "C" int kde4_drv_detect(void *p)
 {
     KCmdLineOptions opts;
-    int n, ret = 1;
+    int ret = 1;
+    int64_t c = 0;
+    mpdm_t v, argv = (mpdm_t) p;
 
-    for (n = 0; n < *argc; n++) {
-        if (strcmp(argv[0][n], "-txt") == 0)
+    while (mpdm_iterator(argv, &c, &v, NULL)) {
+        if (mpdm_cmp_wcs(v, L"-txt") == 0)
             ret = 0;
     }
 

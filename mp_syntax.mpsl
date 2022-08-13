@@ -248,7 +248,7 @@ sub mp_doc.help(doc, word)
             h = [];
 
             while ((l = read(f)) != NULL) {
-                l = sregex(l, "/\x{0008}./g");
+                l = l->sregex("/_\x{08}/g")->sregex("/\x{08}./g");
                 push(h, mp.chomp(l));
             }
 

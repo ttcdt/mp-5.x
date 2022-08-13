@@ -203,3 +203,5 @@ Makefile: makefile.in
 
 validate-metainfo:
 	appstreamcli validate metainfo.xml
+
+# depends star here
