@@ -1,0 +1,27 @@
+{
+    id:         'fountain',
+    name:       'Fountain',
+    filenames:  [ '/\.fountain?$/i' ],
+    defs:       [
+        'word1', [
+            "/^\([^\n\x{ad}]*(\x{ad}\n[^\n]*)*\)$/m"
+        ],
+        'word2', [
+            "/^(@|[^a-z]+)$/m"
+        ],
+        'word3', [
+            "/^.*TO:$/m"
+        ],
+        'documentation', [
+            "/^(\.|EXT|INT|EST|I\/E)[^\n\x{ad}]*(\x{ad}\n[^\n]*)*$/m"
+        ],
+        'quotes', [
+            "/`[^\n']+'/",
+            "/^>[^\n\x{ad}]*(\x{ad}\n[^\n]*)*$/m"
+        ],
+        'comments', [
+            "/```/"
+        ]
+    ],
+    'section'   =>  [ '/^(\.|EXT|INT|EST|I\/E)/' ]
+};

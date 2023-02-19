@@ -706,7 +706,7 @@ static void nc_build_colors(void)
     /* gets the color definitions and attribute names */
     colors      = mpdm_hget_s(MP, L"colors");
     color_names = mpdm_hget_s(MP, L"color_names");
-    rgb = ncurses_detect_color_support(0);
+    rgb = ncurses_detect_color_support(1);
 
     /* loop the colors */
     n = c = 0;

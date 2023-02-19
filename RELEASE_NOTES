@@ -1,6 +1,23 @@
 Minimum Profit Release Notes
 ============================
 
+5.60
+----
+
+* Fixed bugs:
+
+The `section_list' action no longer shows strange lines when the terminal is too short (Theo).
+
+Fix NCurses background color setting (contributed by X-Ryl669).
+
+* New features:
+
+New syntax highlight for roff manual page sources (contributed by Mr. Firefly).
+
+New syntax highlight for INI-style files, like the ones used by `systemd' (contributed by Mr. Firefly).
+
+New syntax highlight for fountain files (a markup language for screenwriting) (contributed by aov).
+
 5.59
 ----
 

@@ -929,10 +929,17 @@ sub mp.open(filename, password)
             d.txt.vy = integer(p.vy);
         }
 
-        if (y)
-            d->search_set_y(y - 1);
-        if (x)
-            d->set_x(x - 1);
+        if (y || x) {
+            d->save_vwrap();
+
+            if (y)
+                d->set_y(y - 1)->restore_vwrap()->search_set_vy();
+
+            if (x)
+                d->set_x(x - 1);
+
+            d->restore_vwrap();
+        }
 
         /* filter the document through the spellchecker (if it's active) */
         mp.spell_document(d);
@@ -976,6 +983,29 @@ sub mp_doc.vw_wrap(doc)
     doc->set_offset(o);
     doc.txt.vx = 0;
     doc->busy(0);
+}
+
+
+sub mp_doc.save_vwrap(doc)
+{
+    if (doc->visual_wrap()) {
+        local vy = doc.txt.vy;
+        doc->vw_unwrap();
+        doc.txt.vy = vy;
+    }
+
+    return doc;
+}
+
+sub mp_doc.restore_vwrap(doc)
+{
+    if (doc->visual_wrap()) {
+        local vy = doc.txt.vy;
+        doc->vw_wrap();
+        doc.txt.vy = vy;
+    }
+
+    return doc;
 }
 
 

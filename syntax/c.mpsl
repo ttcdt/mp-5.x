@@ -241,7 +241,7 @@ sub mp.clang_complete(o, d) {
             "/\<[0-9]+e[0-9]+\>/",                      /* numbers in exp format */
             "/\<0[0-7]+\>/",                            /* octal numbers */
             "/\<0x[0-9a-f]+\>/i",                       /* hex numbers */
-            "/\<__(DATE|FILE|LINE|STDC|TIME|STDC_HOSTED|STDC_VERSION|func)__\>/", /* ISO macros */
+            "/\<__(DATE|FILE|LINE|FUNCTION|STDC|TIME|STDC_HOSTED|STDC_VERSION|func)__\>/", /* ISO macros */
             "/\<(true|false|NULL)\>/"                   /* symbolic constant names */
         ],
         'word3', [

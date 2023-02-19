@@ -261,6 +261,17 @@ mp.actdesc['replace_spaces_with_tabs'] = LL("Replace spaces with tabs");
 
 /** code **/
 
+sub mp_doc.search_set_vy(doc)
+{
+    /* set always to the same line */
+    if (mp.config.move_seek_to_line != NULL &&
+       (doc.txt.vy = doc.txt.y - mp.config.move_seek_to_line) < 0)
+        doc.txt.vy = 0;
+
+    return doc;
+}
+
+
 /**
  * mp_doc.search_set_y - Sets the y position after a successful search.
  * @doc: the document
@@ -271,14 +282,7 @@ mp.actdesc['replace_spaces_with_tabs'] = LL("Replace spaces with tabs");
  */
 sub mp_doc.search_set_y(doc, y)
 {
-    doc->set_y_keep_vy(y);
-
-    /* set always to the same line */
-    if (mp.config.move_seek_to_line != NULL &&
-       (doc.txt.vy = doc.txt.y - mp.config.move_seek_to_line) < 0)
-        doc.txt.vy = 0;
-
-    return doc;
+    return doc->set_y_keep_vy(y)->search_set_vy();
 }
 
 

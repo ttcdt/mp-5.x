@@ -22,7 +22,7 @@
                     "strong", "style", "sub", "sup", "table",
                     "tbody", "td", "textarea", "tfoot", "th",
                     "thead", "title", "tr", "tt", "ul",
-                    "time", "nav",
+                    "time", "nav", "figure", "figcaption",
                     "var" ], "|") +
             ")[^<>]*>/i",
             "/<!doctype html>/i"

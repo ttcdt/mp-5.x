@@ -1,0 +1,8 @@
+{
+    'id'        =>  'man',
+    'name'      =>  'Man page source',
+    'defs'      =>  [
+        'comments', [ '/^\..*$/m' ],
+        'word2',    [ '/^\.[^ ]*/m' ]
+    ]
+};

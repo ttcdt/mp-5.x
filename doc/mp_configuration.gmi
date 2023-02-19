@@ -2,7 +2,7 @@
 
 The following configuration variables can be set in the configuration files, from the command line or from the `Execute MPSL code...' option in the `Edit' menu.
 
-For example, if you always want automatic indentation, word wrapping at column 75 and a special ispell command, you can add the following MPSL code to `~/.config/mp.mpsl' (user-specific) or `/etc/mp.mpsl' (system-wide):
+For example, if you always want automatic indentation, word wrapping at column 75 and a special ispell command, you can add the following MPSL code to `~/.config/mp/mp.mpsl' (user-specific) or `/etc/mp.mpsl' (system-wide):
 
 ```
 mp.config.auto_indent = 1;
@@ -20,7 +20,7 @@ All configuration variables are inside the `mp.config' object.
 
 ## mp.config.ansi_rgbcolor
 
-Controls the use of RGB GUI colors instead of the traditional 16 text colors. It can be set to: 2, force RGB color; 1, autodetect; or 0: disable completely. Autodetection is done by asking the terminal for color information and disabling RGB use if there is no valid response. Please take into account that some terminal emulators and multiplexers (e.g. `tmux' or `st') do not report color information even though they totally support it (default: 1, autodetect).
+Commands the use of RGB GUI colors instead of the traditional 16 text colors in text interfaces. It can be set to: 2, force RGB color; 1, autodetect; or 0: disable completely. Autodetection is done by asking the terminal for color information and disabling RGB use if there is no valid response. Please take into account that some terminal emulators and multiplexers (e.g. `tmux' or `st') do not report color information even though they totally support it (default: 1, autodetect).
 
 This setting can only be set on startup (from the configuration file or the command line).
 
