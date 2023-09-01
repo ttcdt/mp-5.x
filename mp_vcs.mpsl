@@ -151,7 +151,7 @@ sub mp.vcs_form()
 
                 log.force_visual_wrap = 1;
 
-                log->actions.exec_command(cmd);
+                log->actions.exec_command(cmd, 2000);
 
                 if (opt.unique_log) {
                     if (opt.syntax)

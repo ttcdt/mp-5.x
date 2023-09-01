@@ -670,7 +670,7 @@ else
     echo "#endif" >> .tmp.c
     echo "  return c; } " >> .tmp.c
 
-    $CC $CFLAGS .tmp.c tmp.bin.o -o .tmp.o 2>> .config.log
+    $CC $CFLAGS -Wl,--fatal-warnings .tmp.c tmp.bin.o -o .tmp.o 2>> .config.log
 
     if [ $? = 0 ] ; then
         echo "Yes (with underscores)"
@@ -680,7 +680,7 @@ else
         echo "#define ARCH_START &_binary_${ARCH_SYM}_start" >> config.h
         echo "#define ARCH_END &_binary_${ARCH_SYM}_end" >> config.h
     else
-        $CC $CFLAGS -DCONFOPT_EMBED_NOUNDER .tmp.c tmp.bin.o -o .tmp.o 2>> .config.log
+        $CC $CFLAGS -DCONFOPT_EMBED_NOUNDER -Wl,--fatal-warnings .tmp.c tmp.bin.o -o .tmp.o 2>> .config.log
 
         if [ $? = 0 ] ; then
             echo "Yes (without underscores)"
@@ -691,12 +691,17 @@ else
             echo "#define ARCH_START &binary_${ARCH_SYM}_start" >> config.h
             echo "#define ARCH_END &binary_${ARCH_SYM}_end" >> config.h
         else
-            echo "No; using workaround"
-            MORE_OBJS="mp_arch.o"
-            echo "extern const char binary_mp_arch[];" >> config.h
-            echo "extern int binary_mp_arch_size;" >> config.h
-            echo "#define ARCH_START binary_mp_arch" >> config.h
-            echo "#define ARCH_END binary_mp_arch + binary_mp_arch_size" >> config.h
+            if command -v od > /dev/null && command -v awk > /dev/null ; then
+                echo "using bin2c.sh"
+                MORE_OBJS="mp_arch.o"
+                echo "extern const char binary_mp_arch[];" >> config.h
+                echo "extern int binary_mp_arch_size;" >> config.h
+                echo "#define ARCH_START binary_mp_arch" >> config.h
+                echo "#define ARCH_END binary_mp_arch + binary_mp_arch_size" >> config.h
+            else
+                echo "No; falling back to using an external archive"
+                WITH_EXTERNAL_ARCH="1"
+            fi
         fi
     fi
 

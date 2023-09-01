@@ -10,6 +10,13 @@
 
 */
 
+/* if this is set to a filename, use it as the clipboard interchange space */
+mp.config.clipboard_file = NULL;
+
+/* programs to pipe to/from for clipboard operations */
+mp.config.clipboard_copy_prg = NULL;
+mp.config.clipboard_paste_prg = NULL;
+
 /** editor actions **/
 
 mp_doc.actions += {
@@ -229,7 +236,13 @@ sub mp.copy(content)
     mp.clipboard = content;
 
     /* propagate */
-    mp_drv.clip_to_sys();
+    if (mp.config.clipboard_file)
+        open(mp.config.clipboard_file, "w")->write(mp.clipboard->join("\n"));
+    else
+    if (mp.config.clipboard_copy_prg)
+        popen(mp.config.clipboard_copy_prg, "w")->write(mp.clipboard->join("\n"));
+    else
+        mp_drv.clip_to_sys();
 }
 
 
@@ -290,7 +303,13 @@ sub mp_doc.cut(doc)
  */
 sub mp_doc.paste(doc)
 {
-    mp_drv.sys_to_clip();
+    if (mp.config.clipboard_file)
+        mp.clipboard = open(mp.config.clipboard_file)->join();
+    else
+    if (mp.config.clipboard_paste_prg)
+        mp.clipboard = popen(mp.config.clipboard_paste_prg, "r")->join();
+    else
+        mp_drv.sys_to_clip();
 
     if (doc == NULL)
         return join(mp.clipboard, "\n");

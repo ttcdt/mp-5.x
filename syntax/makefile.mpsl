@@ -1,1 +1,12 @@
-mp.syntax.sh || load("syntax/sh.mpsl");
+/* create a copy of the shell syntax highlight */
+local makefile = load("syntax/sh.mpsl");
+
+makefile.pre_event = sub (d, k) {
+    /* all tabs are shift-tabs (real tabs) */
+    if (k == "tab")
+        k = "shift-tab";
+
+    return k;
+};
+
+makefile;

@@ -21,9 +21,10 @@ global mp_hex_view = new(mp_base, {
         f_offset:       0,
         f_size:         0,
         fd:             NULL,
+        h_cursor:       0,
 
         get_status: sub (hex) {
-            sprintf("%s - 0x%06x (%d)", name, offset, offset);
+            sprintf("%s - 0x%06x (%d)", name, offset + h_cursor, offset + h_cursor);
         },
         init:       sub (hex) {
             if ((fd = open(name, "rb")) == NULL)
@@ -39,6 +40,12 @@ global mp_hex_view = new(mp_base, {
             else
             if (keycode == 'cursor-up')
                 offset -= bpl;
+            else
+            if (keycode == 'cursor-left' && h_cursor > 0)
+                h_cursor -= 1;
+            else
+            if (keycode == 'cursor-right' && h_cursor < bpl - 1)
+                h_cursor += 1;
             else
             if (keycode == 'page-down' || keycode == 'mouse-wheel-down')
                 offset += bpl * (mp.window.ty - 1);
@@ -77,6 +84,9 @@ global mp_hex_view = new(mp_base, {
                 tx = mp.window.tx;
             }
 
+            if (h_cursor > bpl)
+                h_cursor = bpl - 1;
+
             /* round offset */
             offset -= offset % bpl;
 
@@ -90,11 +100,11 @@ global mp_hex_view = new(mp_base, {
                 nv = [];
                 av = [
                     mp.colors.word2.attr,
-                    ' | '
+                    sprintf(' %s ', mp.unicode("vert"))
                 ];
                 ov = [
                     mp.colors.word1.attr,
-                    sprintf(" %06X |", ftell(fd))
+                    sprintf(" %06X %s", ftell(fd), mp.unicode("vert"))
                 ];
 
                 for (n = 0; n < bpl; n += 1) {
@@ -105,21 +115,39 @@ global mp_hex_view = new(mp_base, {
                         break;
                     }
 
+                    oc = ord(c);
+
+                    if (h_cursor == n)
+                        a = mp.colors.cursor.attr;
+                    else
                     if (o >= f_offset && o < f_offset + f_size)
                         a = mp.colors.search.attr;
                     else
+                    if (oc == 0)
+                        a = mp.colors.word2.attr;
+                    else
+                    if (oc < 32)
+                        a = mp.colors.word3.attr;
+                    else
+                    if (oc >= ord(' ') && oc <= 126)
+                        a = mp.colors.quotes.attr;
+                    else
                         a = mp.colors.normal.attr;
 
-                    if (o == f_offset)
-                        push(nv, mp.colors.normal.attr, ' ',
-                            a, sprintf("%02X", ord(c)));
-                    else
-                        push(nv, a, sprintf(" %02X", ord(c)));
+                    push(nv, mp.colors.normal.attr, " ",
+                        a, sprintf("%02X", ord(c)));
 
-                    if (ord(c) == 0x0a)
+                    if (oc == 0x0a)
                         c = mp.unicode("pilcrow");
                     else
-                    if (ord(c) < 32 || ord(c) > 126)
+                    if (oc < 32) {
+                        if (mp.config.use_unicode)
+                            c = chr(oc + 0x2400);
+                        else
+                            c = mp.unicode("middledot");
+                    }
+
+                    if (oc > 126)
                         c = mp.unicode("middledot");
 
                     push(av, a, c);
@@ -177,11 +205,26 @@ global mp_hex_view = new(mp_base, {
                     hex.f_offset = hex.offset - 1;
                     hex->actions.seek_next();
                 }
+            },
+
+            go_to_offset: sub (hex) {
+                local t = mp.form([{
+                    label:   L("Address") + ":",
+                    type:    "text",
+                    history: "go_to_offset"}]);
+
+                if (t != NULL) {
+                    hex.offset = integer(t[0]);
+
+                    if (hex.bpl > 0)
+                        hex.h_cursor = hex.offset % hex.bpl;
+                }
             }
         },
         keycodes:   {
             "ctrl-f"    => 'seek',
-            "f3"        => 'seek_next'
+            "f3"        => 'seek_next',
+            "ctrl-g"    => 'go_to_offset'
         }
     }
 );

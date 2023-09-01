@@ -812,7 +812,7 @@ static wchar_t *json_s(wchar_t *o, int *l, mpdm_t v)
             char tmp[7];
             wchar_t wtmp[7];
 
-            sprintf(tmp, "\\u%04x", (unsigned int) *p);
+            snprintf(tmp, sizeof(tmp), "\\u%04x", (unsigned int) *p);
             o = mpdm_pokews(o, l, s_mbstowcs(tmp, wtmp));
         }
         else
@@ -942,7 +942,7 @@ mpdm_t mpdm_fmt(const mpdm_t fmt, const mpdm_t arg)
         t_fmt[m] = '\0';
 
         /* by default, copies the format */
-        strcpy(tmp, t_fmt);
+        strncpy(tmp, t_fmt, sizeof(tmp));
 
         switch (t_fmt[m - 1]) {
         case 'd':
@@ -1566,7 +1566,7 @@ mpdm_t mpdm_sscanf(const mpdm_t str, const mpdm_t fmt, int offset)
             if (cmd == L'%') {
                 vsize = 1;
                 ignore = 1;
-                wcscpy(scanf_yset, L"%");
+                wcsncpy(scanf_yset, L"%", sizeof(scanf_yset) / sizeof(wchar_t));
             }
             else
                 /* a position? */
@@ -1665,7 +1665,7 @@ mpdm_t mpdm_sscanf(const mpdm_t str, const mpdm_t fmt, int offset)
                         for (i = 0; scanf_sets[i].cmd; i++) {
                             if (*f == scanf_sets[i].cmd) {
                                 set[n] = L'\0';
-                                wcscat(set, scanf_sets[i].yset);
+                                wcsncat(set, scanf_sets[i].yset, wcslen(scanf_sets[i].yset));
                                 n += wcslen(scanf_sets[i].yset);
                                 break;
                             }
@@ -1733,8 +1733,8 @@ mpdm_t mpdm_sscanf(const mpdm_t str, const mpdm_t fmt, int offset)
 
                 for (n = 0; scanf_sets[n].cmd != L'\0'; n++) {
                     if (cmd == scanf_sets[n].cmd) {
-                        wcscpy(scanf_yset, scanf_sets[n].yset);
-                        wcscpy(scanf_nset, scanf_sets[n].nset);
+                        wcsncpy(scanf_yset, scanf_sets[n].yset, sizeof(scanf_yset) / sizeof(wchar_t));
+                        wcsncpy(scanf_nset, scanf_sets[n].nset, sizeof(scanf_nset) / sizeof(wchar_t));
                         break;
                     }
                 }
@@ -2150,7 +2150,7 @@ wchar_t *vc_default_string(mpdm_t v)
 {
     char tmp[64];
 
-    sprintf(tmp, "%p", v);
+    snprintf(tmp, sizeof(tmp), "%p", v);
     return string_persist(mpdm_mbstowcs(tmp, NULL, -1));
 }
 

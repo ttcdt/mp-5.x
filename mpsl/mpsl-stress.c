@@ -34,7 +34,7 @@ void _do_test(char *str, int ok, int line)
 {
     char tmp[1024];
 
-    sprintf(tmp, "mpsl-stress.c:%d: %s: %s\n", line, str, ok ? "OK!" : "*** Failed ***");
+    snprintf(tmp, sizeof(tmp), "mpsl-stress.c:%d: %s: %s\n", line, str, ok ? "OK!" : "*** Failed ***");
     printf("%s", tmp);
 
     tests++;

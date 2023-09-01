@@ -959,7 +959,7 @@ void MPArea::mousePressEvent(QMouseEvent *event)
     case Qt::LeftButton:
         ptr = (wchar_t *) L"mouse-left-button";
         break;
-    case Qt::MidButton:
+    case Qt::MiddleButton:
         ptr = (wchar_t *) L"mouse-middle-button";
         break;
     case Qt::RightButton:

@@ -45,7 +45,7 @@ sub mp.tui.prompt(prompt, y)
 sub mp.tui.readline(prompt, history, default, flags)
 /* the readline function, with special functionality in 'flags' */
 {
-    local c, r, h, i, x;
+    local c, r, h, i, x, t;
 
     local p = prompt;
 
@@ -55,7 +55,14 @@ sub mp.tui.readline(prompt, history, default, flags)
 
     mp.tui.prompt(p + " ", flags.y);
     c = mp.tui.getxy();
-    r = default || '';
+
+    /* save the type of 'default' */
+    t = type(default);
+
+    if (t == "null")
+        r = "";
+    else
+        r = string(default);
 
     /* get the history stack */
     if (history)
@@ -205,6 +212,13 @@ sub mp.tui.readline(prompt, history, default, flags)
     /* if a string was accepted, store in the history */
     if (!flags.password && h != NULL && size(r) && h[-1] != r)
         push(h, r);
+
+    /* 'restore' type */
+    if (t == "integer")
+        r = integer(r);
+    else
+    if (t == "real")
+        r = real(r);
 
     return r;
 }

@@ -128,7 +128,7 @@ static void store_syserr(void)
 {
     char tmp[1024];
 
-    sprintf(tmp, "%d %s", errno, strerror(errno));
+    snprintf(tmp, sizeof(tmp), "%d %s", errno, strerror(errno));
     mpdm_set_wcs(mpdm_root(), MPDM_MBS(tmp), L"ERRNO");
 }
 
@@ -1494,6 +1494,42 @@ int mpdm_unlink(const mpdm_t filename)
 
 
 /**
+ * mpdm_link - Links a file to another.
+ * @src: source file name
+ * @dest: destination file name
+ *
+ * Creates @dest as a (hard) link to @src. UNIX only.
+ * [File Management]
+ */
+int mpdm_link(const mpdm_t src, const mpdm_t dest)
+{
+    int ret = -1;
+
+    mpdm_ref(src);
+    mpdm_ref(dest);
+
+#ifndef CONFOPT_WIN32
+
+    /* convert to mbs */
+    mpdm_t sfn = mpdm_ref(MPDM_2MBS(mpdm_data(src)));
+    mpdm_t dfn = mpdm_ref(MPDM_2MBS(mpdm_data(dest)));
+
+    if ((ret = link((char *) mpdm_data(sfn), mpdm_data(dfn))) == -1)
+        store_syserr();
+
+    mpdm_unref(dfn);
+    mpdm_unref(sfn);
+
+#endif /* CONFOPT_WIN32 */
+
+    mpdm_unref(dest);
+    mpdm_unref(src);
+
+    return ret;
+}
+
+
+/**
  * mpdm_rename - Renames a file.
  * @o: old path
  * @n: new path
@@ -2214,7 +2250,7 @@ mpdm_t mpdm_conf_dir(void)
     /* XDG_CONFIG_HOME defined? */
     if (tmp[0] == '\0' && (ptr = getenv("XDG_CONFIG_HOME")) != NULL) {
         strncpy(tmp, ptr, sizeof(tmp) - 1);
-        strcat(tmp, "/");
+        strncat(tmp, "/", sizeof(tmp) - 1);
     }
 
 #ifdef CONFOPT_PWD_H
@@ -2224,7 +2260,7 @@ mpdm_t mpdm_conf_dir(void)
     /* get home dir from /etc/passwd entry */
     if (tmp[0] == '\0' && (p = getpwuid(getuid())) != NULL) {
         strncpy(tmp, p->pw_dir, sizeof(tmp) - 1);
-        strcat(tmp, "/.config/");
+        strncat(tmp, "/.config/", sizeof(tmp) - 1);
     }
 
 #endif
@@ -2232,7 +2268,7 @@ mpdm_t mpdm_conf_dir(void)
     /* still none? try the ENV variable $HOME */
     if (tmp[0] == '\0' && (ptr = getenv("HOME")) != NULL) {
         strncpy(tmp, ptr, sizeof(tmp) - 1);
-        strcat(tmp, "/.config/");
+        strncat(tmp, "/.config/", sizeof(tmp) - 1);
     }
 
     if (tmp[0] != '\0')

@@ -40,6 +40,18 @@ Set to 1 to automatically load / save sessions on startup / exit (default: 0, no
 
 Set to 1 if searches are to be done in a case-sensitive way (default: 1).
 
+## mp.config.clipboard_copy_prg
+
+If this is set to a string containing a program name, a write pipe is open and the content of the internal clipboard written into it instead of to the system one. This is useful for TUI environments that don't have access to the underlying clipboard. For X11, a good setting would be "xclip -sel clipboard -i".
+
+## mp.config.clipboard_file
+
+If this is set to a string containing a file name, it's used as the interchange space instead of the system clipboard.
+
+## mp.config.clipboard_paste_prg
+
+If this is set to a string containing a program name, a read pipe is open and the content of the internal clipboard read from it instead of from the system one. This is useful for TUI environments that don't have access to the underlying clipboard. For X11, a good setting would be "xclip -sel clipboard -o".
+
 ## mp.config.ctags_cmd
 
 The external command to be executed when a tag search is requested. By default it's "ctags *". Other useful value is "ctags -R", that search for tags recursively in subdirectories.
@@ -236,13 +248,13 @@ The status format string to be shown in the status line. By default it's "%m%n 
 +----+-----------------------------------------------------------+
 ```
 
-## mp.config.tabs_as_spaces
-
-Set to 1 if tabs must be converted to spaces (default: 0, no conversion).
-
 ## mp.config.tab_size
 
 Tab size in column spaces (default: 4).
+
+## mp.config.tabs_as_spaces
+
+Set to 1 if tabs must be converted to spaces (default: 0, no conversion).
 
 ## mp.config.text_mode
 

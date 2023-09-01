@@ -303,7 +303,8 @@ static void ansi_build_colors(void)
             c0 = mpdm_ival(mpdm_get_i(w, 0));
             c1 = mpdm_ival(mpdm_get_i(w, 1));
 
-            sprintf(ansi_attrs[n], "\033[0;%s%s%s38;2;%d;%d;%dm\033[48;2;%d;%d;%dm",
+            snprintf(ansi_attrs[n], sizeof(ansi_attrs[n]),
+                "\033[0;%s%s%s38;2;%d;%d;%dm\033[48;2;%d;%d;%dm",
                 cf & 0x1 ? "7;" : "",
                 cf & 0x4 ? "4;" : "",
                 cf & 0x8 ? "3;" : "",
@@ -322,7 +323,8 @@ static void ansi_build_colors(void)
             if ((--c0) == -1) c0 = 9;
             if ((--c1) == -1) c1 = 9;
 
-            sprintf(ansi_attrs[n], "\033[0;%s%s%s%d;%dm",
+            snprintf(ansi_attrs[n], sizeof(ansi_attrs[n]),
+                "\033[0;%s%s%s%d;%dm",
                 cf & 0x1 ? "7;" : "",
                 cf & 0x4 ? "4;" : "",
                 cf & 0x8 ? "3;" : "",
@@ -431,6 +433,11 @@ struct _str_to_code {
     { "\033[12~",           L"f2" },
     { "\033[13~",           L"f3" },
     { "\033[14~",           L"f4" },
+    { "\033[[A",            L"f1" },
+    { "\033[[B",            L"f2" },
+    { "\033[[C",            L"f3" },
+    { "\033[[D",            L"f4" },
+    { "\033[[E",            L"f5" },
     { "\033[E",             L"super-5" },
     { NULL,                 NULL }
 };
@@ -466,7 +473,7 @@ static mpdm_t ansi_getkey(mpdm_t args, mpdm_t ctxt)
             if (str[0] >= ctrl('a') && str[0] <= ctrl('z')) {
                 char tmp[32];
     
-                sprintf(tmp, "ctrl-%c", str[0] + 'a' - ctrl('a'));
+                snprintf(tmp, sizeof(tmp), "ctrl-%c", str[0] + 'a' - ctrl('a'));
                 k = MPDM_MBS(tmp);
             }
             else
@@ -482,12 +489,12 @@ static mpdm_t ansi_getkey(mpdm_t args, mpdm_t ctxt)
             char tmp[16];
 
             if (str[1] == '-')
-                strcpy(tmp, "alt-minus");
+                strncpy(tmp, "alt-minus", sizeof(tmp));
             else
             if (str[1] == '+')
-                strcpy(tmp, "alt-plus");
+                strncpy(tmp, "alt-plus", sizeof(tmp));
             else
-                sprintf(tmp, "alt-%c", str[1]);
+                snprintf(tmp, sizeof(tmp), "alt-%c", str[1]);
 
             k = MPDM_MBS(tmp);
         }
@@ -606,7 +613,7 @@ static mpdm_t ansi_drv_clip_to_sys(mpdm_t a, mpdm_t ctxt)
     /* if text is longer than 74994 (hard limit), truncate it */
     if (strlen(ptr) > 74994) {
         char *msg = "\n[Clipboard too big for ANSI copying]";
-        strcpy(ptr + 74994 - strlen(msg) - 1, msg);
+        strncpy(ptr + 74994 - strlen(msg) - 1, msg, strlen(ptr));
     }
 
     b64 = mpdm_base64enc_mbs((unsigned char *)ptr, strlen(ptr));

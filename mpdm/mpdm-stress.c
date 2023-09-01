@@ -38,7 +38,7 @@ void _do_test(char *str, int ok, int src_line)
 {
     char tmp[1024];
 
-    sprintf(tmp, "mpdm-stress.c:%d: (#%d) %s: %s\n",
+    snprintf(tmp, sizeof(tmp), "mpdm-stress.c:%d: (#%d) %s: %s\n",
         src_line, tests, str, ok ? "OK!" : "*** Failed ***"
     );
 
@@ -1298,7 +1298,7 @@ void benchmark(void)
 
     l = mpdm_ref(MPDM_A(i));
     for (n = 0; n < i; n++) {
-        sprintf(tmp, "%08x", n);
+        snprintf(tmp, sizeof(tmp), "%08x", n);
 /*      mpdm_set_i(l, MPDM_MBS(tmp), n);*/
         mpdm_set_i(l, MPDM_I(n), n);
     }

@@ -1,6 +1,29 @@
 Minimum Profit Release Notes
 ============================
 
+5.61
+----
+
+* New features:
+
+When the `tab' is hit while editing Makefiles, real tabs are always inserted, regardless of the configured tab to spaces conversion. This has been implemented by adding an optional function named pre_event(doc, key) inside a syntax highlight definition, that does the appropriate key conversion and it's called from mp_doc.pre_event() (contributed by aov).
+
+Some enhancements to the hex viewer: character groups (control, printable, zeros, etc) are shown in different colors and a vertical, a left/right movable column is shown as a positioning aid, the `ctrl-g' keycode asks for an address offset to jump (Theo).
+
+Input read from VCS commands is truncated to at most 2000 lines. This is to avoid waiting forever after commands that dump humungous amounts of data, e.g. from the `git log' of a very big project (contributed by Bix1994).
+
+New clipboard configuration knobs: if the `mp.config.clipboard_file' variable is set to a usable file name, it's used as the interchange space instead of the system clipboard; if any of the `mp.config.clipboard_copy_prg' or `mp.config.clipboard_paste_prg' are set to program names, they are used as pipes to write to/read from the content of the clipboard (Claire).
+
+A history of saved files (up to 100) is now stored inside the subdirectory `history' of CONFDIR as hard links (only supported on UNIX-like systems).
+
+* Fixed bugs:
+
+Fixed a bug when editing numbers in TUI forms (Tiny).
+
+* Other changes:
+
+Replaced usage of strcpy() and sprintf() with other functions to placate some paternalistic compilers (Claire).
+
 5.60
 ----
 

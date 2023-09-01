@@ -243,7 +243,7 @@ mp.actions['sync'] = sub {
     return d;
 };
 
-mp_doc.actions['exec_command'] = sub (d, cmd) {
+mp_doc.actions['exec_command'] = sub (d, cmd, max_lines) {
     if (cmd == NULL) {
         local t = mp.form(
             [
@@ -294,8 +294,21 @@ mp_doc.actions['exec_command'] = sub (d, cmd) {
 
                 mp.config.auto_indent = 0;
 
-                foreach (l, p)
-                    d->insert(l);
+                if (max_lines != NULL) {
+                    local l;
+
+                    while (max_lines > 0 && (l = p->read()) != NULL) {
+                        d->insert(l);
+                        max_lines -= 1;
+                    }
+
+                    if (l != NULL)
+                        d->insert(L("[INCOMPLETE (too much input)]\n"));
+                }
+                else {
+                    foreach (l, p)
+                        d->insert(l);
+                }
 
                 mp.config = p_config;
 
@@ -542,6 +555,10 @@ sub mp_doc.pre_event(doc, k)
         mp.mtime_test = time() + 2;
     }
 
+    /* if there is a synhi-specific pre-event, call it */
+    if (is_exec(doc.syntax.pre_event))
+        k = doc.syntax.pre_event(doc, k);
+
     return k;
 }
 
@@ -667,6 +684,12 @@ sub mp_doc.save(doc)
     local s = NULL;
     local ret = 0;
 
+    /* history copy filename */
+    local hcopy = CONFDIR + "history/" + string(time());
+
+    /* hardlink previous content */
+    link(doc.name, hcopy + "-0");
+
     /* if unlink before write is desired, do it */
     if (mp.config.unlink && (s = stat(doc.name)) != NULL)
         unlink(doc.name);
@@ -703,6 +726,15 @@ sub mp_doc.save(doc)
 
         /* delete the recovery file */
         unlink(doc->recov_file_name());
+
+        /* link current content */
+        link(doc.name, hcopy + "-1");
+
+        /* delete old things from that directory */
+        local old_his = glob(CONFDIR + "history/" + "*");
+
+        if (count(old_his) >= 100)
+            unlink(old_his[0]);
     }
     
     return ret;

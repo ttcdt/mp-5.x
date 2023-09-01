@@ -60,7 +60,7 @@ static wchar_t *dump_string(const mpdm_t v, wchar_t * ptr, int *size)
                 char tmp[16];
                 wchar_t wtmp[16];
 
-                sprintf(tmp, "\\x{%x}", (int) *iptr);
+                snprintf(tmp, sizeof(tmp), "\\x{%x}", (int) *iptr);
                 mbstowcs(wtmp, tmp, sizeof(wtmp));
                 ptr = mpdm_pokews(ptr, size, wtmp);
             }

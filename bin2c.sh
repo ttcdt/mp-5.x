@@ -6,7 +6,7 @@ SYMBOL="$1"
 [ "${SYMBOL}" = "" ] && SYMBOL="data"
 
 echo "const char ${SYMBOL}[] = "
-od -b | awk '// { printf("  \""); for (n = 2; n <= NF; n++) \
+od -bv | awk '// { printf("  \""); for (n = 2; n <= NF; n++) \
     { printf("\\%s", $n); } \
     printf("\"\n"); }'
 echo ";"

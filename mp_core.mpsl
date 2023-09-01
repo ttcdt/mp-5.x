@@ -829,6 +829,10 @@ sub mp.load_profile()
     if (stat(cfdir) != NULL)
         CONFDIR = cfdir;
 
+    /* create the history directory */
+    mkdir(cfdir + "history/");
+    ERRNO = NULL;
+
     mp.config_file = CONFDIR + "mp.mpsl";
     mp.state_file  = CONFDIR + "mp_state.json";
 

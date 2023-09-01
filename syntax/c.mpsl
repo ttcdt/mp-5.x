@@ -254,10 +254,10 @@ sub mp.clang_complete(o, d) {
         ],
         'documentation', [
             [ "|/\*\*\n|", '|\*/|' ],                   /* mp_doccer */
-            '/^/\*\*.*\*\*/$/m'                         /* section mark */
+            [ '|/\*\*|', '|\*/|' ]                      /* section mark */
         ]
     ],
-    section:    [ '/(^\/\*\*.*\*\*\/$|^#pragma mark|^[A-Za-z_])/' ],
+    section:    [ '/(\/\*\*.*\*\*\/$|^#pragma mark|^[A-Za-z_])/' ],
     build_targets: [
         "cc -c %s && echo Syntax OK"
     ]

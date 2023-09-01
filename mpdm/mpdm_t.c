@@ -733,7 +733,7 @@ mpdm_t mpdm_md5(mpdm_t v)
         md5_simple(md5, ptr, n);
 
         for (n = 0; n < sizeof(md5); n++)
-            sprintf(&md5_s[n * 2], "%02x", md5[n]);
+            snprintf(&md5_s[n * 2], 3, "%02x", md5[n]);
         md5_s[32] = '\0';
 
         free(ptr);

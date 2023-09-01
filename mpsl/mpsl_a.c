@@ -99,7 +99,7 @@ static void c_error(struct mpsl_a *c)
 {
     char tmp[1024];
 
-    sprintf(tmp, ":%d:%d: syntax error", c->y + 1, c->x + 1);
+    snprintf(tmp, sizeof(tmp), ":%d:%d: syntax error", c->y + 1, c->x + 1);
     mpdm_set_wcs(mpdm_root(), mpdm_strcat(c->source, MPDM_MBS(tmp)), L"ERROR");
 
     c->error = 1;
@@ -510,7 +510,7 @@ static mpdm_t code_pos(struct mpsl_a *c)
 {
     char tmp[1024];
 
-    sprintf(tmp, ":%d", c->y + 1);
+    snprintf(tmp, sizeof(tmp), ":%d", c->y + 1);
 
     return INS1(L"LITERAL", mpdm_strcat(c->source, MPDM_MBS(tmp)));
 }

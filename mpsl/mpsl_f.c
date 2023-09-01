@@ -555,10 +555,24 @@ static mpdm_t F_flock(F_ARGS)
  * Deletes a file.
  * [Input-Output]
  */
-/** bool = unlink(filename); */
+/** status = unlink(filename); */
 static mpdm_t F_unlink(F_ARGS)
 {
     return MPDM_I(mpdm_unlink(A0));
+}
+
+/**
+ * link - Create a file link.
+ * @src: source file
+ * @dest: destination file
+ *
+ * Links @dest as a hard link to @src (UNIX only)
+ * [Input-Output]
+ */
+/** status = link(src, dest); */
+static mpdm_t F_link(F_ARGS)
+{
+    return MPDM_I(mpdm_link(A0, A1));
 }
 
 /**
@@ -1709,6 +1723,7 @@ static struct {
     { L"feof",           F_feof },
     { L"flock",          F_flock },
     { L"unlink",         F_unlink },
+    { L"link",           F_link },
     { L"rename",         F_rename },
     { L"stat",           F_stat },
     { L"chmod",          F_chmod },
