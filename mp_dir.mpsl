@@ -17,6 +17,13 @@ global mp_doc_dir = new(mp_doc);
 
 /** code **/
 
+sub mp_doc_dir.visual_wrap(doc)
+{
+    /* disable visual wrap for the directory editor */
+    return 0;
+}
+
+
 sub mp_doc_dir.setup(doc)
 {
     doc.title = sprintf(L("<listing of %s>"), doc.name);

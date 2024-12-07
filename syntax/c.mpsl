@@ -109,6 +109,10 @@ sub mp.c_gather_help(word)
  * Returns 1 on success or NULL on error (in that case, it'll fallback to common word based completion)
  */
 sub mp.clang_complete(o, d) {
+    /* clang usage must be explicitly enabled */
+    if (!mp.config.use_clang)
+        return NULL;
+
     local w = d->get_word(), clang_options = mp.state.completion.c || "";
     if (size(w) == 0)
         return NULL;
@@ -233,8 +237,6 @@ sub mp.clang_complete(o, d) {
             '/]/'
         ],
         'quotes', [
-            /* from http://ad.hominem.org/log/2005/05/quoted_strings.php */
-            "/\"([^\"\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^\"\\\\\n]*)*)\"/", /* double quoted strings */
 /*            "/\"([^\"\\\\\n]*(\\\\.[^\"\\\\\n]*)*)\"/", */
             "/'([^'\\\\\n]*(\\\\.[^'\\\\\n]*)*)'/",     /* single-quoted strings */
             "/\<-?[0-9]+\>/",                           /* numbers */
@@ -251,6 +253,10 @@ sub mp.clang_complete(o, d) {
             [ '|/\*|', '|\*/|' ],                       /* C-like */
             [ '|#if 0|', '#endif' ],                    /* CPP "comments" */
             "/\/\/[^\n\x{ad}]*(\x{ad}\n[^\n]*)*/"       /* C++-like */
+        ],
+        'quotes', [
+            /* from http://ad.hominem.org/log/2005/05/quoted_strings.php */
+            "/\"([^\"\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^\"\\\\\n]*)*)\"/" /* double quoted strings */
         ],
         'documentation', [
             [ "|/\*\*\n|", '|\*/|' ],                   /* mp_doccer */

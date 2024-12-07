@@ -139,6 +139,7 @@ global mp_mptxt = {
             /* html exporter */
 
             local title = mp.config.html_title;
+            local css   = mp.config.html_css;
 
             local ret = [
                 "<!DOCTYPE html>\n",
@@ -146,7 +147,7 @@ global mp_mptxt = {
                 "<head>\n",
                 "<meta name=\"generator\" content=\"Minimum Profit " + mp.VERSION, "\"/>\n",
                 "<title>" + title + "</title>\n",
-                "<style>.center { text-align: center } .right { text-align: right }</style>\n",
+                "<style>" + css + "</style>\n",
                 "</head>\n",
                 "<body>\n"
             ];
@@ -174,11 +175,14 @@ global mp_mptxt = {
                     if (style == "em")
                         str += "<em>" + text + "</em>";
                     else
+                    if (style == "versalita")
+                        str += "<small>" + uc(text) + "</small>";
+                    else
                     if (style == "url")
                         str += "<a href=\"" + text + "\">" + text + "</a>";
                     else
                     if (style == "img")
-                        str += "<img src=\"" + text + "\"/>";
+                        str += "<img src=\"" + text + "\" alt=\"\"/>";
                     else
                         str += text;
                 }
@@ -199,7 +203,7 @@ global mp_mptxt = {
                     ret->push("<p class='center'>\n" + str->split("\n")->join("<br/>\n") + "\n</p>\n");
                 else
                 if (mode == 'break')
-                    ret->push("<p class='break'>\n&nbsp;\n</p>\n");
+                    ret->push("<p class='break'>\n\x{2002}\n</p>\n");
                 else
                 if (mode == "right")
                     ret->push("<p class='right'>\n" + str->split("\n")->join("<br/>\n") + "\n</p>\n");
@@ -251,6 +255,9 @@ global mp_mptxt = {
                     else
                     if (style == "em")
                         str += '{\i ' + text + "}";
+                    else
+                    if (style == "versalita")
+                        str += '{\scaps ' + lc(text) + "}";
                     else
                     if (style == "url")
                         str += '{\field{\*\fldinst HYPERLINK "' + text + '" }' +
@@ -314,22 +321,22 @@ global mp_mptxt = {
                 else
                 if (mode == 'verbatim')
                     ret->push(mp.config.rtf_style_verbatim + mfont + "\r\n" +
-                        str->split("\n")->join("\\line\r\n"));
+                        str->split("\n")->join("\\par\r\n") + "\\par");
                 else
                 if (mode == 'center')
                     ret->push(mp.config.rtf_style_center + tfont + "\r\n" +
-                        str->split("\n")->join("\\line\r\n"));
+                        str->split("\n")->join("\\par\r\n") + "\\par");
                 else
                 if (mode == 'break')
                     ret->push(mp.config.rtf_style_first + tfont + "\r\n");
                 else
                 if (mode == "right")
                     ret->push(mp.config.rtf_style_right + tfont + "\r\n" +
-                        str->split("\n")->join("\\line\r\n"));
+                        str->split("\n")->join("\\par\r\n") + "\\par");
                 else
                 if (mode == "left")
                     ret->push(mp.config.rtf_style_left + tfont + "\r\n" +
-                        str->split("\n")->join("\\line\r\n"));
+                        str->split("\n")->join("\\par\r\n") + "\\par");
             }
 
             if (rem)
@@ -342,12 +349,15 @@ global mp_mptxt = {
         "troff": sub (mptxt) {
             /* troff exporter */
 
+            local lheight = integer(mp.config.troff_font_size *
+                                    mp.config.troff_line_mult);
+
             local ret = [
                 ".de hd\n'sp 0.8i\n..\n.wh 0 hd\n",
                 ".de fo\n.tl ''%'\n..\n.wh -0.2i fo\n",
                 ".pl " + mp.config.troff_page_height + "i\n",
                 ".ps " + mp.config.troff_font_size + "\n",
-                ".vs " + integer(mp.config.troff_font_size * 2) + "\n",
+                ".vs " + lheight + "\n",
                 ".\\\"generator Minimum Profit " + mp.VERSION + "\n"
             ];
 
@@ -370,6 +380,9 @@ global mp_mptxt = {
                     if (style == "em")
                         str += '\fI' + text + "\fP";
                     else
+                    if (style == "versalita")
+                        str += uc(text);
+                    else
                     if (style == "url")
                         str += text;
                     else
@@ -389,21 +402,34 @@ global mp_mptxt = {
                     ret->push("\t" + str + "\n\n");
                 else
                 if (mode == 'verbatim')
-                    ret->push(".nf\n" + str + "\n.fi\n\n");
+                    ret->push(".nf\n" +
+                        ".vs " + mp.config.troff_font_size + "\n" +
+                        "\\fC" + str + "\\fP\n\n.fi\n" +
+                        ".vs " + lheight + "\n");
                 else
                 if (mode == 'center')
-                    ret->push(".ce " + integer(count(str->split("\n"))) +
-                        "\n" + str + "\n.ce 0\n\n");
+                    ret->push(".ce " + integer(count(str->split("\n"))) + "\n" +
+                        ".vs " + mp.config.troff_font_size + "\n" +
+                        str + "\n.ce 0\n\n" +
+                        ".vs " + lheight + "\n");
                 else
                 if (mode == 'break')
                     ret->push("\n\n");
                 else
                 if (mode == "right")
                     ret->push(".ad r\n" +
-                        str->split("\n")->map(sub (e) {e + "\n.br\n"; })->join() + ".ad b\n\n");
+                        ".vs " + mp.config.troff_font_size + "\n" +
+                        str->split("\n")->
+                        map(sub (e) {"\\fI" + e + "\\fP\n.br\n"; })->join() +
+                        ".ad b\n\n" +
+                        ".vs " + lheight + "\n");
                 else
                 if (mode == "left")
-                    ret->push(".nf\n" + str + "\n.fi\n\n");
+                    ret->push(".nf\n" +
+                        ".vs " + mp.config.troff_font_size + "\n" +
+                        "\\fI" + str + "\\fP" +
+                        "\n.fi\n\n" +
+                        ".vs " + lheight + "\n");
             }
 
             return ret;
@@ -430,6 +456,14 @@ sub mp_mptxt.styles(str, styles)
 
         mp_mptxt.styles(t[0], styles);
         styles->push(["em", sep->slice(1, -2)]);
+        mp_mptxt.styles(t[1], styles);
+    }
+    else
+    if ((sep = str->regex("/=[^=]+=/"))) {
+        local t = str->split(sep);
+
+        mp_mptxt.styles(t[0], styles);
+        styles->push(["versalita", sep->slice(1, -2)]);
         mp_mptxt.styles(t[1], styles);
     }
     else

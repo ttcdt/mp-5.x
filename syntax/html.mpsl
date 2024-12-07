@@ -1,3 +1,6 @@
+if (seek_matching_tag == NULL)
+    mp.load_syntax("xml");
+
 {
     'id'        =>  'html',
     'name'      =>  'HTML',
@@ -47,5 +50,8 @@
     ],
     'section'   =>  [ '/<\s*h[0-9]\s*>/' ],
     'matching_open' => mp.matching_open + "<",
-    'matching_close' => mp.matching_close + ">"
+    'matching_close' => mp.matching_close + ">",
+    'init' => sub(d) {
+        doc.seek_matching = seek_matching_tag;
+    }
 };

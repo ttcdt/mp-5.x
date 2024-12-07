@@ -1,6 +1,27 @@
 Minimum Profit Release Notes
 ============================
 
+5.62
+----
+
+* New features:
+
+The `seek-matching' action in HTML and XML syntax modes also matches open/close tags (not only brackets) (Tiny).
+
+If a document has MSDOS-like end of lines (CR/LF), it's shown in the status line (Theo).
+
+Added syntax highlight for `org-mode' documents (*only* syntax, not operations) (Tiny).
+
+Added syntax highlight for the hare programming language (contributed by Andy Atwood).
+
+New VCS command `git grep' (contributed by aov).
+
+[mptxt] Added support for versalita (smallcaps) text (contributed by aov).
+
+* Fixed bugs:
+
+Action `open_under_cursor' really works over `@@' marks in diff files (Claire).
+
 5.61
 ----
 

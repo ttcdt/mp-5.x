@@ -132,9 +132,9 @@ mp_doc.actions['replace_next'] = sub (d) {
 };
 
 
-mp_doc.actions['seek_next_char'] = sub (d) { d->seek_prev_or_next_char(mp_doc.search); };
-mp_doc.actions['seek_prev_char'] = sub (d) { d->seek_prev_or_next_char(mp_doc.search_back); };
-mp_doc.actions['seek_matching']  = sub (d) { d->seek_matching(); };
+mp_doc.actions['seek_next_char'] = sub (d) { d->busy(1)->seek_prev_or_next_char(mp_doc.search)->busy(0); };
+mp_doc.actions['seek_prev_char'] = sub (d) { d->busy(1)->seek_prev_or_next_char(mp_doc.search_back)->busy(0); };
+mp_doc.actions['seek_matching']  = sub (d) { d->busy(1)->seek_matching()->busy(0); };
 
 mp.actions['grep']  = sub {
     local r = mp.form(

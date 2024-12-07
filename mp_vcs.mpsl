@@ -38,6 +38,7 @@ mp.vcs = {
             "git stash apply"   => NULL,
             "git push"          => NULL,
             "git pull"          => NULL,
+            "git grep -n '%q'"  => { unique_log: 1, query_string: 1 },
             "git commit -a"     => { commit_cmd: "git commit -a -F '%s'" }
         }
     },
@@ -135,6 +136,24 @@ sub mp.vcs_form()
             else {
                 local log;
 
+                if (opt.query_string) {
+                    /* ask for a string to be queried */
+                    local t = mp.form(
+                        [
+                            {
+                                label:   L("Query string") + ':',
+                                type:    'text',
+                                history: 'vcs-query-string'
+                            }
+                        ]
+                    );
+
+                    if (t == NULL)
+                        return;
+
+                    cmd = cmd->sregex("/%q/g", t[0]);
+                }
+
                 /* unique log for this command? */
                 if (opt.unique_log) {
                     log           = mp.open(sprintf(L("<%s output>"), cmd));
@@ -148,6 +167,9 @@ sub mp.vcs_form()
                     log->move_eof();
                     log->insert(cmd + ":\n\n");
                 }
+
+                /* special keycode */
+                log.keycodes.enter = "open_under_cursor";
 
                 log.force_visual_wrap = 1;
 

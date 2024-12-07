@@ -19,14 +19,16 @@ mp.config.rtf_mono_font_size = 10;
 mp.config.rtf_style_default  = '\sa227\sl480\slmult1\i0';
 mp.config.rtf_style_first    = '\qj\fi0';
 mp.config.rtf_style_para     = '\qj\fi567';
-mp.config.rtf_style_center   = '\qc\fi0';
-mp.config.rtf_style_verbatim = '\ql\fi0\sl0';
-mp.config.rtf_style_right    = '\qr\fi0\sl0\i1';
-mp.config.rtf_style_left     = '\ql\fi0\sl0\i1';
+mp.config.rtf_style_center   = '\sa0\qc\fi0\sl0';
+mp.config.rtf_style_verbatim = '\sa0\ql\fi0\sl0';
+mp.config.rtf_style_right    = '\sa0\qr\fi0\sl0\i1';
+mp.config.rtf_style_left     = '\sa0\ql\fi0\sl0\i1';
 mp.config.rtf_image_scale    = 100;
 mp.config.troff_font_size    = 12;
 mp.config.troff_page_height  = 10;
+mp.config.troff_line_mult    = 2;
 mp.config.html_title         = '';
+mp.config.html_css           = ".center { text-align: center } .right { text-align: right; font-style: italic } .left { font-style: italic }";
 
 /** editor actions **/
 
@@ -395,16 +397,15 @@ mp_doc.actions['open_under_cursor'] = sub (d) {
     if (d.txt.lines[d.txt.y]->regex('/^@@ /')) {
         /* it's a diff mark */
 
-        /* pick line */
-        local l = d.txt.lines[d.txt.y]->regex('/[0-9]+/');
+        /* pick line number (+3 usual lines of context) */
+        local y = d.txt.y;
+        local l = integer(d.txt.lines[y]->regex('/[0-9]+/')) + 3;
         local f;
-        local y = d.txt.y - 1;
 
-        foreach (_, y) {
-            /* pick filename (stripping mark from previous line) */
-            if (d.txt.lines[y]->regex('/^\+\+\+ /')) {
-                f = d.txt.lines[y]->sregex('/^\+\+\+ .\//');
-                break;
+        foreach (t, y) {
+            /* pick last filename (stripping mark from previous line) */
+            if (d.txt.lines[t]->regex('/^\+\+\+ /')) {
+                f = d.txt.lines[t]->sregex('/^\+\+\+ .\//');
             }
         }
 
@@ -733,8 +734,11 @@ sub mp_doc.save(doc)
         /* delete old things from that directory */
         local old_his = glob(CONFDIR + "history/" + "*");
 
-        if (count(old_his) >= 100)
+        /* delete old entries */
+        while (count(old_his) >= 1000) {
             unlink(old_his[0]);
+            del(old_his, 0);
+        }
     }
     
     return ret;
@@ -835,7 +839,7 @@ sub mp.open(filename, password)
     local x, y;
 
     /* test if filename includes :y: or :y:x: positioning */
-    if (regex(filename, "/.+:[0-9]+:([0-9]+:)?$/")) {
+    if (regex(filename, "/.+:[0-9]+:([0-9]+:)?/")) {
         local l = split(filename, ':');
 
         x        = integer(l[2]);

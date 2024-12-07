@@ -1,3 +1,83 @@
+sub seek_matching_tag(doc) {
+    local txt = doc.txt;
+
+    local tag_regex = regcomp("/<\/?[a-zA-Z1-9]+( |>)/");
+
+    /* get the current tag under the cursor */
+    local w = doc->get_word(tag_regex);
+
+    /* not a tag? do regular matching search */
+    if (w == NULL || w[0] != "<")
+        return mp_doc.seek_matching(doc);
+
+    /* get only the tag name */
+    local m = doc->get_word("/<\/?[a-zA-Z1-9]+/");
+
+    local level = 1;
+
+    doc->busy(1);
+
+    if (m[1] == "/") {
+        /* closing tag: seek backwards */
+        local r = "<\/?" + slice(m, 2, -1) + "( |>)";
+
+        while (level > 0) {
+            if (doc->search_back(r) == NULL)
+                break;
+
+            doc->move_left();
+
+            /* get the current tag */
+            w = doc->get_word(tag_regex);
+
+            if (w == NULL)
+                break;
+
+            /* check the current level */
+            if (w[1] == "/")
+                level += 1;
+            else
+                level -= 1;
+        }
+
+        w = doc->get_word(tag_regex);
+        local n = size(w) - 1;
+        while (n) {
+            doc->move_left();
+            n -= 1;
+        }
+    }
+    else {
+        /* opening tag: seek forward */
+
+        doc->move_right();
+        local r = "<\/?" + slice(m, 1, -1) + "( |>)";
+
+        while (level > 0) {
+            if (doc->search(r) == NULL)
+                break;
+
+            doc->move_left();
+
+            /* get the current tag */
+            w = doc->get_word(tag_regex);
+
+            if (w == NULL)
+                break;
+
+            /* check the current level */
+            if (w[1] == "/")
+                level -= 1;
+            else
+                level += 1;
+        }
+    }
+
+    doc->busy(0);
+
+    return doc;
+}
+
 {
     'id'        =>  'xml',
     'name'      =>  'XML / XGML',
@@ -20,5 +100,8 @@
         local f = d.txt.lines[0];
 
         return regex(f, '/<\?xml/');
+    },
+    'init' => sub(d) {
+        doc.seek_matching = seek_matching_tag;
     }
 };

@@ -1,0 +1,48 @@
+{
+    'id'        =>  'hare',
+    'name'      =>  'Hare',
+    'defs'      =>  [
+        'word1', [
+            mp.syn_token_list([
+                "as", "break", "case", "const", "continue",
+                "def", "defer", "else", "enum", "export", "fn",
+                "for", "if", "is", "let", "match", "return",
+                "static", "struct", "switch", "type", "union",
+                "yield", "_"
+                ])
+        ],
+        'word3', [
+            mp.syn_token_list([
+                "abort", "align", "alloc", "append", "assert",
+                "delete", "free", "insert", "len", "offset",
+                "use",
+                "vastart", "vaarg", "vaend"
+                ]),
+            "@(fini|init|offset|packed|symbol|test|threadlocal)\>"
+        ],
+        'word2', [
+            mp.syn_token_list([
+                "bool", "f32", "f64", "false", "i16", "i32",
+                "i64", "i8", "int", "never", "null", "nullable",
+                "opaque", "rune", "size", "str", "true", "u16",
+                "u32", "u64", "u8", "uint", "uintptr", "valist", "void"
+                ])
+        ],
+        'quotes', [
+            "/\"([^\"\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^\"\\\\\n]*)*)\"/",
+            "/'([^'\\\\\n\x{ad}]*((\\\\.|\x{ad}\n)[^'\\\\\n]*)*)'/"
+        ],
+        'comments', [
+            "/\/\/[^\n\x{ad}]*(\x{ad}\n[^\n]*)*/"       /* C++-like */
+        ],
+        'documentation', [
+        ]
+    ],
+    'pre_event' => sub (d, k) {
+        /* all tabs are shift-tabs (real tabs) */
+        if (k == "tab")
+            k = "shift-tab";
+
+        return k;
+    }
+};

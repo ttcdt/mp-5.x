@@ -92,6 +92,10 @@ The font weight to be used in GUI environments. It's a floating point number fro
 
 Set to 1 if the `replace' operation must be done upto the end of the file (default: 0, do it only once).
 
+## mp.config.html_css
+
+The CSS to be used when exporting a mptxt file to HTML.
+
 ## mp.config.html_title
 
 The title to be used when exporting a mptxt file to HTML (default: the output file name).
@@ -267,6 +271,10 @@ The format for the time stamp (default: "%a, %d %b %Y %H:%M:%S %z").
 ## mp.config.troff_font_size
 
 The font size when exporting an mptxt file to troff.
+
+## mp.config.troff_line_mult
+
+The multiplier for the line height when exporting an mptxt file to troff (default: 2).
 
 ## mp.config.troff_page_height
 

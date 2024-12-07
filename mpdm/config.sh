@@ -396,7 +396,7 @@ fi
 # mkdir() with 2 arguments detection
 echo -n "Testing for number of arguments for mkdir()... "
 echo "#include <unistd.h>" > .tmp.c
-echo "#include <sys/stat.h>" > .tmp.c
+echo "#include <sys/stat.h>" >> .tmp.c
 echo "int main(void) { mkdir(\"dummy\", 0755); }" >> .tmp.c
 
 $CC $CFLAGS .tmp.c -o .tmp.o 2>> .config.log

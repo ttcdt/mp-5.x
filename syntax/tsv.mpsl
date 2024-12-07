@@ -1,0 +1,11 @@
+{
+    id:         'tsv',
+    name:       'Tab Separated Values',
+    pre_event:  sub (d, k) {
+        /* all tabs are shift-tabs (real tabs) */
+        if (k == "tab")
+            k = "shift-tab";
+
+        return k;
+    }
+};

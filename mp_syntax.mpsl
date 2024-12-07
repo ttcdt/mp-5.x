@@ -190,6 +190,11 @@ sub mp_doc.set_syntax(doc, syntax)
 /* sets a syntax high definition for a document */
 {
     doc.syntax = mp.load_syntax(syntax);
+
+    if (doc.syntax.init != NULL)
+        doc.syntax.init(doc);
+
+    return doc;
 }
 
 
@@ -202,13 +207,13 @@ sub mp_doc.detect_syntax(doc)
     /* try extensions */
     if ((v = doc.name->regex("/\.[^.]+$/"))) {
         v = v->sregex("/\./");
-        doc.syntax = mp.load_syntax(v);
+        doc->set_syntax(v);
     }
 
     /* try full name (Makefile, etc.) */
     if (doc.syntax == NULL) {
         if ((v = doc.name->regex("/[^/]+$/"))) {
-            doc.syntax = mp.load_syntax(v);
+            doc->set_syntax(v);
         }
     }
 
@@ -221,7 +226,9 @@ sub mp_doc.detect_syntax(doc)
             v = v->sregex("/^.*\//")->sregex("/ -[^ ]+/g");
 
             foreach (e, split(v, " ")) {
-                if ((doc.syntax = mp.load_syntax(e))) {
+                local s = mp.load_syntax(e);
+                if (s != NULL) {
+                    doc->set_syntax(e);
                     break;
                 }
             }
@@ -232,7 +239,7 @@ sub mp_doc.detect_syntax(doc)
     if (doc.syntax == NULL) {
         foreach (s, mp.syntax) {
             if (is_exec(s.detect) && s.detect(doc)) {
-                doc.syntax = s;
+                doc->set_syntax(s.id);
                 break;
             }
         }

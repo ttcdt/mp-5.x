@@ -258,5 +258,8 @@ __I18N__ = {
 	"Replace next" => "Reemplazar siguiente",
 	"Paragraph up" => "P\x{00e1}rrafo arriba",
 	"Paragraph down" => "P\x{00e1}rrafo abajo",
+	"Autosaving..." => "Guardando autom\x{00e1}ticamente",
+	"Address" => "Direcci\x{00f3}n",
+	"Lines: %d\nWords: %d\nCharacters: %d\nPages: %d" => "L\x{00ed}neas: %d\nPalabras: %d\nCaracteres: %d\nP\x{00e1}ginas: %d",
 	"-" => "-"
 };

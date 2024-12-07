@@ -181,7 +181,8 @@ sub mp_doc.get_status(doc)
             '%t'    =>  sub { mp.tags[mp.active()->get_word()].label; },
             '%n'    =>  sub { mp.active.title || mp.active.name; },
             '%w'    =>  sub { mp.active()->word_count(); },
-            '%e'    =>  sub { mp.active.encoding || ''; },
+            '%e'    =>  sub { (mp.active.encoding || '') +
+                                (mp.active.eol == "\r\n" && "[CRLF]" || ""); },
             '%u'    =>  sub { sprintf("%04X",
                             mp.active.txt.lines[mp.active.txt.y]->
                                 slice(mp.active.txt.x, 1)->ord());

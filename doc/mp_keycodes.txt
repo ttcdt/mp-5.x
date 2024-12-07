@@ -30,6 +30,10 @@ Table with Minimum Profit's keycodes and their default assigned actions.
  +---------------------+--------------------------+
  |               alt-o |               ctrl-enter |
  +---------------------+--------------------------+
+ |       alt-page-down |                 move_eof |
+ +---------------------+--------------------------+
+ |         alt-page-up |                 move_bof |
+ +---------------------+--------------------------+
  |           alt-space |                     menu |
  +---------------------+--------------------------+
  |           backspace |              delete_left |

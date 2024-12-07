@@ -351,7 +351,7 @@ This action is called by the underlying driver when the mouse is used to drag ov
 
 ## move_bof
 
-Beginning of document [ctrl-home]
+Beginning of document [alt-page-up, ctrl-home]
 
 Moves the cursor to the beginning of the document (first line, first column).
 
@@ -369,7 +369,7 @@ Moves the cursor to the next line.
 
 ## move_eof
 
-End of document [ctrl-end]
+End of document [alt-page-down, ctrl-end]
 
 Moves the cursor to the last line of the document.
 

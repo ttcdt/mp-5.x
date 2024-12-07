@@ -1205,9 +1205,6 @@ static mpdm_t F_map(F_ARGS)
  * two element array, with the 0th element to be the key and the 1st
  * element the value for the new pair in the output hash.
  *
- * If @filter is NULL, the returned hash is the inverse (values are
- * the new keys and keys are the new values).
- *
  * [Arrays]
  * [Hashes]
  */

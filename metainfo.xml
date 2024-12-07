@@ -32,14 +32,26 @@
 
   <releases>
 
-    <release version="5.59" type="stable" date="2022-08-13">
+    <release version="5.61" type="stable" date="2023-09-01">
       <description>
-        <p>New features:</p>
-        <ul>
-            <li>New syntax highlight for Rust (contributed by X-Ryl669).</li>
-            <li>New syntax highlight for Markdown (contributed by Susan Bompensiero).</li>
-            <li>Syntax-highlight definitions can include their own `matching_open' and `matching_close' strings that override the global ones (Tiny).</li>
-        </ul>
+
+<p>New features:</p>
+<ul>
+<li>When the `tab' is hit while editing Makefiles, real tabs are always inserted, regardless of the configured tab to spaces conversion. This has been implemented by adding an optional function named pre_event(doc, key) inside a syntax highlight definition, that does the appropriate key conversion and it's called from mp_doc.pre_event() (contributed by aov).</li>
+<li>Some enhancements to the hex viewer: character groups (control, printable, zeros, etc) are shown in different colors and a vertical, a left/right movable column is shown as a positioning aid, the `ctrl-g' keycode asks for an address offset to jump (Theo).</li>
+<li>Input read from VCS commands is truncated to at most 2000 lines. This is to avoid waiting forever after commands that dump humungous amounts of data, e.g. from the `git log' of a very big project (contributed by Bix1994).</li>
+<li>New clipboard configuration knobs: if the `mp.config.clipboard_file' variable is set to a usable file name, it's used as the interchange space instead of the system clipboard; if any of the `mp.config.clipboard_copy_prg' or `mp.config.clipboard_paste_prg' are set to program names, they are used as pipes to write to/read from the content of the clipboard (Claire).</li>
+<li>A history of saved files (up to 100) is now stored inside the subdirectory `history' of CONFDIR as hard links (only supported on UNIX-like systems).</li>
+</ul>
+<p>Fixed bugs:</p>
+<ul>
+<li>Fixed a bug when editing numbers in TUI forms (Tiny).</li>
+</ul>
+<p>Other changes:</p>
+<ul>
+<li>Replaced usage of strcpy() and sprintf() with other functions to placate some paternalistic compilers (Claire).</li>
+</ul>
+
       </description>
       <artifacts>
         <artifact type="source">
@@ -59,22 +71,22 @@
   <launchable type="desktop-id">minimum_profit.desktop</launchable>
   <screenshots>
     <screenshot type="default">
-      <image>https://triptico.com/img/mp-5-qt4.png</image>
+      <image>https://triptico.com/software/mp-5-qt4.png</image>
     </screenshot>
     <screenshot>
-      <image>https://triptico.com/img/mp-5-curses.png</image>
+      <image>https://triptico.com/software/mp-5-curses.png</image>
     </screenshot>
     <screenshot>
-      <image>https://triptico.com/img/mp-5-ansi.png</image>
+      <image>https://triptico.com/software/mp-5-ansi.png</image>
     </screenshot>
     <screenshot>
-      <image>https://triptico.com/img/mp-5-ansi-256.png</image>
+      <image>https://triptico.com/software/mp-5-ansi-256.png</image>
     </screenshot>
     <screenshot>
-      <image>https://triptico.com/img/mp-5-gtk3.png</image>
+      <image>https://triptico.com/software/mp-5-gtk3.png</image>
     </screenshot>
     <screenshot>
-      <image>https://triptico.com/img/mp-5-win32.png</image>
+      <image>https://triptico.com/software/mp-5-win32.png</image>
     </screenshot>
   </screenshots>
 </component>

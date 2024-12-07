@@ -982,41 +982,43 @@ mpdm_t mpdm_fmt(const mpdm_t fmt, const mpdm_t arg)
 
         case 'b':
             /* binary dump */
-            ptr = tmp;
-            unsigned int mask;
-            int p = 0;
+            {
+            uint64_t val = (uint64_t) mpdm_rval(arg);
+            ptr = tmp + sizeof(tmp) - 1;
+            *ptr = '\0';
+
+            int pad = 0;
             int bits = 0;
 
             /* zero pad? */
             if (t_fmt[1] == '0') {
-                p = 1;
+                pad = 1;
                 sscanf(&t_fmt[2], "%d", &bits);
             }
             else
                 sscanf(&t_fmt[1], "%d", &bits);
 
-            if (bits == 0)
-                bits = sizeof(int) * 8;
+            if (bits == 0 || bits > 64)
+                bits = sizeof(val) * 8;
 
-            mask = 1 << (bits - 1);
-            while (mask) {
-                if (mask & (unsigned int) mpdm_ival(arg)) {
-                    *ptr++ = '1';
-                    p = 1;
-                }
+            while (bits) {
+                /* value is now all zeroes and no padding is wanted? done */
+                if (!pad && !val)
+                    break;
+
+                ptr--;
+                if (val & 0x1)
+                    *ptr = '1';
                 else
-                if (p)
-                    *ptr++ = '0';
+                    *ptr = '0';
 
-                mask >>= 1;
+                val >>= 1;
+                bits--;
             }
 
-            if (ptr == tmp)
-                *ptr++ = '0';
-
-            *ptr = '\0';
-            wptr = mpdm_mbstowcs(tmp, &m, -1);
+            wptr = mpdm_mbstowcs(ptr, &m, -1);
             break;
+            }
 
         case 'j':
             o = json_f(o, &l, arg, 0);

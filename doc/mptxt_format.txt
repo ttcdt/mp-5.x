@@ -2,7 +2,7 @@
 
  Ángel Ortega <angel@triptico.com> 
 
-The mptxt format is a very lightweight text formatting markup that can be converted by the Minimum Profit text editor to other text formats. This document describes version 1.03 of the mptxt format.
+The mptxt format is a very lightweight text formatting markup that can be converted by the Minimum Profit text editor to other text formats. This document describes version 1.04 of the mptxt format.
 
 Output formats supported are: rtf, troff and html.
 
@@ -41,7 +41,7 @@ And on the pedestal these words appear:<
 "My name is Ozymandias, king of kings:<
 Look on my works, ye Mighty, and despair!"<
 
-Text that must be shown emphasized can be surrounded by underscores, like in _this example_. As well, strong text can be surrounded by asterisks, like in *this very attention-demanding text*.
+Text that must be shown emphasized can be surrounded by underscores, like in _this example_. As well, strong text can be surrounded by asterisks, like in *this very attention-demanding text*. Text surrounded by equal symbols will be rendered as =smallcaps= where possible.
 
 Unicode is accepted wherever possible; some output formats have encoding limitations, though, so be reasonable. As it's important for Spanish writing, special treatment for m-dashes (—) is included. Also, if a form feed character (ASCII 0C HEX) is found, a page break is inserted according to the target format.
 
@@ -59,6 +59,7 @@ Some output formatting can be tweaked via configuration variables, see mp.config
 
 Version log:<
 
+• 1.04: Text between equal symbols is rendered as =versalita= (small caps) (MP 5.62).<
 • 1.03: PNG and JPG images can be inserted using the img:// pseudo-url (MP 5.58).<
 • 1.02: Left-aligned text with < at the end of each line (MP 5.56).<
 • 1.01: Center lines with > and <, right-aligned lines with > (MP 5.54).<
